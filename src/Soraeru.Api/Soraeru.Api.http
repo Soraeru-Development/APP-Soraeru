@@ -1,0 +1,107 @@
+### Soraeru Auth smoke test (Development)
+@baseUrl = http://localhost:5080
+
+### 1) Register free user
+# @name registerFree
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "displayName": "Tester"
+}
+
+### 2) Login free user
+# @name loginFree
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### 3) Me (free)
+GET {{baseUrl}}/api/v1/me
+Authorization: Bearer {{loginFree.response.body.$.accessToken}}
+
+### 3b) Complete onboarding
+PATCH {{baseUrl}}/api/v1/me
+Authorization: Bearer {{loginFree.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "onboardingCompleted": true
+}
+
+### 4) Register developer
+# @name registerDev
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "larun70@gmail.com",
+  "password": "password123",
+  "displayName": "Dev1"
+}
+
+### 5) Login developer
+# @name loginDev
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "larun70@gmail.com",
+  "password": "password123"
+}
+
+### 6) Me (developer — isDeveloper=true, unlimited quota)
+GET {{baseUrl}}/api/v1/me
+Authorization: Bearer {{loginDev.response.body.$.accessToken}}
+
+### 7) Google login (replace with a real idToken from Android Sign-In)
+# @name loginGoogle
+POST {{baseUrl}}/api/v1/auth/google
+Content-Type: application/json
+
+{
+  "idToken": "PASTE_GOOGLE_ID_TOKEN"
+}
+
+### 8) Analyze word (Thai example — multilingual model; any language OK)
+# @name analyzeThai
+POST {{baseUrl}}/api/v1/word/analyze
+Authorization: Bearer {{loginFree.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "text": "ขอบคุณ",
+  "sourceLanguage": "auto",
+  "memoryLanguage": "zh-TW",
+  "notationPreference": "bopomofo"
+}
+
+### 9) Analyze word (Japanese)
+POST {{baseUrl}}/api/v1/word/analyze
+Authorization: Bearer {{loginFree.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "text": "ありがとう",
+  "sourceLanguage": "auto",
+  "memoryLanguage": "zh-TW",
+  "notationPreference": "bopomofo"
+}
+
+### 10) Analyze word (English)
+POST {{baseUrl}}/api/v1/word/analyze
+Authorization: Bearer {{loginFree.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "text": "thank you",
+  "sourceLanguage": "en",
+  "memoryLanguage": "zh-TW",
+  "notationPreference": "roman"
+}

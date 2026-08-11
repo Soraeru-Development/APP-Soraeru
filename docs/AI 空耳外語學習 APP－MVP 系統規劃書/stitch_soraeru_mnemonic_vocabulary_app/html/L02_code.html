@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Soraeru - 建立帳號</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&amp;family=JetBrains+Mono:wght@500&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-surface": "#181c1e",
+                      "tertiary-container": "#885116",
+                      "on-secondary-fixed": "#081e27",
+                      "on-secondary-fixed-variant": "#364954",
+                      "surface-bright": "#F5FAFD",
+                      "background": "#f7f9fc",
+                      "on-primary-fixed": "#001f2a",
+                      "primary": "#004d64",
+                      "on-tertiary-fixed-variant": "#6b3b00",
+                      "surface-container-high": "#e6e8eb",
+                      "on-primary-fixed-variant": "#004d64",
+                      "on-surface-variant": "#3f484d",
+                      "error-container": "#ffdad6",
+                      "on-primary": "#ffffff",
+                      "surface-container": "#eceef1",
+                      "inverse-surface": "#2d3133",
+                      "secondary": "#4d616c",
+                      "on-secondary-container": "#536772",
+                      "outline-variant": "#bfc8cd",
+                      "primary-fixed-dim": "#87d0f2",
+                      "on-tertiary-fixed": "#2d1600",
+                      "primary-container": "#006684",
+                      "surface-dim": "#D8E3E9",
+                      "tertiary": "#6b3a00",
+                      "status-warning": "#8B5000",
+                      "secondary-container": "#d0e6f3",
+                      "outline": "#70787e",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed-dim": "#ffb876",
+                      "surface-container-highest": "#e0e3e5",
+                      "primary-fixed": "#bee9ff",
+                      "error": "#ba1a1a",
+                      "on-tertiary": "#ffffff",
+                      "on-background": "#181c1e",
+                      "on-primary-container": "#a2e1ff",
+                      "inverse-on-surface": "#eff1f3",
+                      "secondary-fixed-dim": "#b4cad6",
+                      "surface-container-low": "#f2f4f6",
+                      "surface-tint": "#016684",
+                      "on-secondary": "#ffffff",
+                      "status-info": "#0061A4",
+                      "status-danger": "#BA1A1A",
+                      "surface": "#f7f9fc",
+                      "on-tertiary-container": "#ffcfa6",
+                      "tertiary-fixed": "#ffdcc0",
+                      "on-error": "#ffffff",
+                      "inverse-primary": "#87d0f2",
+                      "surface-variant": "#e0e3e5",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-fixed": "#d0e6f3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "card-padding": "16px",
+                      "bottom-bar-height": "80px",
+                      "gutter": "16px",
+                      "stack-gap": "12px",
+                      "appbar-height": "64px"
+              },
+              "fontFamily": {
+                      "body-source-lg": [
+                              "Noto Sans"
+                      ],
+                      "caption": [
+                              "Noto Sans"
+                      ],
+                      "label-mono": [
+                              "JetBrains Mono"
+                      ],
+                      "display-hero": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-sm": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-target-md": [
+                              "Noto Sans"
+                      ]
+              },
+              "fontSize": {
+                      "body-source-lg": [
+                              "22px",
+                              {
+                                      "lineHeight": "30px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "caption": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-mono": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-hero": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-sm": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-target-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col items-center">
+<!-- TopAppBar (Transactional Screen - Suppress Navigation, use Back action) -->
+<header class="fixed top-0 w-full max-w-[600px] bg-surface/80 backdrop-blur-md z-40">
+<div class="flex justify-between items-center px-gutter h-appbar-height w-full mx-auto">
+<button class="p-2 text-primary hover:bg-surface-variant/50 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_back" data-weight="fill" style="font-variation-settings: 'FILL' 1;">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-on-surface">建立帳號</h1>
+<div class="w-10"></div> <!-- Placeholder to balance header -->
+</div>
+</header>
+<main class="w-full max-w-[600px] flex-1 mt-appbar-height px-gutter pb-bottom-bar-height pt-8 flex flex-col gap-6">
+<form class="flex flex-col gap-5">
+<!-- Display Name (Optional) -->
+<div class="flex flex-col gap-1.5">
+<label class="font-body-target-md text-body-target-md text-on-surface font-medium" for="displayName">顯示名稱 (選填)</label>
+<div class="relative">
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-4 py-3 font-body-target-md text-body-target-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" id="displayName" placeholder="例如：小明" type="text"/>
+</div>
+</div>
+<!-- Email -->
+<div class="flex flex-col gap-1.5">
+<label class="font-body-target-md text-body-target-md text-on-surface font-medium" for="email">電子郵件</label>
+<div class="relative">
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-4 py-3 font-body-target-md text-body-target-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" id="email" placeholder="name@example.com" required="" type="email"/>
+</div>
+</div>
+<!-- Password -->
+<div class="flex flex-col gap-1.5">
+<label class="font-body-target-md text-body-target-md text-on-surface font-medium" for="password">密碼</label>
+<div class="relative">
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-4 py-3 font-body-target-md text-body-target-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" id="password" minlength="8" placeholder="至少 8 個字元" required="" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant p-1" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">請輸入至少 8 個字元的密碼。</p>
+</div>
+<!-- Confirm Password -->
+<div class="flex flex-col gap-1.5">
+<label class="font-body-target-md text-body-target-md text-on-surface font-medium" for="confirmPassword">確認密碼</label>
+<div class="relative">
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-4 py-3 font-body-target-md text-body-target-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" id="confirmPassword" minlength="8" placeholder="再次輸入密碼" required="" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant p-1" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<!-- Privacy Policy Checkbox -->
+<div class="flex items-center gap-3 mt-2 bg-surface-container-low p-4 rounded-lg border border-surface-variant">
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary bg-surface-bright" id="privacyPolicy" required="" type="checkbox"/>
+<label class="font-body-target-md text-body-target-md text-on-surface cursor-pointer select-none" for="privacyPolicy">
+                    我已閱讀 <a class="text-primary underline hover:text-primary-container transition-colors" href="#">隱私權政策</a>
+</label>
+</div>
+</form>
+</main>
+<!-- Sticky Bottom Action Bar -->
+<div class="fixed bottom-0 w-full max-w-[600px] h-bottom-bar-height bg-surface/90 backdrop-blur-md border-t border-surface-variant px-gutter flex items-center justify-center z-40 pb-safe">
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary font-headline-sm text-headline-sm py-3 rounded-full transition-colors shadow-sm flex items-center justify-center gap-2" type="submit">
+            建立帳號
+        </button>
+</div>
+</body></html>

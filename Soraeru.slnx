@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Soraeru.Api/Soraeru.Api.csproj" />
+    <Project Path="src/Soraeru.App/Soraeru.App.csproj">
+      <Deploy Solution="Debug|*" />
+    </Project>
+    <Project Path="src/Soraeru.Application/Soraeru.Application.csproj" />
+    <Project Path="src/Soraeru.ClientLogic/Soraeru.ClientLogic.csproj" />
+    <Project Path="src/Soraeru.Infrastructure/Soraeru.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Soraeru.Application.Tests/Soraeru.Application.Tests.csproj" />
+    <Project Path="tests/Soraeru.ClientLogic.Tests/Soraeru.ClientLogic.Tests.csproj" />
+    <Project Path="tests/Soraeru.Infrastructure.Tests/Soraeru.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

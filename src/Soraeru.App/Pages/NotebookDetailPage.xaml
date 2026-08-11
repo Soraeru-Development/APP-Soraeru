@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Soraeru.Pages.NotebookDetailPage"
+             Title="單字卡"
+             Shell.NavBarIsVisible="True"
+             BackgroundColor="{StaticResource SurfaceBright}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,16,20,32" Spacing="12" MaximumWidthRequest="480" HorizontalOptions="Center">
+
+            <Label x:Name="SourceTextLabel"
+                   Text="…"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource OnSurface}" />
+            <Label x:Name="LanguageLabel" Text="" Style="{StaticResource BodyLabel}" />
+
+            <Label x:Name="MeaningLabel" Text="" Style="{StaticResource BodyLabel}" FontSize="16" Margin="0,12,0,0" />
+            <Label x:Name="ReadingLabel" Text="" Style="{StaticResource BodyLabel}" FontSize="16" />
+
+            <Button Text="▶  播放正式發音"
+                    Style="{StaticResource SecondaryButton}"
+                    Clicked="OnPlayClicked"
+                    Margin="0,4,0,8" />
+
+            <BoxView HeightRequest="1" Color="{StaticResource OutlineVariant}" Margin="0,8" />
+
+            <Label Text="我的近似音" Style="{StaticResource SectionTitle}" />
+            <Label x:Name="MnemonicLabel"
+                   Text=""
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource Primary}" />
+
+            <Label x:Name="CreatedAtLabel"
+                   Text=""
+                   Style="{StaticResource CaptionLabel}"
+                   Margin="0,16,0,8" />
+
+            <Button x:Name="DeleteButton"
+                    Text="刪除單字卡"
+                    Style="{StaticResource DangerButton}"
+                    Clicked="OnDeleteClicked"
+                    IsEnabled="False" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

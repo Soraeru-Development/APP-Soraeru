@@ -1,0 +1,179 @@
+using System.Text;
+
+namespace Soraeru.ClientLogic.Notebook;
+
+/// <summary>
+/// Client-first notebook: local SoT with write gate = authenticated session.
+/// </summary>
+public sealed class LocalNotebookService
+{
+    private readonly ILocalWordCardStore _store;
+    private readonly Func<CancellationToken, Task<LocalSession>> _session;
+
+    public LocalNotebookService(
+        ILocalWordCardStore store,
+        Func<CancellationToken, Task<LocalSession>> session)
+    {
+        _store = store;
+        _session = session;
+    }
+
+    /// <summary>Convenience for sync test/session sources.</summary>
+    public LocalNotebookService(ILocalWordCardStore store, Func<LocalSession> session)
+        : this(store, _ => Task.FromResult(session()))
+    {
+    }
+
+    public async Task<bool> CanWriteAsync(CancellationToken cancellationToken = default)
+    {
+        var session = await _session(cancellationToken);
+        return session.IsAuthenticated && session.UserId is { } id && id != Guid.Empty;
+    }
+
+    public async Task<IReadOnlyList<LocalWordCard>> ListAsync(CancellationToken cancellationToken = default)
+    {
+        var all = await _store.LoadAllAsync(cancellationToken);
+        var session = await _session(cancellationToken);
+
+        IEnumerable<LocalWordCard> active = all.Where(c => c.DeletedAtUtc is null);
+
+        if (session.IsAuthenticated && session.UserId is { } userId)
+            active = active.Where(c => c.OwnerUserId == userId);
+
+        return active
+            .OrderByDescending(c => c.UpdatedAtUtc)
+            .ToList();
+    }
+
+    public async Task<LocalNotebookResult<LocalWordCard>> SaveAsync(
+        SaveLocalWordCardCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var session = await _session(cancellationToken);
+        if (!session.IsAuthenticated || session.UserId is not { } userId || userId == Guid.Empty)
+        {
+            return LocalNotebookResult<LocalWordCard>.Failure(
+                "UNAUTHORIZED",
+                "登入後才能儲存單字卡。");
+        }
+
+        if (string.IsNullOrWhiteSpace(command.SourceText))
+        {
+            return LocalNotebookResult<LocalWordCard>.Failure(
+                "VALIDATION",
+                "原文不可為空。");
+        }
+
+        if (string.IsNullOrWhiteSpace(command.SelectedMnemonic))
+        {
+            return LocalNotebookResult<LocalWordCard>.Failure(
+                "VALIDATION",
+                "請選擇空耳候選。");
+        }
+
+        var language = string.IsNullOrWhiteSpace(command.DetectedLanguage)
+            ? "und"
+            : command.DetectedLanguage.Trim();
+        var sourceText = command.SourceText.Trim();
+        var normalizedText = string.IsNullOrWhiteSpace(command.NormalizedText)
+            ? NormalizeText(sourceText)
+            : NormalizeText(command.NormalizedText);
+
+        var all = (await _store.LoadAllAsync(cancellationToken)).ToList();
+        var existing = all.FirstOrDefault(c =>
+            c.DeletedAtUtc is null
+            && c.OwnerUserId == userId
+            && string.Equals(c.DetectedLanguage, language, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(c.NormalizedText, normalizedText, StringComparison.Ordinal));
+
+        var now = DateTimeOffset.UtcNow;
+        var meaningZh = command.MeaningZh?.Trim() ?? string.Empty;
+        var pronunciation = command.Pronunciation?.Trim() ?? string.Empty;
+        var selectedMnemonic = command.SelectedMnemonic.Trim();
+
+        if (existing is not null)
+        {
+            var updated = existing with
+            {
+                SourceText = sourceText,
+                MeaningZh = meaningZh,
+                Pronunciation = pronunciation,
+                SelectedMnemonic = selectedMnemonic,
+                UpdatedAtUtc = now
+            };
+            var index = all.FindIndex(c => c.Id == existing.Id);
+            all[index] = updated;
+            await _store.SaveAllAsync(all, cancellationToken);
+            return LocalNotebookResult<LocalWordCard>.Success(updated);
+        }
+
+        var card = new LocalWordCard(
+            Guid.NewGuid(),
+            userId,
+            sourceText,
+            normalizedText,
+            language,
+            meaningZh,
+            pronunciation,
+            selectedMnemonic,
+            now,
+            now,
+            DeletedAtUtc: null);
+
+        all.Add(card);
+        await _store.SaveAllAsync(all, cancellationToken);
+        return LocalNotebookResult<LocalWordCard>.Success(card);
+    }
+
+    public async Task<LocalNotebookResult<bool>> DeleteAsync(
+        Guid cardId,
+        CancellationToken cancellationToken = default)
+    {
+        var session = await _session(cancellationToken);
+        if (!session.IsAuthenticated || session.UserId is not { } userId || userId == Guid.Empty)
+        {
+            return LocalNotebookResult<bool>.Failure(
+                "UNAUTHORIZED",
+                "登入後才能刪除單字卡。");
+        }
+
+        if (cardId == Guid.Empty)
+        {
+            return LocalNotebookResult<bool>.Failure("VALIDATION", "單字卡編號無效。");
+        }
+
+        var all = (await _store.LoadAllAsync(cancellationToken)).ToList();
+        var index = all.FindIndex(c =>
+            c.Id == cardId
+            && c.OwnerUserId == userId
+            && c.DeletedAtUtc is null);
+
+        if (index < 0)
+        {
+            return LocalNotebookResult<bool>.Failure("NOT_FOUND", "找不到單字卡。");
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var existing = all[index];
+        all[index] = existing with { DeletedAtUtc = now, UpdatedAtUtc = now };
+        await _store.SaveAllAsync(all, cancellationToken);
+        return LocalNotebookResult<bool>.Success(true);
+    }
+
+    public async Task ClearLocalNotebookAsync(CancellationToken cancellationToken = default) =>
+        await _store.SaveAllAsync([], cancellationToken);
+
+    public async Task<LocalWordCard?> GetAsync(Guid cardId, CancellationToken cancellationToken = default)
+    {
+        var list = await ListAsync(cancellationToken);
+        return list.FirstOrDefault(c => c.Id == cardId);
+    }
+
+    private static string NormalizeText(string text)
+    {
+        var collapsed = string.Join(
+            ' ',
+            text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        return collapsed.Normalize(NormalizationForm.FormC);
+    }
+}

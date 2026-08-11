@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Soraeru.Pages.AnalyzingPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource SurfaceBright}">
+
+    <VerticalStackLayout VerticalOptions="Center" Padding="32" Spacing="16" MaximumWidthRequest="420" HorizontalOptions="Center">
+
+        <Label Text="正在分析單字"
+               Style="{StaticResource PageTitle}"
+               FontSize="24"
+               HorizontalTextAlignment="Center" />
+
+        <Label x:Name="WordLabel"
+               Text=""
+               FontSize="28"
+               TextColor="{StaticResource Primary}"
+               HorizontalTextAlignment="Center"
+               Margin="0,0,0,8" />
+
+        <ActivityIndicator x:Name="BusyIndicator"
+                           IsRunning="True"
+                           Color="{StaticResource Primary}"
+                           HeightRequest="48"
+                           WidthRequest="48"
+                           HorizontalOptions="Center" />
+
+        <Label x:Name="StatusLabel"
+               Text="請稍候"
+               Style="{StaticResource BodyLabel}"
+               HorizontalTextAlignment="Center" />
+
+        <VerticalStackLayout Spacing="10" Margin="24,24,24,0" HorizontalOptions="Center">
+            <Label x:Name="StepLanguage" Text="○  偵測來源語言" TextColor="{StaticResource OnSurfaceVariant}" FontSize="15" />
+            <Label x:Name="StepMeaning" Text="○  整理詞義及讀音" TextColor="{StaticResource OnSurfaceVariant}" FontSize="15" />
+            <Label x:Name="StepMnemonics" Text="○  產生近似音候選" TextColor="{StaticResource OnSurfaceVariant}" FontSize="15" />
+        </VerticalStackLayout>
+
+        <Button x:Name="CancelButton"
+                Text="取消"
+                Style="{StaticResource SecondaryButton}"
+                Margin="0,24,0,0"
+                Clicked="OnCancelClicked" />
+    </VerticalStackLayout>
+</ContentPage>

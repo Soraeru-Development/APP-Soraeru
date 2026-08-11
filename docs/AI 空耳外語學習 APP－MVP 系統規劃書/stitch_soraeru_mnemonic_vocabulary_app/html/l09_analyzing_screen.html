@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Soraeru - Analyzing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;family=Noto+Sans:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#181c1e",
+                        "tertiary-container": "#885116",
+                        "on-secondary-fixed": "#081e27",
+                        "on-secondary-fixed-variant": "#364954",
+                        "surface-bright": "#F5FAFD",
+                        "background": "#f7f9fc",
+                        "on-primary-fixed": "#001f2a",
+                        "primary": "#004d64",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "surface-container-high": "#e6e8eb",
+                        "on-primary-fixed-variant": "#004d64",
+                        "on-surface-variant": "#3f484d",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#eceef1",
+                        "inverse-surface": "#2d3133",
+                        "secondary": "#4d616c",
+                        "on-secondary-container": "#536772",
+                        "outline-variant": "#bfc8cd",
+                        "primary-fixed-dim": "#87d0f2",
+                        "on-tertiary-fixed": "#2d1600",
+                        "primary-container": "#006684",
+                        "surface-dim": "#D8E3E9",
+                        "tertiary": "#6b3a00",
+                        "status-warning": "#8B5000",
+                        "secondary-container": "#d0e6f3",
+                        "outline": "#70787e",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb876",
+                        "surface-container-highest": "#e0e3e5",
+                        "primary-fixed": "#bee9ff",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#181c1e",
+                        "on-primary-container": "#a2e1ff",
+                        "inverse-on-surface": "#eff1f3",
+                        "secondary-fixed-dim": "#b4cad6",
+                        "surface-container-low": "#f2f4f6",
+                        "surface-tint": "#016684",
+                        "on-secondary": "#ffffff",
+                        "status-info": "#0061A4",
+                        "status-danger": "#BA1A1A",
+                        "surface": "#f7f9fc",
+                        "on-tertiary-container": "#ffcfa6",
+                        "tertiary-fixed": "#ffdcc0",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#87d0f2",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#d0e6f3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-padding": "16px",
+                        "bottom-bar-height": "80px",
+                        "gutter": "16px",
+                        "stack-gap": "12px",
+                        "appbar-height": "64px"
+                    },
+                    "fontFamily": {
+                        "body-source-lg": ["Noto Sans"],
+                        "caption": ["Noto Sans"],
+                        "label-mono": ["JetBrains Mono"],
+                        "display-hero": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "headline-sm": ["Hanken Grotesk"],
+                        "body-target-md": ["Noto Sans"]
+                    },
+                    "fontSize": {
+                        "body-source-lg": ["22px", { "lineHeight": "30px", "fontWeight": "400" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "display-hero": ["40px", { "lineHeight": "48px", "fontWeight": "700" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-target-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .spinner {
+            border: 4px solid rgba(0, 77, 100, 0.1);
+            border-left-color: #004d64;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .pulse-text {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body class="bg-surface-bright text-on-surface font-body-target-md antialiased min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+<!-- Decorative Background Elements -->
+<div class="absolute inset-0 pointer-events-none z-0 overflow-hidden flex items-center justify-center opacity-30">
+<div class="w-[500px] h-[500px] rounded-full bg-secondary-container/40 blur-3xl absolute top-10 right-[-100px]"></div>
+<div class="w-[400px] h-[400px] rounded-full bg-primary-container/20 blur-3xl absolute bottom-10 left-[-50px]"></div>
+</div>
+<!-- Main Content Canvas -->
+<main class="w-full max-w-[600px] mx-auto px-gutter py-8 flex flex-col items-center justify-center flex-grow z-10 relative h-full">
+<!-- Analysis Card Container -->
+<div class="bg-surface/80 backdrop-blur-md border border-outline-variant/30 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] w-full p-8 flex flex-col items-center justify-center space-y-12">
+<!-- Header & Spinner -->
+<div class="flex flex-col items-center justify-center space-y-6 text-center">
+<div class="spinner"></div>
+<h1 class="font-headline-lg text-headline-lg text-primary pulse-text tracking-tight">正在分析單字</h1>
+</div>
+<!-- Target Word Display -->
+<div class="bg-surface-container-low rounded-lg p-6 w-full text-center shadow-inner border border-surface-container-highest">
+<p class="font-caption text-caption text-on-surface-variant uppercase tracking-wider mb-2">目標單字</p>
+<p class="font-display-hero text-display-hero text-on-surface">สวัสดี</p>
+</div>
+<!-- Progress Checklist -->
+<div class="w-full space-y-4">
+<!-- Step 1: Complete -->
+<div class="flex items-center space-x-4 p-4 rounded-lg bg-surface-container-lowest border border-outline-variant/50 opacity-80">
+<div class="w-8 h-8 rounded-full bg-primary-container/20 text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex-grow">
+<p class="font-body-target-md text-body-target-md text-on-surface font-semibold">偵測來源語言</p>
+<p class="font-caption text-caption text-on-surface-variant">泰語 (Thai)</p>
+</div>
+</div>
+<!-- Step 2: Complete -->
+<div class="flex items-center space-x-4 p-4 rounded-lg bg-surface-container-lowest border border-outline-variant/50 opacity-80">
+<div class="w-8 h-8 rounded-full bg-primary-container/20 text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex-grow">
+<p class="font-body-target-md text-body-target-md text-on-surface font-semibold">整理詞義及讀音</p>
+<p class="font-caption text-caption text-on-surface-variant">完成</p>
+</div>
+</div>
+<!-- Step 3: In Progress -->
+<div class="flex items-center space-x-4 p-4 rounded-lg bg-primary/5 border border-primary/20 shadow-sm relative overflow-hidden">
+<!-- Subtle progress highlight -->
+<div class="absolute top-0 left-0 h-1 bg-primary w-1/3 rounded-r-full"></div>
+<div class="w-8 h-8 rounded-full border-2 border-primary border-dashed flex items-center justify-center flex-shrink-0 text-primary animate-[spin_4s_linear_infinite]">
+<span class="material-symbols-outlined text-sm">autorenew</span>
+</div>
+<div class="flex-grow">
+<p class="font-body-target-md text-body-target-md text-primary font-semibold">產生近似音候選</p>
+<p class="font-caption text-caption text-on-surface-variant pulse-text">AI 正在生成諧音記憶法...</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Area (Transactional, no shell nav) -->
+<div class="fixed bottom-0 left-0 w-full z-50 h-bottom-bar-height flex items-center justify-center px-gutter pb-safe bg-gradient-to-t from-surface-bright to-transparent">
+<button class="px-8 py-3 rounded-full border border-outline text-on-surface-variant font-label-mono text-label-mono hover:bg-surface-variant/50 transition-colors bg-surface-bright/80 backdrop-blur-sm">
+            取消
+        </button>
+</div>
+</body></html>

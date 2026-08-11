@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>空耳 Prompt 多語測評 Canvas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+    body {
+      font-family: 'Inter', 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 selection:bg-indigo-500 selection:text-white">
+
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react,typescript">
+    const { useState, useEffect } = React;
+
+    function scoreTone(score) {
+      if (score >= 4) return "success";
+      if (score >= 3) return "warning";
+      return "danger";
+    }
+
+    function mark(score) {
+      if (score === null) return "-";
+      if (score >= 4) return "OK";
+      if (score >= 3) return "~";
+      return "X";
+    }
+
+    const toneStyles = {
+      success: {
+        bg: "bg-emerald-950/40",
+        border: "border-emerald-800/60",
+        text: "text-emerald-400",
+        badgeBg: "bg-emerald-500/20",
+        badgeText: "text-emerald-300",
+        barBg: "bg-emerald-500"
+      },
+      warning: {
+        bg: "bg-amber-950/40",
+        border: "border-amber-800/60",
+        text: "text-amber-400",
+        badgeBg: "bg-amber-500/20",
+        badgeText: "text-amber-300",
+        barBg: "bg-amber-500"
+      },
+      danger: {
+        bg: "bg-rose-950/40",
+        border: "border-rose-800/60",
+        text: "text-rose-400",
+        badgeBg: "bg-rose-500/20",
+        badgeText: "text-rose-300",
+        barBg: "bg-rose-500"
+      },
+      info: {
+        bg: "bg-sky-950/40",
+        border: "border-sky-800/60",
+        text: "text-sky-400",
+        badgeBg: "bg-sky-500/20",
+        badgeText: "text-sky-300",
+        barBg: "bg-sky-500"
+      },
+      neutral: {
+        bg: "bg-slate-900/60",
+        border: "border-slate-800",
+        text: "text-slate-300",
+        badgeBg: "bg-slate-800",
+        badgeText: "text-slate-300",
+        barBg: "bg-slate-600"
+      }
+    };
+
+    const Stack = ({ gap = 16, children, style = {} }) => (
+      <div className="flex flex-col" style={{ gap: `${gap}px`, ...style }}>
+        {children}
+      </div>
+    );
+
+    const Row = ({ gap = 8, wrap = false, children, style = {} }) => (
+      <div 
+        className={`flex flex-row items-center ${wrap ? 'flex-wrap' : ''}`} 
+        style={{ gap: `${gap}px`, ...style }}
+      >
+        {children}
+      </div>
+    );
+
+    const Grid = ({ columns = 2, gap = 12, children, style = {} }) => {
+      let gridCols = 'grid-cols-1 md:grid-cols-2';
+      if (columns === 4) gridCols = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
+      if (columns === 3) gridCols = 'grid-cols-1 md:grid-cols-3';
+      
+      const customStyle = typeof columns === 'string' 
+        ? { gridTemplateColumns: columns, ...style } 
+        : style;
+
+      return (
+        <div className={`grid ${typeof columns === 'number' ? gridCols : ''}`} style={{ gap: `${gap}px`, ...customStyle }}>
+          {children}
+        </div>
+      );
+    };
+
+    const H1 = ({ children }) => (
+      <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-2">
+        {children}
+      </h1>
+    );
+
+    const H2 = ({ children }) => (
+      <h2 className="text-xl font-semibold tracking-tight text-slate-100 mt-2 flex items-center gap-2">
+        {children}
+      </h2>
+    );
+
+    const H3 = ({ children }) => (
+      <h3 className="text-base font-medium text-slate-200 mt-1">
+        {children}
+      </h3>
+    );
+
+    const Text = ({ tone = "primary", size = "normal", weight = "normal", as = "p", children }) => {
+      const Component = as;
+      const colorMap = {
+        primary: "text-slate-200",
+        secondary: "text-slate-400",
+        tertiary: "text-slate-500",
+      };
+      const sizeMap = {
+        small: "text-xs",
+        normal: "text-sm",
+        large: "text-base",
+      };
+      const weightMap = {
+        normal: "font-normal",
+        medium: "font-medium",
+        semibold: "font-semibold",
+        bold: "font-bold",
+      };
+
+      return (
+        <Component className={`${colorMap[tone] || colorMap.primary} ${sizeMap[size]} ${weightMap[weight]}`}>
+          {children}
+        </Component>
+      );
+    };
+
+    const Callout = ({ tone = "info", title, children }) => {
+      const styles = toneStyles[tone] || toneStyles.info;
+      return (
+        <div className={`p-4 rounded-xl border ${styles.bg} ${styles.border} transition-all`}>
+          {title && <h4 className={`font-semibold text-sm mb-1 ${styles.text}`}>{title}</h4>}
+          <div className="text-xs md:text-sm text-slate-300 leading-relaxed">
+            {children}
+          </div>
+        </div>
+      );
+    };
+
+    const Pill = ({ active = false, size = "sm", tone = "neutral", children }) => {
+      const styles = toneStyles[tone] || toneStyles.neutral;
+      return (
+        <span className={`inline-flex items-center font-medium rounded-full px-2.5 py-0.5 text-xs transition-colors ${
+          active 
+            ? `${styles.badgeBg} ${styles.badgeText} border border-${tone}-500/30` 
+            : 'bg-slate-800/80 text-slate-400 border border-slate-700'
+        }`}>
+          {children}
+        </span>
+      );
+    };
+
+    const Stat = ({ value, label, tone = "neutral" }) => {
+      const styles = toneStyles[tone] || toneStyles.neutral;
+      return (
+        <div className={`p-4 rounded-xl border bg-slate-900/60 border-slate-800 relative overflow-hidden group hover:border-slate-700 transition-all`}>
+          <div className={`absolute top-0 left-0 w-1 h-full ${styles.barBg}`}></div>
+          <div className="text-2xl md:text-3xl font-extrabold tracking-tight text-white mb-1 pl-2">
+            {value}
+          </div>
+          <div className="text-xs text-slate-400 font-medium pl-2">
+            {label}
+          </div>
+        </div>
+      );
+    };
+
+    const BarChart = ({ categories, series, yMin = 0, yMax = 5, height = 220, showValues = false, referenceLines = [] }) => {
+      return (
+        <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 my-2">
+          <div className="relative w-full" style={{ height: `${height}px` }}>
+            {/* Reference lines */}
+            {referenceLines.map((ref, idx) => {
+              const bottomPercent = ((ref.value - yMin) / (yMax - yMin)) * 100;
+              const refTone = toneStyles[ref.tone] || toneStyles.info;
+              return (
+                <div 
+                  key={idx} 
+                  className="absolute w-full border-t border-dashed pointer-events-none flex items-center justify-end pr-2 text-[10px] z-10"
+                  style={{ 
+                    bottom: `${bottomPercent}%`, 
+                    borderColor: ref.tone === 'success' ? '#10b981' : ref.tone === 'warning' ? '#f59e0b' : '#3b82f6'
+                  }}
+                >
+                  <span className={`px-1.5 py-0.5 rounded ${refTone.badgeBg} ${refTone.badgeText} font-semibold`}>
+                    {ref.label} ({ref.value})
+                  </span>
+                </div>
+              );
+            })}
+
+            {/* Bars container */}
+            <div className="flex h-full items-end justify-between gap-2 pt-6 pb-2">
+              {categories.map((cat, idx) => {
+                const val = series[0]?.data[idx] ?? 0;
+                const heightPercent = Math.max(0, Math.min(100, ((val - yMin) / (yMax - yMin)) * 100));
+                const toneKey = scoreTone(val);
+                const currentTone = toneStyles[toneKey] || toneStyles.info;
+
+                return (
+                  <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group">
+                    {showValues && (
+                      <span className="text-xs font-bold text-slate-300 mb-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                        {val}
+                      </span>
+                    )}
+                    <div className="w-full max-w-[40px] bg-slate-800/50 rounded-t overflow-hidden flex items-end h-full">
+                      <div 
+                        className={`w-full rounded-t transition-all duration-500 ${currentTone.barBg} group-hover:brightness-125`}
+                        style={{ height: `${heightPercent}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          {/* X Axis Labels */}
+          <div className="flex justify-between gap-2 border-t border-slate-800 pt-2 text-center">
+            {categories.map((cat, idx) => (
+              <div key={idx} className="flex-1 text-[11px] font-medium text-slate-400 truncate" title={cat}>
+                {cat}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    const Table = ({ headers, columnAlign = [], striped = false, rowTone = [], rows = [], stickyHeader = false, framed = false }) => {
+      return (
+        <div className={`overflow-x-auto rounded-xl border border-slate-800 ${framed ? 'bg-slate-900/40' : 'bg-slate-900/20'}`}>
+          <table className="w-full text-left text-xs md:text-sm border-collapse">
+            <thead>
+              <tr className="border-b border-slate-800 bg-slate-900/80 text-slate-400 font-medium">
+                {headers.map((h, i) => (
+                  <th 
+                    key={i} 
+                    className={`p-3 ${columnAlign[i] === 'center' ? 'text-center' : columnAlign[i] === 'right' ? 'text-right' : 'text-left'}`}
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60">
+              {rows.map((row, rIdx) => {
+                const tone = rowTone[rIdx];
+                const toneStyle = tone ? toneStyles[tone] : null;
+                const bgClass = toneStyle 
+                  ? toneStyle.bg 
+                  : striped && rIdx % 2 === 1 ? 'bg-slate-900/40' : 'bg-transparent';
+
+                return (
+                  <tr key={rIdx} className={`${bgClass} hover:bg-slate-800/40 transition-colors`}>
+                    {row.map((cell, cIdx) => (
+                      <td 
+                        key={cIdx} 
+                        className={`p-3 text-slate-300 ${columnAlign[cIdx] === 'center' ? 'text-center' : columnAlign[cIdx] === 'right' ? 'text-right' : 'text-left'}`}
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      );
+    };
+
+    const Card = ({ children }) => (
+      <div className="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden shadow-lg hover:border-slate-700/80 transition-all">
+        {children}
+      </div>
+    );
+
+    const CardHeader = ({ trailing, children }) => (
+      <div className="p-4 border-b border-slate-800/80 font-semibold text-slate-200 flex items-center justify-between">
+        <div>{children}</div>
+        {trailing && <div>{trailing}</div>}
+      </div>
+    );
+
+    const CardBody = ({ children }) => (
+      <div className="p-4">
+        {children}
+      </div>
+    );
+
+    const Divider = () => (
+      <hr className="border-slate-800/80 my-2" />
+    );
+
+    type ModelCell = { label: string; score: number | null };
+
+    type CrossRound = {
+      round: string;
+      gold: string;
+      chatgpt: ModelCell;
+      claude: ModelCell;
+      gemini: ModelCell;
+      grok: ModelCell;
+      perplexity: ModelCell;
+      kimi: ModelCell;
+    };
+
+    type HindiRow = {
+      model: string;
+      best: string;
+      alts: string;
+      score: number;
+      note: string;
+    };
+
+    const HINDI_A_ROWS: HindiRow[] = [
+      {
+        model: "ChatGPT",
+        best: "納媽斯爹",
+        alts: "那麼斯貼",
+        score: 3,
+        note: "四拍＋尾爹對上；納／媽／斯仍偏正字族，非拿罵司",
+      },
+      {
+        model: "Claude",
+        best: "拿馬斯dei",
+        alts: "那馬斯貼",
+        score: 3,
+        note: "起首拿命中；馬／斯偏；拉丁 dei＝v1.1 補音殘債",
+      },
+      {
+        model: "Gemini",
+        best: "拿瑪斯爹",
+        alts: "拿瑪－斯貼",
+        score: 4,
+        note: "拿…爹骨架最齊、可連寫；瑪／斯未到罵／司",
+      },
+      {
+        model: "Grok",
+        best: "那馬、斯特",
+        alts: "那－馬斯－铁；納－馬死－帖",
+        score: 2,
+        note: "切段過碎；铁／死／帖離爹／司遠",
+      },
+      {
+        model: "Perplexity",
+        best: "那摩斯戴…",
+        alts: "（摘要截斷）",
+        score: 2,
+        note: "那／摩／斯／戴＝拼寫軌；無拿罵司爹",
+      },
+      {
+        model: "Kimi",
+        best: "那媽斯－貼",
+        alts: "哪嗎嘶－te",
+        score: 2,
+        note: "貼／te 尾錯；嘶＋拉丁 te 過補",
+      },
+    ];
+
+    const HINDI_B_ROWS: HindiRow[] = [
+      {
+        model: "ChatGPT",
+        best: "凱莎－恰拉－拉哈－嘿",
+        alts: "凱莎－恰爾－拉哈－嘿",
+        score: 2,
+        note: "凱≠給；恰≠加；嘿≠黑；四塊過碎；恰爾＝兒化債",
+      },
+      {
+        model: "Claude",
+        best: "開沙、恰拉哈嘿",
+        alts: "k些、恰、拉哈、嘿",
+        score: 2,
+        note: "開≠給；恰族；k些拉丁；切段略壓但仍非給薩加－拉哈黑",
+      },
+      {
+        model: "Gemini",
+        best: "開薩－拆－辣哈－嗨",
+        alts: "凱薩－拆l－拉哈－嗨",
+        score: 2,
+        note: "薩命中；開／凱、拆≠加、嗨≠黑；拆l＝拉丁 l 殘債",
+      },
+      {
+        model: "Grok",
+        best: "凱薩－查－拉哈－嗨",
+        alts: "（其餘稿近似查／嗨族）",
+        score: 2,
+        note: "薩＋拉哈位對；凱／查／嗨仍是拼寫聽寫預設",
+      },
+      {
+        model: "Perplexity",
+        best: "ㄎㄧㄚˇ－…（kyā 錯讀）",
+        alts: "整句聽成 kyā…",
+        score: 1,
+        note: "句級錯聽：कैसा→kyā；空耳之前已偏航",
+      },
+      {
+        model: "Kimi",
+        best: "開薩－恰勒－拉哈－嘿",
+        alts: "凱薩－恰樂－拉哈－嗨",
+        score: 2,
+        note: "薩＋拉哈可；開／凱、恰、嘿／嗨＝給／加／黑全偏",
+      },
+    ];
+
+    const CROSS_ROUNDS = [
+      {
+        round: "A 俄語",
+        gold: "普哩V頁特斯托菲G",
+        chatgpt: { label: "純漢字長串", score: 2 },
+        claude: { label: "純漢字長串", score: 2 },
+        gemini: { label: "純漢字長串", score: 2 },
+        grok: { label: "純漢字長串", score: 2 },
+        perplexity: { label: "純漢字長串", score: 2 },
+        kimi: { label: "（未測／摘要缺）", score: null },
+      },
+      {
+        round: "B 西語",
+        gold: "勾某-ㄟ斯大-菸斗",
+        chatgpt: { label: "摳某欸…", score: 3 },
+        claude: { label: "扣某欸STˊ…", score: 2 },
+        gemini: { label: "摳莫s大´燕多", score: 4 },
+        grok: { label: "科莫欸斯塔言多", score: 3 },
+        perplexity: { label: "科莫依斯達延多", score: 3 },
+        kimi: { label: "口莫欸斯大耶n豆", score: 3 },
+      },
+      {
+        round: "C 丹麥",
+        gold: "瓦Den、勾o、迪",
+        chatgpt: { label: "唬／霍夫類問題", score: 2 },
+        claude: { label: "勾兒／德特類", score: 2 },
+        gemini: { label: "近緣誤判風險", score: 2 },
+        grok: { label: "弱化不足", score: 2 },
+        perplexity: { label: "長尾／誤語", score: 2 },
+        kimi: { label: "尾音過長", score: 2 },
+      },
+      {
+        round: "D 印尼",
+        gold: "阿爸-咖拔",
+        chatgpt: { label: "阿帕－卡巴", score: 3 },
+        claude: { label: "阿爸、咖吧", score: 4 },
+        gemini: { label: "阿爸－卡拔", score: 4 },
+        grok: { label: "啊趴－咖拔", score: 3 },
+        perplexity: { label: "阿巴－卡巴爾", score: 2 },
+        kimi: { label: "阿啪－尬拔", score: 3 },
+      },
+      {
+        round: "E 他加祿",
+        gold: "古穆斯塔 納˙",
+        chatgpt: { label: "庫穆斯塔－那", score: 3 },
+        claude: { label: "哭母斯大、那", score: 2 },
+        gemini: { label: "庫木斯大－拿", score: 2 },
+        grok: { label: "庫姆斯塔－那", score: 3 },
+        perplexity: { label: "庫穆斯塔－納", score: 4 },
+        kimi: { label: "固母斯大－那", score: 3 },
+      },
+      {
+        round: "F 俄語²",
+        gold: "卡逼丟拉",
+        chatgpt: { label: "卡k－迪拉́", score: 3 },
+        claude: { label: "咖k、迭啦", score: 2 },
+        gemini: { label: "卡k－狄拉", score: 3 },
+        grok: { label: "卡克－迪拉´", score: 2 },
+        perplexity: { label: "卡克－傑拉", score: 2 },
+        kimi: { label: "卡克－接拉", score: 2 },
+      },
+      {
+        round: "G 印地 namaste",
+        gold: "拿罵司爹",
+        chatgpt: { label: "納媽斯爹", score: 3 },
+        claude: { label: "拿馬斯dei", score: 3 },
+        gemini: { label: "拿瑪斯爹", score: 4 },
+        grok: { label: "那馬、斯特", score: 2 },
+        perplexity: { label: "那摩斯戴…", score: 2 },
+        kimi: { label: "那媽斯－貼", score: 2 },
+      },
+      {
+        round: "H 印地 kaisā",
+        gold: "給薩加-拉哈黑",
+        chatgpt: { label: "凱莎－恰拉－…嘿", score: 2 },
+        claude: { label: "開沙、恰拉哈嘿", score: 2 },
+        gemini: { label: "開薩－拆－…嗨", score: 2 },
+        grok: { label: "凱薩－查－拉哈－嗨", score: 2 },
+        perplexity: { label: "kyā 錯讀", score: 1 },
+        kimi: { label: "開薩－恰勒－…嘿", score: 2 },
+      },
+    ];
+
+    const V12_TRUST_DOMAINS = [
+      {
+        domain: "Schema 可用性",
+        score: 4.5,
+        reading: "JSON／2–3 候選／切段符／notice 幾乎都可吃；管線可用",
+      },
+      {
+        domain: "規則內化一致性",
+        score: 2.5,
+        reading: "切段與偶發聽感字有；禁令（殘渣／兒化／正字／近緣語）跨模型不穩",
+      },
+      {
+        domain: "聽感天花板",
+        score: 2.5,
+        reading: "易句可貼；硬金標 A／F／E／H 多數仍遠，天花板靠偶發命中",
+      },
+      {
+        domain: "產品信任風險（越高越安全）",
+        score: 2.0,
+        reading: "殘渣／兒化／語錯／正字預設直接傷「這像原詞」",
+      },
+    ];
+
+    const PROMPT_GAPS = [
+      {
+        rule: "聽感優先",
+        gap: "A 長串；E K→庫；F 迪族≠逼丟；G 那／納／麼≠拿、斯≠司；H 凱／開≠給、恰／查／拆≠加",
+        effect: "v1.1 未飽和；印地正字預設仍蓋耳",
+        rounds: "A→H",
+      },
+      {
+        rule: "多詞切段",
+        gap: "H 金標兩塊給薩加－拉哈黑；多數四塊或過碎；G 連寫骨架僅 Gemini 近",
+        effect: "切段規則在用，塊數未跟听感",
+        rounds: "B→H",
+      },
+      {
+        rule: "重讀開母音",
+        gap: "G 罵（開 ma 粗）→媽／馬／瑪；H 黑未見",
+        effect: "開母音／粗調仍漂移",
+        rounds: "B→H",
+      },
+      {
+        rule: "補音克制",
+        gap: "F day／迪LA；G dei／te；H 拆l、k些",
+        effect: "v1.1 禁殘渣仍冒出",
+        rounds: "B→H",
+      },
+      {
+        rule: "Silent／弱化／短尾",
+        gap: "C／E 主證據；G／H 未加劇",
+        effect: "本輪非主債",
+        rounds: "C→E",
+      },
+      {
+        rule: "勿濫用兒化",
+        gap: "C／D 舊債；H ChatGPT 恰爾再現",
+        effect: "v1.1 後仍偶發——印地首現踩雷",
+        rounds: "C→H",
+      },
+      {
+        rule: "近緣語分辨",
+        gap: "C 丹麥↔挪威；H Perplexity 整句聽成 kyā",
+        effect: "句級錯讀＝新警示",
+        rounds: "C、H",
+      },
+      {
+        rule: "塞音調性",
+        gap: "E ta→大；本輪未新爆",
+        effect: "E 仍待對準",
+        rounds: "E",
+      },
+      {
+        rule: "軟輔音／腭化聽感",
+        gap: "F 逼丟零命中；G／H 未複測俄語腭化",
+        effect: "F 債仍在；本輪主債改為正字→漢字映射",
+        rounds: "F",
+      },
+      {
+        rule: "正字／羅馬≠聽感字（新號）",
+        gap: "kai/ai→凱開；chal→恰查拆；hai→嘿嗨；namaste 中段媽馬瑪／斯",
+        effect: "印地首輪主爆點；v1.1 聽感第一未擋住",
+        rounds: "G→H",
+      },
+    ];
+
+    function formatCell(cell) {
+      if (cell.score === null) return `${cell.label} -`;
+      return `${cell.label} ${cell.score}${mark(cell.score)}`;
+    }
+
+    function modelComboAvg(name) {
+      const a = HINDI_A_ROWS.find((r) => r.model === name)?.score ?? 0;
+      const b = HINDI_B_ROWS.find((r) => r.model === name)?.score ?? 0;
+      return Math.round(((a + b) / 2) * 10) / 10;
+    }
+
+    function SoramimiPromptEvalCanvas() {
+      const comboModels = [
+        "ChatGPT",
+        "Claude",
+        "Gemini",
+        "Grok",
+        "Perplexity",
+        "Kimi",
+      ];
+
+      const comboScores = comboModels.map((m) => ({
+        model: m,
+        avg: modelComboAvg(m),
+      }));
+
+      const avgGH =
+        comboScores.reduce((s, r) => s + r.avg, 0) / comboScores.length;
+
+      const bestCombo = comboScores.reduce((a, b) => (b.avg > a.avg ? b : a));
+      const bestA = HINDI_A_ROWS.reduce((a, b) => (b.score > a.score ? b : a));
+
+      const roundAvgs = CROSS_ROUNDS.map((r) => {
+        const scores = [
+          r.chatgpt.score,
+          r.claude.score,
+          r.gemini.score,
+          r.grok.score,
+          r.perplexity.score,
+          r.kimi.score,
+        ].filter((x) => typeof x === "number");
+        const avg = scores.reduce((s, n) => s + n, 0) / scores.length;
+        return { label: r.round, avg: Math.round(avg * 10) / 10 };
+      });
+
+      return (
+        <div className="max-w-6xl mx-auto">
+          <Stack gap={24} style={{ padding: 12 }}>
+            <Stack gap={8}>
+              <H1>空耳 Prompt 多語測評</H1>
+              <Text tone="secondary">
+                焦點＝Prompt 可用性與可信度（非模型排行）。金標＝使用者實際聽感。
+                Source: A–H 歷史輪＋<strong className="text-slate-200">v1.2 七句複測</strong> · 2026-08 · G namaste 本批未測 · word-analysis.v1.2
+              </Text>
+              <Row gap={8} wrap>
+                <Pill active size="sm" tone="info">
+                  v1.2 複測
+                </Pill>
+                <Pill active size="sm" tone="warning">
+                  Prompt trust
+                </Pill>
+                <Pill size="sm">7 句 · 不含 namaste</Pill>
+                <Pill size="sm">6 模型</Pill>
+                <Pill size="sm">歷史 A–H 仍保留</Pill>
+              </Row>
+            </Stack>
+
+            <Callout tone="danger" title="v1.2 MVP 判決：可用有條件 YES · 可信度 NO">
+              Schema／切段夠跑產品；禁令未內化＋硬金標失手＋殘渣／兒化／語錯 → 尚不足以自信上架多語。下一步宜後處理閘與語種／驗收閘，純再加 Prompt 字效益遞減。
+            </Callout>
+
+            <Stack gap={12}>
+              <H2>Prompt v1.2 retest — usability / trust</H2>
+              <Text tone="secondary" size="small">
+                複測：Приветствовать · ¿Cómo está yendo? · Hvordan går det? · Apa kabar? ·
+                Kumusta na? · Как дела? · कैसा चल रहा है? · 不含 नमस्ते
+              </Text>
+
+              <Grid columns={4} gap={12}>
+                <Stat value="4.5" label="Schema 可用性" tone="success" />
+                <Stat value="2.5" label="規則內化一致性" tone="warning" />
+                <Stat value="2.5" label="聽感天花板" tone="warning" />
+                <Stat value="2.0" label="信任安全度" tone="danger" />
+              </Grid>
+
+              <BarChart
+                categories={V12_TRUST_DOMAINS.map((d) => d.domain)}
+                series={[
+                  {
+                    name: "領域分 (1–5)",
+                    data: V12_TRUST_DOMAINS.map((d) => d.score),
+                    tone: "info",
+                  },
+                ]}
+                yMin={0}
+                yMax={5}
+                height={220}
+                showValues
+                referenceLines={[
+                  { value: 4, label: "可上船線", tone: "success" },
+                  { value: 3, label: "猶豫線", tone: "warning" },
+                ]}
+              />
+              <Text tone="tertiary" size="small">
+                Chart: Prompt 四領域 · 非模型比分 · 參考線 4＝可自信用／3＝有條件
+              </Text>
+
+              <Table
+                headers={["領域", "分", "判讀"]}
+                columnAlign={["left", "center", "left"]}
+                striped
+                rowTone={V12_TRUST_DOMAINS.map((d) => scoreTone(d.score))}
+                rows={V12_TRUST_DOMAINS.map((d) => [
+                  d.domain,
+                  String(d.score),
+                  d.reading,
+                ])}
+              />
+
+              <Grid columns={2} gap={12}>
+                <Card>
+                  <CardHeader trailing={<Pill size="sm" tone="success" active>已內化</Pill>}>
+                    規則可用性
+                  </CardHeader>
+                  <CardBody>
+                    <Stack gap={6}>
+                      <Text>
+                        多詞切段「－」各語頻繁，相對早期純漢字長串進步
+                      </Text>
+                      <Text>
+                        聽感偶發勝：Claude≈勾某－欸斯大－菸斗；Gemini 丹麥＝瓦Den－勾o－迪；印尼阿爸／阿巴族
+                      </Text>
+                      <Text>
+                        重音標示偶用；H：Kimi 給…黑，Claude／Gemini 可見黑
+                      </Text>
+                    </Stack>
+                  </CardBody>
+                </Card>
+                <Card>
+                  <CardHeader trailing={<Pill size="sm" tone="warning" active>信任債</Pill>}>
+                    仍傷產品信任
+                  </CardHeader>
+                  <CardBody>
+                    <Stack gap={8}>
+                      <Text>
+                        <Text weight="semibold" as="span">
+                          拉丁殘渣
+                        </Text>
+                        ：大t／ㄧㄝ˙n斗／卡巴r／恰l／恰ㄌ／卡k／ㄙㄊ；Grok 嵌 s／l／v
+                      </Text>
+                      <Text>
+                        <Text weight="semibold" as="span">
+                          兒化
+                        </Text>
+                        ：ChatGPT 勾兒；Perplexity 胡爾丹／勾兒
+                      </Text>
+                      <Text>
+                        <Text weight="semibold" as="span">
+                          硬金標失手
+                        </Text>
+                        ：F 逼丟零；A 仍遠；E 古罕見；H 多數凱／恰／查
+                      </Text>
+                      <Text>
+                        <Text weight="semibold" as="span">
+                          近緣語／過切／腳本滲入
+                        </Text>
+                        ：Claude／Pplx da→no；H 四塊vs兩塊；Pplx 天城文 चल
+                      </Text>
+                    </Stack>
+                  </CardBody>
+                </Card>
+              </Grid>
+
+              <Callout tone="warning" title="自信上船前要補">
+                後處理硬閘（殘渣／兒／爾／外文書寫）· 語種／模型閘 · 金標驗收清單（逼丟／給薩加／瓦Den…）·
+                再生成 UX。v1.2 禁令已寫仍冒 → 別只靠再加字。
+              </Callout>
+            </Stack>
+
+            <Divider />
+
+            <Stack gap={8}>
+              <H2>歷史輪次摘要（A–H · 含印地首輪）</H2>
+              <Text tone="secondary" size="small">
+                以下保留 v1.1 印地首輪與跨輪對照，供對照 v1.2 前後；排行僅作歷史備註。
+              </Text>
+              <Row gap={8} wrap>
+                <Pill size="sm">8 歷史輪</Pill>
+                <Pill size="sm">印地 G／H post v1.1</Pill>
+                <Pill size="sm">已升後複測見上</Pill>
+              </Row>
+            </Stack>
+
+            <Grid columns={4} gap={12}>
+              <Stat value="8" label="歷史測試輪次" tone="info" />
+              <Stat value={avgGH.toFixed(1)} label="印地首輪均分 (G+H)" tone="warning" />
+              <Stat
+                value={`${bestCombo.avg}`}
+                label={`歷史綜合最佳：${bestCombo.model}`}
+                tone="success"
+              />
+              <Stat value="OK/~ /X" label="跨輪符號對照" />
+            </Grid>
+
+            <Callout tone="warning" title="v1.1 債務旗標（印地首現 · 對照）">
+              兒化（恰爾）、拉丁殘渣（dei／te／l／k些）、正字啟航（凱／開≠給）、句級錯讀（kyā）——
+              v1.2 複測顯示殘渣／兒化／正字債仍在，H 略有「給／黑」前進。
+            </Callout>
+
+            <Callout tone="info" title="總覽：迭代方向（多語通用）">
+              俄語 A → 西語 → 丹麥 → 印尼 → 他加祿 → 俄語 F → 印地 G／H → v1.2
+              七句複測（無 G）。策略維持短語種提示＋條件附錄。
+            </Callout>
+
+            <Divider />
+
+            <Stack gap={12}>
+              <H2>1. 歷史本輪（印地 G／H · post v1.1）</H2>
+              <Text tone="secondary" size="small">
+                G 金標：拿罵司爹（नमस्ते）· 拿≠那／納／那麼｜罵≠媽／馬／瑪｜司≠斯｜爹≠貼／铁／帖／dei／戴｜偏連寫
+                · H 金標：給薩加-拉哈黑（कैसा चल रहा है?）· 給≠凱／開｜加≠恰／查／拆｜黑≠嘿／嗨｜兩塊給薩加－拉哈黑
+              </Text>
+
+              <BarChart
+                categories={comboScores.map((r) => r.model)}
+                series={[
+                  {
+                    name: "兩句平均相似分 (1–5)",
+                    data: comboScores.map((r) => r.avg),
+                    tone: "info",
+                  },
+                ]}
+                yMin={0}
+                yMax={5}
+                height={220}
+                showValues
+                referenceLines={[{ value: 4, label: "可用線", tone: "success" }]}
+              />
+              <Text tone="tertiary" size="small">
+                Chart: 各模型 G＋H 最佳候選平均 · 參考線＝4 · 僅 Gemini 憑 G 拉高綜合
+              </Text>
+
+              <H3>G · नमस्ते → 拿罵司爹</H3>
+              <Table
+                headers={["模型", "最佳候選", "其他稿", "分", "評註"]}
+                columnAlign={["left", "left", "left", "center", "left"]}
+                striped
+                rowTone={HINDI_A_ROWS.map((r) => scoreTone(r.score))}
+                rows={HINDI_A_ROWS.map((r) => [
+                  r.model === bestA.model ? `${r.model} (最佳)` : r.model,
+                  r.best,
+                  r.alts,
+                  String(r.score),
+                  r.note,
+                ])}
+              />
+
+              <H3>H · कैसा चल रहा है? → 給薩加-拉哈黑</H3>
+              <Table
+                headers={["模型", "最佳候選", "其他稿", "分", "評註"]}
+                columnAlign={["left", "left", "left", "center", "left"]}
+                striped
+                rowTone={HINDI_B_ROWS.map((r) => scoreTone(r.score))}
+                rows={HINDI_B_ROWS.map((r) => [
+                  r.model === "Grok" ? `${r.model} (並列最近)` : r.model,
+                  r.best,
+                  r.alts,
+                  String(r.score),
+                  r.note,
+                ])}
+              />
+              <Text tone="tertiary" size="small">
+                H 全員未過 2；薩／拉哈位偶中，給／加／黑零命中。並列最近：Grok／Gemini／Kimi／ChatGPT（結構近似）
+              </Text>
+
+              <Grid columns={2} gap={12}>
+                <Card>
+                  <CardHeader>金標對照軸</CardHeader>
+                  <CardBody>
+                    <Stack gap={6}>
+                      <Text>G：拿｜罵｜司｜爹（連寫或輕切）</Text>
+                      <Text>H：給薩加 － 拉哈黑（約兩塊）</Text>
+                      <Text>禁：凱開恰查拆嘿嗨；兒化；拉丁 l／dei／te</Text>
+                      <Text>禁：整句換成 kyā 等錯詞</Text>
+                    </Stack>
+                  </CardBody>
+                </Card>
+                <Card>
+                  <CardHeader>本輪分水嶺</CardHeader>
+                  <CardBody>
+                    <Stack gap={6}>
+                      <Text>
+                        G：Gemini「拿瑪斯爹」唯一達 4；拿…爹骨架。
+                      </Text>
+                      <Text>
+                        H：給／加／黑全滅——正字 kai／chal／hai 預設蓋耳。
+                      </Text>
+                      <Text>
+                        v1.1 殘債：恰爾、dei／te／l、開凱vs給。
+                      </Text>
+                    </Stack>
+                  </CardBody>
+                </Card>
+              </Grid>
+            </Stack>
+
+            <Divider />
+
+            <Stack gap={12}>
+              <H2>2. 跨輪次對照</H2>
+              <Text tone="secondary" size="small">
+                每格＝該輪「最近候選」簡寫 ＋ 分／OK≥4 ~≈3 X≤2（Kimi Round A
+                缺摘要故 -）· G／H＝印地兩句
+              </Text>
+
+              <BarChart
+                categories={roundAvgs.map((r) => r.label)}
+                series={[
+                  {
+                    name: "輪次均分 (有資料模型)",
+                    data: roundAvgs.map((r) => r.avg),
+                    tone: "info",
+                  },
+                ]}
+                yMin={0}
+                yMax={5}
+                height={220}
+                showValues
+              />
+              <Text tone="tertiary" size="small">
+                Chart: A→H 輪次均分 · G≈2.7（namaste 尚可）· H≈1.8（kaisā 全滅給加黑）
+              </Text>
+
+              <Table
+                headers={[
+                  "輪次",
+                  "金標",
+                  "ChatGPT",
+                  "Claude",
+                  "Gemini",
+                  "Grok",
+                  "Perplexity",
+                  "Kimi",
+                ]}
+                striped
+                stickyHeader
+                rows={CROSS_ROUNDS.map((r) => [
+                  r.round,
+                  r.gold,
+                  formatCell(r.chatgpt),
+                  formatCell(r.claude),
+                  formatCell(r.gemini),
+                  formatCell(r.grok),
+                  formatCell(r.perplexity),
+                  formatCell(r.kimi),
+                ])}
+              />
+            </Stack>
+
+            <Divider />
+
+            <Stack gap={12}>
+              <H2>3. 改進是否有效（A→H · 含 v1.1 後）</H2>
+              <Grid columns={2} gap={12}>
+                <Card>
+                  <CardHeader>已對上／部分有效</CardHeader>
+                  <CardBody>
+                    <Stack gap={8}>
+                      <Text>
+                        <Text weight="semibold" as="span">
+                          切段意識
+                        </Text>
+                        ：H 多數有 －；相對 A 長串有進步（塊數仍偏多）。
+                      </Text>
+                      <Text>
+                        <Text weight="semibold" as="span">
+                          G 尾爹
+                        </Text>
+                        ：ChatGPT／Gemini 能落到爹，貼／铁未全滅。
+                      </Text>
+                      <Text>
+                        <Text weight="semibold" as="span">
+                          G 起首拿
+                        </Text>
+                        ：Claude／Gemini 命中；那／納仍常見。
+                      </Text>
+                    </Stack>
+                  </CardBody>
+                </Card>
+                <Card>
+                  <CardHeader>v1.1 後仍未收斂</CardHeader>
+                  <CardBody>
+                    <Stack gap={8}>
+                      <Text>
+                        <Text weight="semibold" as="span">
+                          兒化／拉丁
+                        </Text>
+                        ：恰爾、dei、te、拆l、k些——禁令未內化。
+                      </Text>
+                      <Text>
+                        <Text weight="semibold" as="span">
+                          正字啟航字
+                        </Text>
+                        ：凱開／恰查拆／嘿嗨 系統性取代 給／加／黑。
+                      </Text>
+                      <Text>
+                        <Text weight="semibold" as="span">
+                          句級保真
+                        </Text>
+                        ：Perplexity H 聽成 kyā——空耳前已錯。
+                      </Text>
+                    </Stack>
+                  </CardBody>
+                </Card>
+              </Grid>
+
+              <Table
+                headers={["Prompt 規則", "測到的缺口", "有效性", "主要輪次"]}
+                striped
+                rowTone={[
+                  "danger",
+                  "warning",
+                  "warning",
+                  "danger",
+                  "info",
+                  "danger",
+                  "warning",
+                  "info",
+                  "warning",
+                  "danger",
+                ]}
+                rows={PROMPT_GAPS.map((g) => [g.rule, g.gap, g.effect, g.rounds])}
+              />
+            </Stack>
+
+            <Divider />
+
+            <Stack gap={12}>
+              <H2>4. 共通問題與下一輪觀察點</H2>
+              <Grid columns="1.2fr 1fr" gap={16}>
+                <Stack gap={10}>
+                  <H3>仍共通問題</H3>
+                  <Table
+                    headers={["問題", "表現"]}
+                    framed
+                    rows={[
+                      [
+                        "正字／羅馬→預設漢字",
+                        "凱開≠給；恰查拆≠加；媽馬瑪≠罵；斯≠司",
+                      ],
+                      [
+                        "兒化＋拉丁殘渣",
+                        "恰爾；dei／te／l／k些（v1.1 明示禁仍現）",
+                      ],
+                      [
+                        "尾／收束字漂移",
+                        "嘿嗨≠黑；貼铁帖≠爹",
+                      ],
+                      [
+                        "切段粒度",
+                        "金標兩塊 vs 模型三四塊",
+                      ],
+                      [
+                        "句級錯讀",
+                        "H：kyā 替換整句起首",
+                      ],
+                    ]}
+                  />
+                </Stack>
+                <Stack gap={10}>
+                  <H3>下一輪可觀察（仍通用）</H3>
+                  <Card>
+                    <CardBody>
+                      <Stack gap={8}>
+                        <Text>
+                          1.{" "}
+                          <Text weight="semibold" as="span">
+                            常見字≠听感字
+                          </Text>
+                          ：開／凱類是否仍搶給類？
+                        </Text>
+                        <Text>
+                          2.{" "}
+                          <Text weight="semibold" as="span">
+                            兒化／拉丁禁令
+                          </Text>
+                          ：恰爾、dei、l 是否清零？
+                        </Text>
+                        <Text>
+                          3.{" "}
+                          <Text weight="semibold" as="span">
+                            塊數跟气口
+                          </Text>
+                          ：兩塊金標是否仍被切成四塊？
+                        </Text>
+                        <Text>
+                          4.{" "}
+                          <Text weight="semibold" as="span">
+                            句級保真
+                          </Text>
+                          ：是否先確認詞再空耳？
+                        </Text>
+                        <Text>
+                          5.{" "}
+                          <Text weight="semibold" as="span">
+                            複測 F 逼丟
+                          </Text>
+                          ：腭化債是否仍在？
+                        </Text>
+                      </Stack>
+                    </CardBody>
+                  </Card>
+                  <Callout tone="success" title="評測建議 → v1.2 已收">
+                    已 retune Prompt（通用主規則，無印地專章）：聽感字蓋過正字預設、禁兒／爾填縫、禁拉丁殘渣、原詞鎖定、氣口少塊。建議複測 G／H＋可選 1 句舊硬例。
+                  </Callout>
+                </Stack>
+              </Grid>
+            </Stack>
+
+            <Divider />
+
+            <Stack gap={4}>
+              <Callout tone="danger" title="結論（v1.2 Prompt trust）">
+                可用性：有條件 YES。可信度：NO（尚不足以自信上架多語）。切段／Schema
+                夠用；殘渣、兒化、硬金標失手、da／no 誤判仍傷信任。建議後處理閘＋語種／驗收閘，勿只加 Prompt 字。
+              </Callout>
+              <Callout tone="info" title="歷史結論（印地輪 · post v1.1）">
+                句最近：G＝Gemini「拿瑪斯爹」；H＝並列低分（缺給加黑）。共通債已納入
+                word-analysis.v1.2；複測見上方 trust 區塊。
+              </Callout>
+              <Text tone="secondary" size="small">
+                Prompt 未再改寫；定稿仍為 word-analysis.v1.2。G namaste 本批未測。
+              </Text>
+              <Text tone="tertiary" size="small">
+                路徑：canvases/soramimi-prompt-eval.canvas.tsx · 文字備援
+                docs/prompts/soramimi-prompt-eval.md
+              </Text>
+            </Stack>
+          </Stack>
+        </div>
+      );
+    }
+
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<SoramimiPromptEvalCanvas />);
+  </script>
+</body>
+</html>

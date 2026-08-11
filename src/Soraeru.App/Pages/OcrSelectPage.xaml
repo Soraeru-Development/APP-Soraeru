@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Soraeru.Pages.OcrSelectPage"
+             Title="選擇單字"
+             Shell.NavBarIsVisible="True"
+             BackgroundColor="{StaticResource SurfaceBright}">
+
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20,16" Spacing="14" MaximumWidthRequest="480" HorizontalOptions="Center">
+
+                <Grid ColumnDefinitions="72,*" ColumnSpacing="12">
+                    <Border StrokeThickness="0"
+                            BackgroundColor="{StaticResource SurfaceDim}"
+                            StrokeShape="RoundRectangle 8"
+                            HeightRequest="72" WidthRequest="72">
+                        <Image x:Name="ThumbImage"
+                               Aspect="AspectFill" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                        <Label x:Name="ImageCaptionLabel"
+                               Text="已選圖片"
+                               Style="{StaticResource SectionTitle}"
+                               FontSize="16" />
+                        <Button Text="返回重選圖"
+                                Style="{StaticResource LinkButton}"
+                                Padding="0"
+                                HorizontalOptions="Start"
+                                Clicked="OnReselectClicked" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <Label Text="辨識文字（可編輯）" Style="{StaticResource FieldLabel}" Margin="0,8,0,0" />
+                <Border Style="{StaticResource InputBorder}" Padding="12,8">
+                    <Editor x:Name="OcrEditor"
+                            AutoSize="TextChanges"
+                            HeightRequest="80"
+                            TextChanged="OnOcrTextChanged" />
+                </Border>
+
+                <Label Text="點選要分析的單字（單選）" Style="{StaticResource FieldLabel}" Margin="0,8,0,0" />
+                <Border Style="{StaticResource CardBorder}" Padding="8,4">
+                    <VerticalStackLayout x:Name="TokenList" Spacing="0" />
+                </Border>
+
+                <Button Text="＋ 手動輸入其他單字"
+                        Style="{StaticResource LinkButton}"
+                        HorizontalOptions="Start"
+                        Clicked="OnManualClicked" />
+
+                <Label x:Name="SelectionCountLabel"
+                       Text="已選擇 0 個單字"
+                       Style="{StaticResource CaptionLabel}" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid Grid.Row="1" Style="{StaticResource StickyBar}">
+            <Button Text="分析選定單字"
+                    Style="{StaticResource PrimaryButton}"
+                    Clicked="OnAnalyzeClicked" />
+        </Grid>
+    </Grid>
+</ContentPage>

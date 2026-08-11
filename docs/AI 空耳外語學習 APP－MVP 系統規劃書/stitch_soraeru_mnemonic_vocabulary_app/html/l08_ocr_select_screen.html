@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>選擇單字 - Soraeru</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&amp;family=JetBrains+Mono:wght@500&amp;family=Noto+Sans:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#181c1e",
+                        "tertiary-container": "#885116",
+                        "on-secondary-fixed": "#081e27",
+                        "on-secondary-fixed-variant": "#364954",
+                        "surface-bright": "#F5FAFD",
+                        "background": "#f7f9fc",
+                        "on-primary-fixed": "#001f2a",
+                        "primary": "#004d64",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "surface-container-high": "#e6e8eb",
+                        "on-primary-fixed-variant": "#004d64",
+                        "on-surface-variant": "#3f484d",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#eceef1",
+                        "inverse-surface": "#2d3133",
+                        "secondary": "#4d616c",
+                        "on-secondary-container": "#536772",
+                        "outline-variant": "#bfc8cd",
+                        "primary-fixed-dim": "#87d0f2",
+                        "on-tertiary-fixed": "#2d1600",
+                        "primary-container": "#006684",
+                        "surface-dim": "#D8E3E9",
+                        "tertiary": "#6b3a00",
+                        "status-warning": "#8B5000",
+                        "secondary-container": "#d0e6f3",
+                        "outline": "#70787e",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb876",
+                        "surface-container-highest": "#e0e3e5",
+                        "primary-fixed": "#bee9ff",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#181c1e",
+                        "on-primary-container": "#a2e1ff",
+                        "inverse-on-surface": "#eff1f3",
+                        "secondary-fixed-dim": "#b4cad6",
+                        "surface-container-low": "#f2f4f6",
+                        "surface-tint": "#016684",
+                        "on-secondary": "#ffffff",
+                        "status-info": "#0061A4",
+                        "status-danger": "#BA1A1A",
+                        "surface": "#f7f9fc",
+                        "on-tertiary-container": "#ffcfa6",
+                        "tertiary-fixed": "#ffdcc0",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#87d0f2",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#d0e6f3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-padding": "16px",
+                        "bottom-bar-height": "80px",
+                        "gutter": "16px",
+                        "stack-gap": "12px",
+                        "appbar-height": "64px",
+                        "safe": "env(safe-area-inset-bottom, 20px)"
+                    },
+                    "fontFamily": {
+                        "body-source-lg": ["Noto Sans"],
+                        "caption": ["Noto Sans"],
+                        "label-mono": ["JetBrains Mono"],
+                        "display-hero": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "headline-sm": ["Hanken Grotesk"],
+                        "body-target-md": ["Noto Sans"]
+                    },
+                    "fontSize": {
+                        "body-source-lg": ["22px", { "lineHeight": "30px", "fontWeight": "400" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "display-hero": ["40px", { "lineHeight": "48px", "fontWeight": "700" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-target-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for editable area to keep it clean */
+        .editable-area::-webkit-scrollbar {
+            width: 4px;
+        }
+        .editable-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .editable-area::-webkit-scrollbar-thumb {
+            background-color: var(--tw-colors-outline-variant);
+            border-radius: 4px;
+        }
+        
+        /* Material Symbols Fill Configuration */
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-surface-bright text-on-surface font-body-target-md antialiased h-screen overflow-hidden flex flex-col">
+<!-- Top AppBar (from JSON but modified for specific screen intent) -->
+<header class="bg-surface dark:bg-surface text-primary dark:text-primary-fixed-dim font-headline-sm text-headline-sm docked full-width top-0 bg-surface/80 backdrop-blur-md flat no shadows flex justify-between items-center px-gutter h-appbar-height w-full max-w-[600px] mx-auto z-40 sticky">
+<button class="p-2 -ml-2 text-on-surface-variant hover:bg-surface-variant/50 rounded-full transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-on-surface text-center flex-1">選擇單字</h1>
+<div class="w-10"></div> <!-- Spacer for center alignment -->
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto px-gutter pb-[calc(100px+env(safe-area-inset-bottom,20px))] max-w-[600px] w-full mx-auto relative pt-4">
+<!-- Context Area: Thumbnail & Raw Text -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-card-padding mb-6 shadow-sm relative overflow-hidden group">
+<div class="flex items-start gap-4">
+<!-- Thumbnail -->
+<div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-surface-variant relative shadow-inner border border-surface-container-highest">
+<img alt="Scan Thumbnail" class="object-cover w-full h-full" data-alt="A close-up photograph of a printed page or document snippet in Japanese text, captured under bright, even lighting suitable for an OCR scanner application. The image should look like a clean, high-resolution mobile phone scan, with a modern, pragmatic aesthetic in a light-mode context. Soft shadows give a sense of physical paper depth against a slightly cooler white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_RIhfopGkEiklijF3AgyS48WwLppv92ZvVdkpJJWjFLNqp6kL9K0WS1c_D1Ei11aEieXRY004mVu-zTqqbi5AP9yRNrDs1k1I5Md5gP9eTA0Qpu_-xjOJA7-zq9-N4j_ioGfptsKxu-pedtl8BFbWnwFVac6RxvqdZLCOHleWnWNLhJILC3laB099mLZmHCfLZmtFGmTkQ9jbmWb_qzbozG4aoZjLbDsonNFjzuF65C1yFkxMDy9BKg"/>
+</div>
+<!-- Editable Text Area -->
+<div class="flex-1 relative">
+<label class="sr-only" for="ocr-text">OCR 識別文本</label>
+<textarea class="w-full bg-transparent border-none p-0 text-body-target-md text-on-surface focus:ring-0 resize-none editable-area" id="ocr-text" rows="4" spellcheck="false">私は昨日、図書館で新しい本を借りました。その本は非常に興味深く、歴史について多くのことを教えてくれました。</textarea>
+<button class="absolute top-0 right-0 p-1 text-on-surface-variant bg-surface rounded-full shadow-sm hover:bg-surface-variant transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+</div>
+</div>
+<!-- Warning Banner inside context if confidence is low (Example) -->
+<div class="mt-4 bg-status-warning/10 border-l-4 border-status-warning p-3 rounded-r-lg flex items-start gap-2">
+<span class="material-symbols-outlined text-status-warning text-[18px]">warning</span>
+<p class="text-caption text-on-surface-variant m-0">部分辨識結果可能不準確，請檢查並修正文本。</p>
+</div>
+</div>
+<!-- Recognition Results Section -->
+<section>
+<div class="flex justify-between items-end mb-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">候選單字</h2>
+<span class="text-caption text-secondary">已選擇 1 個單字</span>
+</div>
+<!-- Bento-style grid for candidates to break from standard lists -->
+<div class="grid grid-cols-1 gap-3 mb-6">
+<!-- Candidate 1: Selected -->
+<label class="relative flex items-center p-4 bg-primary-container/10 border-2 border-primary rounded-xl cursor-pointer hover:bg-primary-container/20 transition-colors shadow-sm">
+<input checked="" class="form-radio h-5 w-5 text-primary border-outline focus:ring-primary focus:ring-offset-surface-bright bg-transparent" name="word-candidate" type="radio" value="図書館"/>
+<div class="ml-4 flex-1">
+<div class="font-body-source-lg text-body-source-lg text-on-surface font-bold">図書館 <span class="text-caption text-on-surface-variant font-normal ml-2">としょかん</span></div>
+<div class="text-body-target-md text-secondary mt-1">圖書館</div>
+</div>
+<span class="material-symbols-outlined text-primary" data-weight="fill">check_circle</span>
+</label>
+<!-- Candidate 2 -->
+<label class="relative flex items-center p-4 bg-surface-container-low border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-variant/50 transition-colors">
+<input class="form-radio h-5 w-5 text-primary border-outline focus:ring-primary focus:ring-offset-surface-bright bg-transparent" name="word-candidate" type="radio" value="借りる"/>
+<div class="ml-4 flex-1">
+<div class="font-body-source-lg text-body-source-lg text-on-surface font-bold">借りる <span class="text-caption text-on-surface-variant font-normal ml-2">かりる</span></div>
+<div class="text-body-target-md text-secondary mt-1">借</div>
+</div>
+</label>
+<!-- Candidate 3 -->
+<label class="relative flex items-center p-4 bg-surface-container-low border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-variant/50 transition-colors">
+<input class="form-radio h-5 w-5 text-primary border-outline focus:ring-primary focus:ring-offset-surface-bright bg-transparent" name="word-candidate" type="radio" value="興味深い"/>
+<div class="ml-4 flex-1">
+<div class="font-body-source-lg text-body-source-lg text-on-surface font-bold">興味深い <span class="text-caption text-on-surface-variant font-normal ml-2">きょうみぶかい</span></div>
+<div class="text-body-target-md text-secondary mt-1">非常有趣的</div>
+</div>
+</label>
+</div>
+<!-- Manual Entry Action -->
+<button class="w-full py-4 border-2 border-dashed border-outline-variant rounded-xl text-primary font-label-mono text-label-mono hover:bg-surface-variant/30 transition-colors flex items-center justify-center gap-2 bg-surface-bright" type="button">
+<span class="material-symbols-outlined">add</span>
+                手動輸入其他單字
+            </button>
+</section>
+<!-- Bottom spacing for sticky bar -->
+<div class="h-8"></div>
+</main>
+<!-- Sticky Bottom Bar for Primary Action (Replacing BottomNav since this is a transactional screen) -->
+<div class="fixed bottom-0 left-0 w-full z-50 flex justify-center items-center h-bottom-bar-height px-gutter pb-safe bg-surface-bright/90 backdrop-blur-md shadow-[0_-8px_16px_0_rgba(0,0,0,0.05)] border-t border-surface-container-highest">
+<div class="max-w-[600px] w-full flex gap-4">
+<button class="flex-1 bg-primary text-on-primary py-3 px-6 rounded-full font-headline-sm text-headline-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-sm" type="button">
+                分析選定單字
+                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</body></html>

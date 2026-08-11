@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Soraeru - 輸入單字</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&amp;family=JetBrains+Mono:wght@500&amp;family=Noto+Sans:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#181c1e",
+                        "tertiary-container": "#885116",
+                        "on-secondary-fixed": "#081e27",
+                        "on-secondary-fixed-variant": "#364954",
+                        "surface-bright": "#F5FAFD",
+                        "background": "#f7f9fc",
+                        "on-primary-fixed": "#001f2a",
+                        "primary": "#004d64",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "surface-container-high": "#e6e8eb",
+                        "on-primary-fixed-variant": "#004d64",
+                        "on-surface-variant": "#3f484d",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#eceef1",
+                        "inverse-surface": "#2d3133",
+                        "secondary": "#4d616c",
+                        "on-secondary-container": "#536772",
+                        "outline-variant": "#bfc8cd",
+                        "primary-fixed-dim": "#87d0f2",
+                        "on-tertiary-fixed": "#2d1600",
+                        "primary-container": "#006684",
+                        "surface-dim": "#D8E3E9",
+                        "tertiary": "#6b3a00",
+                        "status-warning": "#8B5000",
+                        "secondary-container": "#d0e6f3",
+                        "outline": "#70787e",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb876",
+                        "surface-container-highest": "#e0e3e5",
+                        "primary-fixed": "#bee9ff",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#181c1e",
+                        "on-primary-container": "#a2e1ff",
+                        "inverse-on-surface": "#eff1f3",
+                        "secondary-fixed-dim": "#b4cad6",
+                        "surface-container-low": "#f2f4f6",
+                        "surface-tint": "#016684",
+                        "on-secondary": "#ffffff",
+                        "status-info": "#0061A4",
+                        "status-danger": "#BA1A1A",
+                        "surface": "#f7f9fc",
+                        "on-tertiary-container": "#ffcfa6",
+                        "tertiary-fixed": "#ffdcc0",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#87d0f2",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#d0e6f3"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "card-padding": "16px",
+                        "bottom-bar-height": "80px",
+                        "gutter": "16px",
+                        "stack-gap": "12px",
+                        "appbar-height": "64px"
+                    },
+                    fontFamily: {
+                        "body-source-lg": ["Noto Sans", "sans-serif"],
+                        "caption": ["Noto Sans", "sans-serif"],
+                        "label-mono": ["JetBrains Mono", "monospace"],
+                        "display-hero": ["Hanken Grotesk", "sans-serif"],
+                        "headline-lg": ["Hanken Grotesk", "sans-serif"],
+                        "headline-sm": ["Hanken Grotesk", "sans-serif"],
+                        "body-target-md": ["Noto Sans", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface-bright text-on-surface font-body-target-md min-h-screen flex flex-col relative pb-[96px] md:pb-0 selection:bg-primary-container selection:text-on-primary-container">
+<header class="fixed top-0 w-full z-40 bg-surface/80 backdrop-blur-md flex justify-between items-center px-gutter h-appbar-height max-w-[600px] mx-auto left-0 right-0">
+<button aria-label="Go back" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/50 text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-on-surface">輸入單字</h1>
+<div class="w-10 h-10"></div>
+</header>
+<main class="flex-grow pt-appbar-height px-gutter max-w-[600px] mx-auto w-full flex flex-col gap-6 mt-6">
+<div class="flex flex-col gap-2">
+<label class="font-headline-sm text-headline-sm text-on-surface" for="word-input">外語單字或短語</label>
+<div class="relative">
+<textarea class="w-full bg-surface border border-outline-variant rounded-lg p-4 font-body-source-lg text-body-source-lg text-on-surface placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary transition-shadow resize-none" id="word-input" maxlength="50" oninput="document.getElementById('char-count').textContent = this.value.length" placeholder="例如：ขอบคุณ / salamat / ありがとう" rows="4"></textarea>
+<div class="absolute bottom-3 right-3 flex items-center gap-1 text-outline">
+<span class="font-label-mono text-label-mono" id="char-count">0</span>
+<span class="font-label-mono text-label-mono">/ 50</span>
+</div>
+</div>
+<p class="font-caption text-caption text-on-surface-variant mt-1">請輸入您想學習的外語單字，我們將為您生成好記的諧音與解釋。</p>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-headline-sm text-headline-sm text-on-surface" for="source-language">來源語言</label>
+<div class="relative">
+<select class="w-full bg-surface border border-outline-variant rounded-lg p-4 pr-10 font-body-target-md text-body-target-md text-on-surface appearance-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" id="source-language">
+<option value="auto">自動偵測</option>
+<option value="ja">日文 (Japanese)</option>
+<option value="th">泰文 (Thai)</option>
+<option value="tl">他加祿語 (Tagalog)</option>
+<option value="ko">韓文 (Korean)</option>
+<option value="vi">越南文 (Vietnamese)</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">arrow_drop_down</span>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<label class="font-headline-sm text-headline-sm text-on-surface">標記偏好</label>
+<div class="flex flex-col gap-0 border border-outline-variant rounded-lg overflow-hidden bg-surface">
+<label class="flex items-center gap-4 p-4 hover:bg-surface-variant/50 cursor-pointer transition-colors border-b border-outline-variant">
+<input checked="" class="w-5 h-5 text-primary border-outline-variant focus:ring-primary" name="annotation-pref" type="radio" value="bopomofo"/>
+<div class="flex flex-col">
+<span class="font-body-target-md text-body-target-md text-on-surface">注音符號</span>
+<span class="font-caption text-caption text-on-surface-variant">適合熟悉台灣注音拼寫的學習者</span>
+</div>
+</label>
+<label class="flex items-center gap-4 p-4 hover:bg-surface-variant/50 cursor-pointer transition-colors border-b border-outline-variant">
+<input class="w-5 h-5 text-primary border-outline-variant focus:ring-primary" name="annotation-pref" type="radio" value="romaji"/>
+<div class="flex flex-col">
+<span class="font-body-target-md text-body-target-md text-on-surface">羅馬拼音</span>
+<span class="font-caption text-caption text-on-surface-variant">使用英文字母標示發音</span>
+</div>
+</label>
+<label class="flex items-center gap-4 p-4 hover:bg-surface-variant/50 cursor-pointer transition-colors">
+<input class="w-5 h-5 text-primary border-outline-variant focus:ring-primary" name="annotation-pref" type="radio" value="mixed"/>
+<div class="flex flex-col">
+<span class="font-body-target-md text-body-target-md text-on-surface">混合模式</span>
+<span class="font-caption text-caption text-on-surface-variant">同時顯示兩種標音方式，提供更準確的參考</span>
+</div>
+</label>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-4 border-l-4 border-status-info flex items-start gap-3 mt-4">
+<span class="material-symbols-outlined text-status-info mt-0.5" style="font-variation-settings: 'FILL' 1;">info</span>
+<p class="font-caption text-caption text-on-surface-variant leading-relaxed">
+                分析結果由 AI 模型生成，可能會因語言特性產生些許誤差。建議搭配原生語音朗讀功能輔助學習。
+            </p>
+</div>
+</main>
+<div class="fixed bottom-0 left-0 w-full z-50 bg-surface-bright/90 backdrop-blur-md shadow-[0_-2px_8px_0_rgba(0,0,0,0.05)] h-[96px] px-gutter flex items-center justify-center md:hidden pb-safe">
+<button class="w-full max-w-[568px] h-12 bg-primary text-on-primary rounded-full font-headline-sm text-headline-sm flex items-center justify-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm active:scale-[0.98]">
+<span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+            開始分析
+        </button>
+</div>
+<div class="hidden md:flex fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-[600px] px-gutter z-50">
+<button class="w-full h-12 bg-primary text-on-primary rounded-full font-headline-sm text-headline-sm flex items-center justify-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-md active:scale-[0.98]">
+<span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+            開始分析
+        </button>
+</div>
+</body></html>

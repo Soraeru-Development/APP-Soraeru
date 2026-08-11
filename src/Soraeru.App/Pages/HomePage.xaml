@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Soraeru.Pages.HomePage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource SurfaceBright}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,48,16,32"
+                             Spacing="12"
+                             MaximumWidthRequest="480"
+                             HorizontalOptions="Center">
+
+            <!-- App bar: brand left + settings -->
+            <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                <Label Text="空耳學單字"
+                       TextColor="{StaticResource Primary}"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       VerticalOptions="Center" />
+                <Button Grid.Column="1"
+                        Text="⚙"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource OnSurfaceVariant}"
+                        FontSize="22"
+                        WidthRequest="48"
+                        HeightRequest="48"
+                        Padding="0"
+                        Clicked="OnSettingsClicked" />
+            </Grid>
+
+            <!-- Headline + quota (Stitch L05 order) -->
+            <VerticalStackLayout Spacing="6" Margin="0,8,0,4">
+                <Label Text="用發音記住外語單字"
+                       Style="{StaticResource SectionTitle}"
+                       FontSize="18" />
+                <Label Text="支援多語自動偵測"
+                       Style="{StaticResource BodyLabel}" />
+
+                <Border StrokeThickness="0"
+                        BackgroundColor="#33006684"
+                        StrokeShape="RoundRectangle 999"
+                        Padding="12,8"
+                        Margin="0,8,0,0"
+                        HorizontalOptions="Start">
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        <Image Source="ic_bolt.png"
+                               HeightRequest="18"
+                               WidthRequest="18"
+                               Aspect="AspectFit"
+                               VerticalOptions="Center" />
+                        <Label x:Name="QuotaLabel"
+                               Text="今日剩餘 AI 次數：…"
+                               TextColor="{StaticResource Primary}"
+                               FontSize="13"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Primary CTA -->
+            <Border StrokeThickness="0"
+                    BackgroundColor="{StaticResource Primary}"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="24,28"
+                    Margin="0,4,0,0">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnWordInputTapped" />
+                </Border.GestureRecognizers>
+                <Border.Shadow>
+                    <Shadow Brush="Black" Offset="0,2" Radius="6" Opacity="0.12" />
+                </Border.Shadow>
+                <VerticalStackLayout Spacing="12"
+                                     HorizontalOptions="Center"
+                                     VerticalOptions="Center">
+                    <Image Source="ic_keyboard.png"
+                           HeightRequest="48"
+                           WidthRequest="48"
+                           Aspect="AspectFit"
+                           HorizontalOptions="Center" />
+                    <Label Text="輸入單字"
+                           TextColor="{StaticResource OnPrimary}"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Secondary two-column actions -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,0,0,0">
+                <Border Grid.Column="0"
+                        Stroke="{StaticResource OutlineVariant}"
+                        StrokeThickness="1"
+                        BackgroundColor="{StaticResource SurfaceContainer}"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="16,20">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnImagePickTapped" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Image Source="ic_photo_camera.png"
+                               HeightRequest="32"
+                               WidthRequest="32"
+                               Aspect="AspectFit"
+                               HorizontalOptions="Center" />
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="拍照／選擇圖片"
+                                   TextColor="{StaticResource OnSurface}"
+                                   FontSize="15"
+                                   FontAttributes="Bold"
+                                   HorizontalTextAlignment="Center"
+                                   LineBreakMode="WordWrap" />
+                            <Label Text="僅手機端 OCR"
+                                   Style="{StaticResource CaptionLabel}"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Column="1"
+                        Stroke="{StaticResource OutlineVariant}"
+                        StrokeThickness="1"
+                        BackgroundColor="{StaticResource SurfaceContainer}"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="16,20">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnNotebookTapped" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="10"
+                                         HorizontalOptions="Center"
+                                         VerticalOptions="Center">
+                        <Image Source="ic_style.png"
+                               HeightRequest="32"
+                               WidthRequest="32"
+                               Aspect="AspectFit"
+                               HorizontalOptions="Center" />
+                        <Label Text="我的單字卡"
+                               TextColor="{StaticResource OnSurface}"
+                               FontSize="15"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- Warning banner: peach / left accent + info + wrapped copy -->
+            <Border StrokeThickness="0"
+                    BackgroundColor="{StaticResource WarningContainer}"
+                    StrokeShape="RoundRectangle 0,8,0,8"
+                    Padding="0"
+                    Margin="0,16,0,0">
+                <Grid ColumnDefinitions="4,*">
+                    <BoxView Grid.Column="0"
+                             Color="{StaticResource StatusWarning}" />
+                    <Grid Grid.Column="1"
+                          ColumnDefinitions="Auto,*"
+                          ColumnSpacing="10"
+                          Padding="12,14">
+                        <Image Grid.Column="0"
+                               Source="ic_info.png"
+                               HeightRequest="20"
+                               WidthRequest="20"
+                               Aspect="AspectFit"
+                               VerticalOptions="Start"
+                               Margin="0,1,0,0" />
+                        <Label Grid.Column="1"
+                               Text="AI 近似音僅供記憶輔助參考，&#10;可能無法完全精確反映母語人士之標準發音。"
+                               TextColor="{StaticResource OnSurfaceVariant}"
+                               FontSize="12"
+                               LineBreakMode="WordWrap" />
+                    </Grid>
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

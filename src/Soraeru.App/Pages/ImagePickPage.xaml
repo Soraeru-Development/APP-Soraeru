@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Soraeru.Pages.ImagePickPage"
+             Title="圖片取字"
+             Shell.NavBarIsVisible="True"
+             BackgroundColor="{StaticResource SurfaceBright}">
+
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20,16" Spacing="16" MaximumWidthRequest="480" HorizontalOptions="Center">
+
+                <Border Stroke="{StaticResource OutlineVariant}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{StaticResource SurfaceContainerLow}"
+                        HeightRequest="220">
+                    <Grid>
+                        <VerticalStackLayout x:Name="PreviewPlaceholder"
+                                             VerticalOptions="Center"
+                                             HorizontalOptions="Center"
+                                             Spacing="8">
+                            <Label Text="🖼"
+                                   FontSize="40"
+                                   HorizontalTextAlignment="Center" />
+                            <Label Text="圖片預覽區"
+                                   Style="{StaticResource SectionTitle}"
+                                   HorizontalTextAlignment="Center" />
+                            <Label Text="請拍照或從相簿選圖"
+                                   Style="{StaticResource CaptionLabel}"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                        <Image x:Name="PreviewImage"
+                               IsVisible="False"
+                               Aspect="AspectFit" />
+                    </Grid>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Button Grid.Column="0"
+                            Text="📷 拍照"
+                            Style="{StaticResource SecondaryButton}"
+                            Clicked="OnCameraClicked" />
+                    <Button Grid.Column="1"
+                            Text="🖼 相簿"
+                            Style="{StaticResource SecondaryButton}"
+                            Clicked="OnGalleryClicked" />
+                </Grid>
+
+                <Border Style="{StaticResource InfoBanner}">
+                    <Label Text="圖片僅在手機端辨識，不會上傳至伺服器。"
+                           TextColor="{StaticResource StatusInfo}"
+                           FontSize="14" />
+                </Border>
+
+                <ActivityIndicator x:Name="BusyIndicator"
+                                   IsRunning="False"
+                                   IsVisible="False"
+                                   Color="{StaticResource Primary}" />
+                <Label x:Name="StatusLabel"
+                       Style="{StaticResource CaptionLabel}"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid Grid.Row="1" Style="{StaticResource StickyBar}">
+            <Button x:Name="StartOcrButton"
+                    Text="開始辨識"
+                    Style="{StaticResource PrimaryButton}"
+                    Clicked="OnOcrClicked" />
+        </Grid>
+    </Grid>
+</ContentPage>

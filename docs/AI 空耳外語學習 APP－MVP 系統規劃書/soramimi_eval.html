@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>空耳 Prompt 多語測評</title>
+<style>
+  :root{
+    --success-bg:#ecfdf5; --success-text:#047857; --success-border:#a7f3d0; --success-bar:#10b981;
+    --warning-bg:#fffbeb; --warning-text:#b45309; --warning-border:#fde68a; --warning-bar:#f59e0b;
+    --danger-bg:#fff1f2;  --danger-text:#be123c;  --danger-border:#fecdd3;  --danger-bar:#e11d48;
+    --neutral-bg:#f8fafc; --neutral-text:#334155; --neutral-border:#e2e8f0; --neutral-bar:#64748b;
+    --info-bg:#f0f9ff;    --info-text:#0369a1;    --info-border:#bae6fd;    --info-bar:#0ea5e9;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:#f8fafc; color:#1e293b;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
+    line-height:1.6;
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:32px 16px 64px;}
+  .stack{display:flex; flex-direction:column;}
+  .gap-4{gap:8px;} .gap-6{gap:12px;} .gap-8{gap:16px;} .gap-12{gap:24px;}
+  .row{display:flex; flex-direction:row; align-items:center; flex-wrap:wrap;}
+  h1{font-size:28px; font-weight:800; letter-spacing:-0.02em; margin:0; color:#0f172a;}
+  h2{font-size:20px; font-weight:700; margin:0; color:#0f172a;}
+  h3{font-size:16px; font-weight:700; margin:0; color:#1e293b;}
+  p.text{margin:0; font-size:14px; color:#334155;}
+  p.text.secondary{color:#64748b;}
+  p.text.tertiary{color:#94a3b8; font-size:12px;}
+  p.text.small{font-size:12px;}
+  .pill{
+    display:inline-block; font-size:12px; font-weight:600; padding:4px 10px;
+    border-radius:999px; border:1px solid #e2e8f0; background:#fff; color:#64748b; white-space:nowrap;
+  }
+  .pill.sm{font-size:11px; padding:2px 8px;}
+  .pill.active{background:var(--info-bg); color:var(--info-text); border-color:var(--info-border);}
+  .pill.active.success{background:var(--success-bg); color:var(--success-text); border-color:var(--success-border);}
+  .pill.active.warning{background:var(--warning-bg); color:var(--warning-text); border-color:var(--warning-border);}
+
+  .callout{border-radius:14px; padding:16px; border:1px solid;}
+  .callout.danger{background:var(--danger-bg); border-color:var(--danger-border);}
+  .callout.warning{background:var(--warning-bg); border-color:var(--warning-border);}
+  .callout.info{background:var(--info-bg); border-color:var(--info-border);}
+  .callout.success{background:var(--success-bg); border-color:var(--success-border);}
+  .callout .title{font-weight:700; font-size:14px; margin-bottom:6px;}
+  .callout.danger .title{color:var(--danger-text);}
+  .callout.warning .title{color:var(--warning-text);}
+  .callout.info .title{color:var(--info-text);}
+  .callout.success .title{color:var(--success-text);}
+  .callout .body{font-size:14px; color:#334155;}
+
+  .card{background:#fff; border:1px solid #e2e8f0; border-radius:14px; overflow:hidden;}
+  .card-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 16px; border-bottom:1px solid #f1f5f9; background:#f8fafc;
+    font-size:14px; font-weight:700; color:#1e293b;
+  }
+  .card-body{padding:16px;}
+
+  .stat{background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:4px;}
+  .stat .value{font-size:24px; font-weight:800;}
+  .stat .label{font-size:12px; color:#64748b;}
+  .stat.success .value{color:var(--success-text);}
+  .stat.warning .value{color:var(--warning-text);}
+  .stat.danger .value{color:var(--danger-text);}
+  .stat.info .value{color:var(--info-text);}
+  .stat.neutral .value{color:#334155;}
+
+  .grid{display:grid; gap:12px;}
+  .grid-2{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .grid-4{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .grid-12-1{grid-template-columns:1.2fr 1fr;}
+  @media (max-width:720px){
+    .grid-2, .grid-4, .grid-12-1{grid-template-columns:1fr;}
+  }
+
+  .divider{height:1px; width:100%; background:#e2e8f0;}
+
+  .table-wrap{overflow-x:auto; border-radius:10px;}
+  .table-wrap.framed{border:1px solid #e2e8f0;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  thead tr{background:#f1f5f9;}
+  th{padding:8px 12px; text-align:left; font-size:11px; font-weight:700; color:#475569; border-bottom:1px solid #e2e8f0; white-space:nowrap;}
+  th.center{text-align:center;}
+  td{padding:8px 12px; vertical-align:top; color:#334155; border-bottom:1px solid #f1f5f9;}
+  td.center{text-align:center;}
+  tr.striped{background:#f8fafc;}
+  tr.plain{background:#fff;}
+  td.rowtone-success{color:var(--success-text); font-weight:600;}
+  td.rowtone-warning{color:var(--warning-text); font-weight:600;}
+  td.rowtone-danger{color:var(--danger-text); font-weight:600;}
+  td.rowtone-info{color:var(--info-text); font-weight:600;}
+
+  .chart-box{width:100%; position:relative;}
+  .chart-note{text-align:center; margin-top:2px;}
+  .bar-chart-svg{width:100%; height:100%; display:block;}
+  .bar-chart-svg text{font-family:inherit;}
+
+  strong.sb{font-weight:700; color:#0f172a;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stack gap-12" id="root">
+
+    <div class="stack gap-6">
+      <h1>空耳 Prompt 多語測評</h1>
+      <p class="text secondary">
+        焦點＝Prompt 可用性與可信度（非模型排行）。金標＝使用者實際聽感。
+        Source: A–H 歷史輪＋v1.2 七句複測 · 2026-08 · G namaste 本批未測 · word-analysis.v1.2
+      </p>
+      <div class="row gap-4">
+        <span class="pill sm active">v1.2 複測</span>
+        <span class="pill sm active">Prompt trust</span>
+        <span class="pill sm">7 句 · 不含 namaste</span>
+        <span class="pill sm">6 模型</span>
+        <span class="pill sm">歷史 A–H 仍保留</span>
+      </div>
+    </div>
+
+    <div class="callout danger">
+      <div class="title">v1.2 MVP 判決：可用有條件 YES · 可信度 NO</div>
+      <div class="body">Schema／切段夠跑產品；禁令未內化＋硬金標失手＋殘渣／兒化／語錯 → 尚不足以自信上架多語。下一步宜後處理閘與語種／驗收閘，純再加 Prompt 字效益遞減。</div>
+    </div>
+
+    <div class="stack gap-6">
+      <h2>Prompt v1.2 retest — usability / trust</h2>
+      <p class="text secondary small">
+        複測：Приветствовать · ¿Cómo está yendo? · Hvordan går det? · Apa kabar? ·
+        Kumusta na? · Как дела? · कैसा चल रहा है? · 不含 नमस्ते
+      </p>
+
+      <div class="grid grid-4">
+        <div class="stat success"><span class="value">4.5</span><span class="label">Schema 可用性</span></div>
+        <div class="stat warning"><span class="value">2.5</span><span class="label">規則內化一致性</span></div>
+        <div class="stat warning"><span class="value">2.5</span><span class="label">聽感天花板</span></div>
+        <div class="stat danger"><span class="value">2.0</span><span class="label">信任安全度</span></div>
+      </div>
+
+      <div class="chart-box" id="chartTrust" style="height:240px;"></div>
+      <p class="text tertiary chart-note">Chart: Prompt 四領域 · 非模型比分 · 參考線 4＝可自信用／3＝有條件</p>
+
+      <div class="table-wrap" id="tblTrust"></div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-header">規則可用性 <span class="pill sm active success">已內化</span></div>
+          <div class="card-body stack gap-6">
+            <p class="text">多詞切段「－」各語頻繁，相對早期純漢字長串進步</p>
+            <p class="text">聽感偶發勝：Claude≈勾某－欸斯大－菸斗；Gemini 丹麥＝瓦Den－勾o－迪；印尼阿爸／阿巴族</p>
+            <p class="text">重音標示偶用；H：Kimi 給…黑，Claude／Gemini 可見黑</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">仍傷產品信任 <span class="pill sm active warning">信任債</span></div>
+          <div class="card-body stack gap-8">
+            <p class="text"><strong class="sb">拉丁殘渣</strong>：大t／ㄧㄝ˙n斗／卡巴r／恰l／恰ㄌ／卡k／ㄙㄊ；Grok 嵌 s／l／v</p>
+            <p class="text"><strong class="sb">兒化</strong>：ChatGPT 勾兒；Perplexity 胡爾丹／勾爾</p>
+            <p class="text"><strong class="sb">硬金標失手</strong>：F 逼丟零；A 仍遠；E 古罕見；H 多數凱／恰／查</p>
+            <p class="text"><strong class="sb">近緣語／過切／腳本滲入</strong>：Claude／Pplx da→no；H 四塊vs兩塊；Pplx 天城文 चल</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout warning">
+        <div class="title">自信上船前要補</div>
+        <div class="body">後處理硬閘（殘渣／兒／爾／外文書寫）· 語種／模型閘 · 金標驗收清單（逼丟／給薩加／瓦Den…）· 再生成 UX。v1.2 禁令已寫仍冒 → 別只靠再加字。</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="stack gap-4">
+      <h2>歷史輪次摘要（A–H · 含印地首輪）</h2>
+      <p class="text secondary small">以下保留 v1.1 印地首輪與跨輪對照，供對照 v1.2 前後；排行僅作歷史備註。</p>
+      <div class="row gap-4">
+        <span class="pill sm">8 歷史輪</span>
+        <span class="pill sm">印地 G／H post v1.1</span>
+        <span class="pill sm">已升後複測見上</span>
+      </div>
+    </div>
+
+    <div class="grid grid-4">
+      <div class="stat info"><span class="value">8</span><span class="label">歷史測試輪次</span></div>
+      <div class="stat warning"><span class="value" id="statAvgGH">-</span><span class="label">印地首輪均分 (G+H)</span></div>
+      <div class="stat success"><span class="value" id="statBestCombo">-</span><span class="label" id="statBestComboLabel">歷史綜合最佳</span></div>
+      <div class="stat neutral"><span class="value">OK/~ /X</span><span class="label">跨輪符號對照</span></div>
+    </div>
+
+    <div class="callout warning">
+      <div class="title">v1.1 債務旗標（印地首現 · 對照）</div>
+      <div class="body">兒化（恰爾）、拉丁殘渣（dei／te／l／k些）、正字啟航（凱／開≠給）、句級錯讀（kyā）—— v1.2 複測顯示殘渣／兒化／正字債仍在，H 略有「給／黑」前進。</div>
+    </div>
+
+    <div class="callout info">
+      <div class="title">總覽：迭代方向（多語通用）</div>
+      <div class="body">俄語 A → 西語 → 丹麥 → 印尼 → 他加祿 → 俄語 F → 印地 G／H → v1.2 七句複測（無 G）。策略維持短語種提示＋條件附錄。</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="stack gap-6">
+      <h2>1. 歷史本輪（印地 G／H · post v1.1）</h2>
+      <p class="text secondary small">
+        G 金標：拿罵司爹（नमस्ते）· 拿≠那／納／那麼｜罵≠媽／馬／瑪｜司≠斯｜爹≠貼／铁／帖／dei／戴｜偏連寫
+        · H 金標：給薩加-拉哈黑（कैसा चल रहा है?）· 給≠凱／開｜加≠恰／查／拆｜黑≠嘿／嗨｜兩塊給薩加－拉哈黑
+      </p>
+
+      <div class="chart-box" id="chartCombo" style="height:240px;"></div>
+      <p class="text tertiary chart-note">Chart: 各模型 G＋H 最佳候選平均 · 參考線＝4 · 僅 Gemini 憑 G 拉高綜合</p>
+
+      <h3>G · नमस्ते → 拿罵司爹</h3>
+      <div class="table-wrap" id="tblHindiA"></div>
+
+      <h3>H · कैसा चल रहा है? → 給薩加-拉哈黑</h3>
+      <div class="table-wrap" id="tblHindiB"></div>
+      <p class="text tertiary small">H 全員未過 2；薩／拉哈位偶中，給／加／黑零命中。並列最近：Grok／Gemini／Kimi／ChatGPT（結構近似）</p>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-header">金標對照軸</div>
+          <div class="card-body stack gap-4">
+            <p class="text">G：拿｜罵｜司｜爹（連寫或輕切）</p>
+            <p class="text">H：給薩加 － 拉哈黑（約兩塊）</p>
+            <p class="text">禁：凱開恰查拆嘿嗨；兒化；拉丁 l／dei／te</p>
+            <p class="text">禁：整句換成 kyā 等錯詞</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">本輪分水嶺</div>
+          <div class="card-body stack gap-4">
+            <p class="text">G：Gemini「拿瑪斯爹」唯一達 4；拿…爹骨架。</p>
+            <p class="text">H：給／加／黑全滅——正字 kai／chal／hai 預設蓋耳。</p>
+            <p class="text">v1.1 殘債：恰爾、dei／te／l、開凱vs給。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="stack gap-6">
+      <h2>2. 跨輪次對照</h2>
+      <p class="text secondary small">每格＝該輪「最近候選」簡寫 ＋ 分／OK≥4 ~≈3 X≤2（Kimi Round A 缺摘要故 -）· G／H＝印地兩句</p>
+
+      <div class="chart-box" id="chartRounds" style="height:240px;"></div>
+      <p class="text tertiary chart-note">Chart: A→H 輪次均分 · G≈2.7（namaste 尚可）· H≈1.8（kaisā 全滅給加黑）</p>
+
+      <div class="table-wrap" id="tblRounds"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="stack gap-6">
+      <h2>3. 改進是否有效（A→H · 含 v1.1 後）</h2>
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-header">已對上／部分有效</div>
+          <div class="card-body stack gap-8">
+            <p class="text"><strong class="sb">切段意識</strong>：H 多數有 －；相對 A 長串有進步（塊數仍偏多）。</p>
+            <p class="text"><strong class="sb">G 尾爹</strong>：ChatGPT／Gemini 能落到爹，貼／铁未全滅。</p>
+            <p class="text"><strong class="sb">G 起首拿</strong>：Claude／Gemini 命中；那／納仍常見。</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">v1.1 後仍未收斂</div>
+          <div class="card-body stack gap-8">
+            <p class="text"><strong class="sb">兒化／拉丁</strong>：恰爾、dei、te、拆l、k些——禁令未內化。</p>
+            <p class="text"><strong class="sb">正字啟航字</strong>：凱開／恰查拆／嘿嗨 系統性取代 給／加／黑。</p>
+            <p class="text"><strong class="sb">句級保真</strong>：Perplexity H 聽成 kyā——空耳前已錯。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap" id="tblGaps"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="stack gap-6">
+      <h2>4. 共通問題與下一輪觀察點</h2>
+      <div class="grid grid-12-1">
+        <div class="stack gap-4">
+          <h3>仍共通問題</h3>
+          <div class="table-wrap framed" id="tblCommon"></div>
+        </div>
+        <div class="stack gap-4">
+          <h3>下一輪可觀察（仍通用）</h3>
+          <div class="card">
+            <div class="card-body stack gap-8">
+              <p class="text">1. <strong class="sb">常見字≠听感字</strong>：開／凱類是否仍搶給類？</p>
+              <p class="text">2. <strong class="sb">兒化／拉丁禁令</strong>：恰爾、dei、l 是否清零？</p>
+              <p class="text">3. <strong class="sb">塊數跟气口</strong>：兩塊金標是否仍被切成四塊？</p>
+              <p class="text">4. <strong class="sb">句級保真</strong>：是否先確認詞再空耳？</p>
+              <p class="text">5. <strong class="sb">複測 F 逼丟</strong>：腭化債是否仍在？</p>
+            </div>
+          </div>
+          <div class="callout success">
+            <div class="title">評測建議 → v1.2 已收</div>
+            <div class="body">已 retune Prompt（通用主規則，無印地專章）：聽感字蓋過正字預設、禁兒／爾填縫、禁拉丁殘渣、原詞鎖定、氣口少塊。建議複測 G／H＋可選 1 句舊硬例。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="stack gap-6">
+      <div class="callout danger">
+        <div class="title">結論（v1.2 Prompt trust）</div>
+        <div class="body">可用性：有條件 YES。可信度：NO（尚不足以自信上架多語）。切段／Schema 夠用；殘渣、兒化、硬金標失手、da／no 誤判仍傷信任。建議後處理閘＋語種／驗收閘，勿只加 Prompt 字。</div>
+      </div>
+      <div class="callout info">
+        <div class="title">歷史結論（印地輪 · post v1.1）</div>
+        <div class="body">句最近：G＝Gemini「拿瑪斯爹」；H＝並列低分（缺給加黑）。共通債已納入 word-analysis.v1.2；複測見上方 trust 區塊。</div>
+      </div>
+      <p class="text secondary small">Prompt 未再改寫；定稿仍為 word-analysis.v1.2。G namaste 本批未測。</p>
+      <p class="text tertiary small">路徑：canvases/soramimi-prompt-eval.canvas.tsx · 文字備援 docs/prompts/soramimi-prompt-eval.md</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ---------- data ---------- */
+const TONES = {
+  success: { bar: "#10b981" }, warning: { bar: "#f59e0b" }, danger: { bar: "#e11d48" },
+  neutral: { bar: "#64748b" }, info: { bar: "#0ea5e9" },
+};
+function scoreTone(score){ if(score>=4) return "success"; if(score>=3) return "warning"; return "danger"; }
+function mark(score){ if(score===null) return "-"; if(score>=4) return "OK"; if(score>=3) return "~"; return "X"; }
+function formatCell(cell){ if(cell.score===null) return `${cell.label} -`; return `${cell.label} ${cell.score}${mark(cell.score)}`; }
+
+const HINDI_A_ROWS = [
+  { model: "ChatGPT", best: "納媽斯爹", alts: "那麼斯貼", score: 3, note: "四拍＋尾爹對上；納／媽／斯仍偏正字族，非拿罵司" },
+  { model: "Claude", best: "拿馬斯dei", alts: "那馬斯貼", score: 3, note: "起首拿命中；馬／斯偏；拉丁 dei＝v1.1 補音殘債" },
+  { model: "Gemini", best: "拿瑪斯爹", alts: "拿瑪－斯貼", score: 4, note: "拿…爹骨架最齊、可連寫；瑪／斯未到罵／司" },
+  { model: "Grok", best: "那馬、斯特", alts: "那－馬斯－铁；納－馬死－帖", score: 2, note: "切段過碎；铁／死／帖離爹／司遠" },
+  { model: "Perplexity", best: "那摩斯戴…", alts: "（摘要截斷）", score: 2, note: "那／摩／斯／戴＝拼寫軌；無拿罵司爹" },
+  { model: "Kimi", best: "那媽斯－貼", alts: "哪嗎嘶－te", score: 2, note: "貼／te 尾錯；嘶＋拉丁 te 過補" },
+];
+const HINDI_B_ROWS = [
+  { model: "ChatGPT", best: "凱莎－恰拉－拉哈－嘿", alts: "凱莎－恰爾－拉哈－嘿", score: 2, note: "凱≠給；恰≠加；嘿≠黑；四塊過碎；恰爾＝兒化債" },
+  { model: "Claude", best: "開沙、恰拉哈嘿", alts: "k些、恰、拉哈、嘿", score: 2, note: "開≠給；恰族；k些拉丁；切段略壓但仍非給薩加－拉哈黑" },
+  { model: "Gemini", best: "開薩－拆－辣哈－嗨", alts: "凱薩－拆l－拉哈－嗨", score: 2, note: "薩命中；開／凱、拆≠加、嗨≠黑；拆l＝拉丁 l 殘債" },
+  { model: "Grok", best: "凱薩－查－拉哈－嗨", alts: "（其餘稿近似查／嗨族）", score: 2, note: "薩＋拉哈位對；凱／查／嗨仍是拼寫聽寫預設" },
+  { model: "Perplexity", best: "ㄎㄧㄚˇ－…（kyā 錯讀）", alts: "整句聽成 kyā…", score: 1, note: "句級錯聽：कैसा→kyā；空耳之前已偏航" },
+  { model: "Kimi", best: "開薩－恰勒－拉哈－嘿", alts: "凱薩－恰樂－拉哈－嗨", score: 2, note: "薩＋拉哈可；開／凱、恰、嘿／嗨＝給／加／黑全偏" },
+];
+const CROSS_ROUNDS = [
+  { round: "A 俄語", gold: "普哩V頁特斯托菲G", chatgpt:{label:"純漢字長串",score:2}, claude:{label:"純漢字長串",score:2}, gemini:{label:"純漢字長串",score:2}, grok:{label:"純漢字長串",score:2}, perplexity:{label:"純漢字長串",score:2}, kimi:{label:"（未測／摘要缺）",score:null} },
+  { round: "B 西語", gold: "勾某-ㄟ斯大-菸斗", chatgpt:{label:"摳某欸…",score:3}, claude:{label:"扣某欸STˊ…",score:2}, gemini:{label:"摳莫s大´燕多",score:4}, grok:{label:"科莫欸斯塔言多",score:3}, perplexity:{label:"科莫依斯達延多",score:3}, kimi:{label:"口莫欸斯大耶n豆",score:3} },
+  { round: "C 丹麥", gold: "瓦Den、勾o、迪", chatgpt:{label:"唬／霍夫類問題",score:2}, claude:{label:"勾兒／德特類",score:2}, gemini:{label:"近緣誤判風險",score:2}, grok:{label:"弱化不足",score:2}, perplexity:{label:"長尾／誤語",score:2}, kimi:{label:"尾音過長",score:2} },
+  { round: "D 印尼", gold: "阿爸-咖拔", chatgpt:{label:"阿帕－卡巴",score:3}, claude:{label:"阿爸、咖吧",score:4}, gemini:{label:"阿爸－卡拔",score:4}, grok:{label:"啊趴－咖拔",score:3}, perplexity:{label:"阿巴－卡巴爾",score:2}, kimi:{label:"阿啪－尬拔",score:3} },
+  { round: "E 他加祿", gold: "古穆斯塔 納˙", chatgpt:{label:"庫穆斯塔－那",score:3}, claude:{label:"哭母斯大、那",score:2}, gemini:{label:"庫木斯大－拿",score:2}, grok:{label:"庫姆斯塔－那",score:3}, perplexity:{label:"庫穆斯塔－納",score:4}, kimi:{label:"固母斯大－那",score:3} },
+  { round: "F 俄語²", gold: "卡逼丟拉", chatgpt:{label:"卡k－迪拉́",score:3}, claude:{label:"咖k、迭啦",score:2}, gemini:{label:"卡k－狄拉",score:3}, grok:{label:"卡克－迪拉´",score:2}, perplexity:{label:"卡克－傑拉",score:2}, kimi:{label:"卡克－接拉",score:2} },
+  { round: "G 印地 namaste", gold: "拿罵司爹", chatgpt:{label:"納媽斯爹",score:3}, claude:{label:"拿馬斯dei",score:3}, gemini:{label:"拿瑪斯爹",score:4}, grok:{label:"那馬、斯特",score:2}, perplexity:{label:"那摩斯戴…",score:2}, kimi:{label:"那媽斯－貼",score:2} },
+  { round: "H 印地 kaisā", gold: "給薩加-拉哈黑", chatgpt:{label:"凱莎－恰拉－…嘿",score:2}, claude:{label:"開沙、恰拉哈嘿",score:2}, gemini:{label:"開薩－拆－…嗨",score:2}, grok:{label:"凱薩－查－拉哈－嗨",score:2}, perplexity:{label:"kyā 錯讀",score:1}, kimi:{label:"開薩－恰勒－…嘿",score:2} },
+];
+const V12_TRUST_DOMAINS = [
+  { domain: "Schema 可用性", score: 4.5, reading: "JSON／2–3 候選／切段符／notice 幾乎都可吃；管線可用" },
+  { domain: "規則內化一致性", score: 2.5, reading: "切段與偶發聽感字有；禁令（殘渣／兒化／正字／近緣語）跨模型不穩" },
+  { domain: "聽感天花板", score: 2.5, reading: "易句可貼；硬金標 A／F／E／H 多數仍遠，天花板靠偶發命中" },
+  { domain: "產品信任風險（越高越安全）", score: 2.0, reading: "殘渣／兒化／語錯／正字預設直接傷「這像原詞」" },
+];
+const PROMPT_GAPS = [
+  { rule: "聽感優先", gap: "A 長串；E K→庫；F 迪族≠逼丟；G 那／納／麼≠拿、斯≠司；H 凱／開≠給、恰／查／拆≠加", effect: "v1.1 未飽和；印地正字預設仍蓋耳", rounds: "A→H", tone:"danger" },
+  { rule: "多詞切段", gap: "H 金標兩塊給薩加－拉哈黑；多數四塊或過碎；G 連寫骨架僅 Gemini 近", effect: "切段規則在用，塊數未跟听感", rounds: "B→H", tone:"warning" },
+  { rule: "重讀開母音", gap: "G 罵（開 ma 粗）→媽／馬／瑪；H 黑未見", effect: "開母音／粗調仍漂移", rounds: "B→H", tone:"warning" },
+  { rule: "補音克制", gap: "F day／迪LA；G dei／te；H 拆l、k些", effect: "v1.1 禁殘渣仍冒出", rounds: "B→H", tone:"danger" },
+  { rule: "Silent／弱化／短尾", gap: "C／E 主證據；G／H 未加劇", effect: "本輪非主債", rounds: "C→E", tone:"info" },
+  { rule: "勿濫用兒化", gap: "C／D 舊債；H ChatGPT 恰爾再現", effect: "v1.1 後仍偶發——印地首現踩雷", rounds: "C→H", tone:"danger" },
+  { rule: "近緣語分辨", gap: "C 丹麥↔挪威；H Perplexity 整句聽成 kyā", effect: "句級錯讀＝新警示", rounds: "C、H", tone:"warning" },
+  { rule: "塞音調性", gap: "E ta→大；本輪未新爆", effect: "E 仍待對準", rounds: "E", tone:"info" },
+  { rule: "軟輔音／腭化聽感", gap: "F 逼丟零命中；G／H 未複測俄語腭化", effect: "F 債仍在；本輪主債改為正字→漢字映射", rounds: "F", tone:"warning" },
+  { rule: "正字／羅馬≠聽感字（新號）", gap: "kai/ai→凱開；chal→恰查拆；hai→嘿嗨；namaste 中段媽馬瑪／斯", effect: "印地首輪主爆點；v1.1 聽感第一未擋住", rounds: "G→H", tone:"danger" },
+];
+const COMMON_ISSUES = [
+  ["正字／羅馬→預設漢字", "凱開≠給；恰查拆≠加；媽馬瑪≠罵；斯≠司"],
+  ["兒化＋拉丁殘渣", "恰爾；dei／te／l／k些（v1.1 明示禁仍現）"],
+  ["尾／收束字漂移", "嘿嗨≠黑；貼铁帖≠爹"],
+  ["切段粒度", "金標兩塊 vs 模型三四塊"],
+  ["句級錯讀", "H：kyā 替換整句起首"],
+];
+
+function modelComboAvg(name){
+  const a = HINDI_A_ROWS.find(r=>r.model===name)?.score ?? 0;
+  const b = HINDI_B_ROWS.find(r=>r.model===name)?.score ?? 0;
+  return Math.round(((a+b)/2)*10)/10;
+}
+
+/* ---------- table renderer ---------- */
+function renderTable(container, headers, rows, opts={}){
+  const { align=[], striped=false, rowTone=[], framed=false } = opts;
+  let html = `<table><thead><tr>`;
+  headers.forEach((h,i)=>{ html += `<th class="${align[i]==='center'?'center':''}">${h}</th>`; });
+  html += `</tr></thead><tbody>`;
+  rows.forEach((row,ri)=>{
+    const tone = rowTone[ri] ? `rowtone-${rowTone[ri]}` : "";
+    html += `<tr class="${striped && ri%2===1 ? 'striped':'plain'}">`;
+    row.forEach((cell,ci)=>{
+      const a = align[ci]==='center' ? 'center' : '';
+      const toneClass = (ci===0 && tone) ? tone : '';
+      html += `<td class="${a} ${toneClass}">${cell}</td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+  if(framed) container.classList.add('framed');
+}
+
+/* ---------- chart renderer (pure SVG, no external library) ---------- */
+function renderBarChart(containerId, labels, data, color, refLines=[]){
+  const container = document.getElementById(containerId);
+  const width = container.clientWidth || 600;
+  const height = container.clientHeight || 240;
+
+  const padding = { top: 24, right: 16, bottom: labels.length > 6 ? 46 : 28, left: 28 };
+  const plotW = width - padding.left - padding.right;
+  const plotH = height - padding.top - padding.bottom;
+
+  const yMax = 5, yMin = 0;
+  const yScale = v => padding.top + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+  const n = labels.length;
+  const slot = plotW / n;
+  const barW = Math.min(44, slot * 0.55);
+
+  let svg = `<svg class="bar-chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">`;
+
+  // gridlines + y ticks
+  for (let v = 0; v <= yMax; v++) {
+    const y = yScale(v);
+    svg += `<line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="#e2e8f0" stroke-width="1"/>`;
+    svg += `<text x="${padding.left - 8}" y="${y + 3}" font-size="11" fill="#475569" text-anchor="end">${v}</text>`;
+  }
+
+  // bars + value labels + x labels
+  labels.forEach((label, i) => {
+    const val = data[i] == null ? 0 : data[i];
+    const cx = padding.left + slot * i + slot / 2;
+    const barX = cx - barW / 2;
+    const barY = yScale(val);
+    const barH = (padding.top + plotH) - barY;
+
+    svg += `<rect x="${barX}" y="${barY}" width="${barW}" height="${Math.max(barH,0)}" rx="4" fill="${color}"><title>${label}: ${data[i]}</title></rect>`;
+    svg += `<text x="${cx}" y="${barY - 6}" font-size="11" fill="#334155" text-anchor="middle">${data[i] === null ? '-' : data[i]}</text>`;
+
+    if (n > 6) {
+      svg += `<text x="${cx}" y="${padding.top + plotH + 16}" font-size="11" fill="#475569" text-anchor="end" transform="rotate(-25 ${cx} ${padding.top + plotH + 16})">${label}</text>`;
+    } else {
+      svg += `<text x="${cx}" y="${padding.top + plotH + 18}" font-size="11" fill="#475569" text-anchor="middle">${label}</text>`;
+    }
+  });
+
+  // reference lines
+  refLines.forEach(rl => {
+    const y = yScale(rl.value);
+    svg += `<line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="${rl.color}" stroke-width="1.5" stroke-dasharray="5,5"/>`;
+    svg += `<text x="${width - padding.right}" y="${y - 4}" font-size="10" fill="${rl.color}" text-anchor="end">${rl.label}</text>`;
+  });
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+}
+
+/* ---------- build everything ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+  // stats
+  const comboModels = ["ChatGPT","Claude","Gemini","Grok","Perplexity","Kimi"];
+  const comboScores = comboModels.map(m => ({ model:m, avg: modelComboAvg(m) }));
+  const avgGH = comboScores.reduce((s,r)=>s+r.avg,0)/comboScores.length;
+  const bestCombo = comboScores.reduce((a,b)=> b.avg>a.avg?b:a);
+  const bestA = HINDI_A_ROWS.reduce((a,b)=> b.score>a.score?b:a);
+  const roundAvgs = CROSS_ROUNDS.map(r=>{
+    const scores = [r.chatgpt.score,r.claude.score,r.gemini.score,r.grok.score,r.perplexity.score,r.kimi.score].filter(x=>typeof x==='number');
+    const avg = scores.reduce((s,n)=>s+n,0)/scores.length;
+    return { label:r.round, avg: Math.round(avg*10)/10 };
+  });
+
+  document.getElementById('statAvgGH').textContent = avgGH.toFixed(1);
+  document.getElementById('statBestCombo').textContent = bestCombo.avg;
+  document.getElementById('statBestComboLabel').textContent = `歷史綜合最佳：${bestCombo.model}`;
+
+  // charts
+  renderBarChart('chartTrust', V12_TRUST_DOMAINS.map(d=>d.domain), V12_TRUST_DOMAINS.map(d=>d.score), TONES.info.bar,
+    [{value:4,label:'可上船線',color:TONES.success.bar},{value:3,label:'猶豫線',color:TONES.warning.bar}]);
+  renderBarChart('chartCombo', comboScores.map(r=>r.model), comboScores.map(r=>r.avg), TONES.info.bar,
+    [{value:4,label:'可用線',color:TONES.success.bar}]);
+  renderBarChart('chartRounds', roundAvgs.map(r=>r.label), roundAvgs.map(r=>r.avg), TONES.info.bar);
+
+  // tables
+  renderTable(document.getElementById('tblTrust'), ["領域","分","判讀"],
+    V12_TRUST_DOMAINS.map(d=>[d.domain,String(d.score),d.reading]),
+    { align:["left","center","left"], striped:true, rowTone:V12_TRUST_DOMAINS.map(d=>scoreTone(d.score)) });
+
+  renderTable(document.getElementById('tblHindiA'), ["模型","最佳候選","其他稿","分","評註"],
+    HINDI_A_ROWS.map(r=>[ r.model===bestA.model ? `${r.model} (最佳)` : r.model, r.best, r.alts, String(r.score), r.note ]),
+    { align:["left","left","left","center","left"], striped:true, rowTone:HINDI_A_ROWS.map(r=>scoreTone(r.score)) });
+
+  renderTable(document.getElementById('tblHindiB'), ["模型","最佳候選","其他稿","分","評註"],
+    HINDI_B_ROWS.map(r=>[ r.model==="Grok" ? `${r.model} (並列最近)` : r.model, r.best, r.alts, String(r.score), r.note ]),
+    { align:["left","left","left","center","left"], striped:true, rowTone:HINDI_B_ROWS.map(r=>scoreTone(r.score)) });
+
+  renderTable(document.getElementById('tblRounds'), ["輪次","金標","ChatGPT","Claude","Gemini","Grok","Perplexity","Kimi"],
+    CROSS_ROUNDS.map(r=>[ r.round, r.gold, formatCell(r.chatgpt), formatCell(r.claude), formatCell(r.gemini), formatCell(r.grok), formatCell(r.perplexity), formatCell(r.kimi) ]),
+    { striped:true });
+
+  renderTable(document.getElementById('tblGaps'), ["Prompt 規則","測到的缺口","有效性","主要輪次"],
+    PROMPT_GAPS.map(g=>[g.rule,g.gap,g.effect,g.rounds]),
+    { striped:true, rowTone: PROMPT_GAPS.map(g=>g.tone) });
+
+  renderTable(document.getElementById('tblCommon'), ["問題","表現"], COMMON_ISSUES, { framed:true });
+});
+</script>
+</body>
+</html>

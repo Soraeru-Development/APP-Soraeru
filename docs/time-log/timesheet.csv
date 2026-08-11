@@ -1,0 +1,25 @@
+date,person,hours,ticket,note,kind
+2026-08-04,Ashton,2,plan,（估計）多模型 MVP 規劃草稿開寫（Claude/ChatGPT）,backfill
+2026-08-05,Ashton,1.5,plan,（估計）Gemini MVP 規劃書,backfill
+2026-08-06,Ashton,2.5,plan,（估計）Cursor-MVP App 規劃書／多模型彙整,backfill
+2026-08-06,Ashton,1.5,plan,（估計）Stitch UI／設計資產與畫面,backfill
+2026-08-06,Ashton,1,setup,（估計）簡報素材＋App 源碼骨架起點,backfill
+2026-08-07,Ashton,1.5,plan,（估計）Clean Architecture 三層重整,backfill
+2026-08-07,Ashton,2.5,auth,（估計）Email Auth＋本機 DB／開發帳號,backfill
+2026-08-07,Ashton,2,auth,（估計）Google 登入端到端與綁定流程,backfill
+2026-08-07,Ashton,0.5,setup,（估計）Splash L00／VS 建置與啟動雜項,backfill
+2026-08-10,Ashton,1.5,auth,（估計）Google DEVELOPER_ERROR／SHA1／實機登入除錯,backfill
+2026-08-10,Ashton,0.5,setup,（估計）MAUI／Android 建置修復,backfill
+2026-08-10,Ashton,2.5,prompt,（估計）空耳 analyze／多語 prompt eval（A–H）與 v1.x 迭代,backfill
+2026-08-10,Ashton,1.5,planning,（估計）grill＋Glossary/ADR＋平行 Web／信任閘規格與拆票,backfill
+2026-08-10,Ashton,0.25,01,（估計）Application 測試骨架（prefactor）,backfill
+2026-08-10,Ashton,0.5,02,（估計）後處理硬閘＋LLM 草稿標示,backfill
+2026-08-10,Ashton,0.75,03,（估計）單字本端到端可存可查,backfill
+2026-08-11,Ashton,0.5,04,（估計）已驗證空耳 API／覆寫驗收收尾,backfill
+2026-08-11,Ashton,0.5,tickets,（估計）App-first 策略＋票 07–12 重整,backfill
+2026-08-11,Ashton,0.5,07,（估計）App 裝置端 OCR 選一字進分析,backfill
+2026-08-11,Ashton,0.25,misc,建立 docs/time-log 工時帳骨架,ops
+2026-08-11,Ashton,0.75,13,票13殘餘：刪帳 DELETE /me＋Settings UI＋SessionAuthGate Splash/Settings 測,dev
+2026-08-11,Ashton,0.75,planning,ADR-0007 Client-first 拷問＋薄規格＋glossary,plan
+2026-08-11,Ashton,0.5,tickets,to-tickets 拆票 13–17＋README frontier,plan
+2026-08-11,Ashton,2.25,13,票13：本機 WordCard SoT 列表／存／刪＋review 補洞（Splash 離線／session 清庫／同字重存 mnemonic）,dev

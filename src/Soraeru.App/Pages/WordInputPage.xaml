@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Soraeru.Pages.WordInputPage"
+             Title="輸入單字"
+             Shell.NavBarIsVisible="True"
+             BackgroundColor="{StaticResource SurfaceBright}">
+
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20,16" Spacing="14" MaximumWidthRequest="480" HorizontalOptions="Center">
+
+                <Label Text="單字或短語" Style="{StaticResource FieldLabel}" />
+                <Border Style="{StaticResource InputBorder}" Padding="12,8">
+                    <Editor x:Name="WordEditor"
+                            Placeholder="例：ขอบคุณ / salamat / ありがとう"
+                            PlaceholderColor="{StaticResource Outline}"
+                            AutoSize="TextChanges"
+                            HeightRequest="100"
+                            TextChanged="OnWordTextChanged" />
+                </Border>
+                <Label x:Name="CharCountLabel"
+                       Text="字數 0／50"
+                       Style="{StaticResource CaptionLabel}"
+                       HorizontalTextAlignment="End" />
+
+                <Label Text="來源語言" Style="{StaticResource FieldLabel}" Margin="0,8,0,0" />
+                <Border Style="{StaticResource InputBorder}">
+                    <Picker x:Name="LanguagePicker"
+                            Title="選擇語言"
+                            SelectedIndex="0">
+                        <Picker.Items>
+                            <x:String>自動偵測</x:String>
+                            <x:String>英語</x:String>
+                            <x:String>日語</x:String>
+                            <x:String>泰語</x:String>
+                            <x:String>韓語</x:String>
+                            <x:String>其他</x:String>
+                        </Picker.Items>
+                    </Picker>
+                </Border>
+                <Label Text="※ 可改為指定語言；不確定請留自動"
+                       Style="{StaticResource CaptionLabel}" />
+
+                <Label Text="標記偏好" Style="{StaticResource FieldLabel}" Margin="0,8,0,0" />
+                <HorizontalStackLayout Spacing="16">
+                    <RadioButton x:Name="NotationBopomofo" Content="注音" IsChecked="True" GroupName="Notation" />
+                    <RadioButton x:Name="NotationRoman" Content="羅馬" GroupName="Notation" />
+                    <RadioButton x:Name="NotationMixed" Content="混合" GroupName="Notation" />
+                </HorizontalStackLayout>
+
+                <Label Text="只支援單字或簡短詞組"
+                       Style="{StaticResource CaptionLabel}"
+                       Margin="0,8,0,0" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid Grid.Row="1" Style="{StaticResource StickyBar}">
+            <Button Text="開始分析"
+                    Style="{StaticResource PrimaryButton}"
+                    Clicked="OnAnalyzeClicked" />
+        </Grid>
+    </Grid>
+</ContentPage>

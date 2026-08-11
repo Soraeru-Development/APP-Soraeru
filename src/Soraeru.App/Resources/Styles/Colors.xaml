@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Soraeru Deep Teal design tokens (DESIGN_1.md) -->
+    <Color x:Key="Primary">#004d64</Color>
+    <Color x:Key="PrimaryDark">#87d0f2</Color>
+    <Color x:Key="PrimaryDarkText">#001f2a</Color>
+    <Color x:Key="PrimaryContainer">#006684</Color>
+    <Color x:Key="OnPrimary">#ffffff</Color>
+    <Color x:Key="OnPrimaryContainer">#a2e1ff</Color>
+    <Color x:Key="InversePrimary">#87d0f2</Color>
+
+    <Color x:Key="Secondary">#4d616c</Color>
+    <Color x:Key="SecondaryDarkText">#536772</Color>
+    <Color x:Key="SecondaryContainer">#d0e6f3</Color>
+    <Color x:Key="OnSecondary">#ffffff</Color>
+    <Color x:Key="OnSecondaryContainer">#536772</Color>
+
+    <Color x:Key="Tertiary">#6b3a00</Color>
+    <Color x:Key="TertiaryContainer">#885116</Color>
+    <Color x:Key="OnTertiary">#ffffff</Color>
+    <Color x:Key="OnTertiaryContainer">#ffcfa6</Color>
+
+    <Color x:Key="Surface">#f7f9fc</Color>
+    <Color x:Key="SurfaceBright">#F5FAFD</Color>
+    <Color x:Key="SurfaceDim">#D8E3E9</Color>
+    <Color x:Key="SurfaceContainer">#eceef1</Color>
+    <Color x:Key="SurfaceContainerLow">#f2f4f6</Color>
+    <Color x:Key="SurfaceContainerHigh">#e6e8eb</Color>
+    <Color x:Key="SurfaceContainerHighest">#e0e3e5</Color>
+    <Color x:Key="SurfaceContainerLowest">#ffffff</Color>
+    <Color x:Key="OnSurface">#181c1e</Color>
+    <Color x:Key="OnSurfaceVariant">#3f484d</Color>
+    <Color x:Key="Outline">#70787e</Color>
+    <Color x:Key="OutlineVariant">#bfc8cd</Color>
+
+    <Color x:Key="Background">#f7f9fc</Color>
+    <Color x:Key="OnBackground">#181c1e</Color>
+
+    <Color x:Key="Error">#ba1a1a</Color>
+    <Color x:Key="OnError">#ffffff</Color>
+    <Color x:Key="ErrorContainer">#ffdad6</Color>
+    <Color x:Key="OnErrorContainer">#93000a</Color>
+
+    <Color x:Key="StatusWarning">#8B5000</Color>
+    <Color x:Key="StatusInfo">#0061A4</Color>
+    <Color x:Key="StatusDanger">#BA1A1A</Color>
+    <Color x:Key="WarningContainer">#FFECD4</Color>
+    <Color x:Key="InfoContainer">#D6E7F5</Color>
+
+    <!-- Compat keys used by default Styles.xaml -->
+    <Color x:Key="White">White</Color>
+    <Color x:Key="Black">Black</Color>
+    <Color x:Key="Magenta">#004d64</Color>
+    <Color x:Key="MidnightBlue">#181c1e</Color>
+    <Color x:Key="OffBlack">#1f1f1f</Color>
+
+    <Color x:Key="Gray100">#E1E1E1</Color>
+    <Color x:Key="Gray200">#C8C8C8</Color>
+    <Color x:Key="Gray300">#ACACAC</Color>
+    <Color x:Key="Gray400">#919191</Color>
+    <Color x:Key="Gray500">#6E6E6E</Color>
+    <Color x:Key="Gray600">#404040</Color>
+    <Color x:Key="Gray900">#212121</Color>
+    <Color x:Key="Gray950">#141414</Color>
+
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
+    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
+    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
+    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceBright}"/>
+
+    <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}"/>
+    <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}"/>
+    <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}"/>
+    <SolidColorBrush x:Key="Gray400Brush" Color="{StaticResource Gray400}"/>
+    <SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500}"/>
+    <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
+    <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
+    <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
+</ResourceDictionary>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Soraeru.Pages.LoginPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource SurfaceBright}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24,48,24,32" Spacing="16" MaximumWidthRequest="480" HorizontalOptions="Center">
+
+            <Image Source="logo.png"
+                   HeightRequest="72"
+                   WidthRequest="72"
+                   Aspect="AspectFit"
+                   HorizontalOptions="Center" />
+
+            <Label Text="空耳學單字"
+                   Style="{StaticResource PageTitle}"
+                   HorizontalTextAlignment="Center" />
+
+            <Label Text="登入後同步單字卡與使用額度"
+                   Style="{StaticResource BodyLabel}"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,8" />
+
+            <Label Text="電子郵件" Style="{StaticResource FieldLabel}" />
+            <Border Style="{StaticResource InputBorder}">
+                <Entry x:Name="EmailEntry"
+                       Placeholder="you@example.com"
+                       Keyboard="Email"
+                       PlaceholderColor="{StaticResource Outline}" />
+            </Border>
+
+            <Label Text="密碼" Style="{StaticResource FieldLabel}" />
+            <Border Style="{StaticResource InputBorder}">
+                <Entry x:Name="PasswordEntry"
+                       Placeholder="請輸入密碼"
+                       IsPassword="True"
+                       PlaceholderColor="{StaticResource Outline}" />
+            </Border>
+
+            <Button Text="登入"
+                    Style="{StaticResource PrimaryButton}"
+                    Clicked="OnLoginClicked"
+                    Margin="0,8,0,0" />
+
+            <Button Text="忘記密碼？"
+                    Style="{StaticResource LinkButton}"
+                    Clicked="OnForgotClicked"
+                    HorizontalOptions="Center" />
+
+            <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="12" Margin="0,8">
+                <BoxView Grid.Column="0" HeightRequest="1" Color="{StaticResource OutlineVariant}" VerticalOptions="Center" />
+                <Label Grid.Column="1" Text="或" Style="{StaticResource CaptionLabel}" VerticalOptions="Center" />
+                <BoxView Grid.Column="2" HeightRequest="1" Color="{StaticResource OutlineVariant}" VerticalOptions="Center" />
+            </Grid>
+
+            <Button Text="使用 Google 登入"
+                    Style="{StaticResource SecondaryButton}"
+                    Clicked="OnGoogleClicked" />
+
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="4" Margin="0,8,0,0">
+                <Label Text="還沒有帳號？" Style="{StaticResource BodyLabel}" VerticalOptions="Center" />
+                <Button Text="註冊"
+                        Style="{StaticResource LinkButton}"
+                        Clicked="OnRegisterClicked" />
+            </HorizontalStackLayout>
+
+            <Button Text="隱私權政策"
+                    Style="{StaticResource LinkButton}"
+                    Clicked="OnPrivacyClicked"
+                    HorizontalOptions="Center" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

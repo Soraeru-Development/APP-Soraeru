@@ -1,0 +1,65 @@
+using Soraeru.Services.Interfaces;
+
+namespace Soraeru.Pages;
+
+public partial class RegisterPage : ContentPage
+{
+    private readonly ISoraeruApiClient _api;
+    private readonly IAuthSessionStore _session;
+
+    public RegisterPage(ISoraeruApiClient api, IAuthSessionStore session)
+    {
+        InitializeComponent();
+        _api = api;
+        _session = session;
+    }
+
+    async void OnCreateClicked(object? sender, EventArgs e)
+    {
+        if (!PrivacyCheck.IsChecked)
+        {
+            await DisplayAlertAsync("提醒", "請先勾選已閱讀隱私權政策。", "了解");
+            return;
+        }
+
+        var email = EmailEntry.Text?.Trim() ?? string.Empty;
+        var password = PasswordEntry.Text ?? string.Empty;
+        var confirm = ConfirmPasswordEntry.Text ?? string.Empty;
+        var displayName = DisplayNameEntry.Text?.Trim();
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            await DisplayAlertAsync("提醒", "請輸入 Email 與密碼。", "了解");
+            return;
+        }
+
+        if (password.Length < 8)
+        {
+            await DisplayAlertAsync("提醒", "密碼至少需要 8 碼。", "了解");
+            return;
+        }
+
+        if (!string.Equals(password, confirm, StringComparison.Ordinal))
+        {
+            await DisplayAlertAsync("提醒", "兩次輸入的密碼不一致。", "了解");
+            return;
+        }
+
+        var result = await _api.RegisterWithEmailAsync(email, password, displayName);
+        if (!result.IsSuccess || result.Session is null)
+        {
+            var title = result.Failure == AuthFailureKind.Network ? "無法連線" : "註冊失敗";
+            await DisplayAlertAsync(title, result.Message ?? "註冊失敗。", "了解");
+            return;
+        }
+
+        var session = result.Session;
+        await _session.SetSessionAsync(
+            session.AccessToken,
+            session.UserId,
+            session.Email,
+            session.OnboardingCompleted);
+
+        await Routes.GoAsync(Routes.Onboarding);
+    }
+}

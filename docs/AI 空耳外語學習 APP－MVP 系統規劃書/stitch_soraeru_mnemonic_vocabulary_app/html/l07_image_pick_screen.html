@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-TW"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Soraeru - 圖片取字</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;family=Noto+Sans:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-surface": "#181c1e",
+                      "tertiary-container": "#885116",
+                      "on-secondary-fixed": "#081e27",
+                      "on-secondary-fixed-variant": "#364954",
+                      "surface-bright": "#F5FAFD",
+                      "background": "#f7f9fc",
+                      "on-primary-fixed": "#001f2a",
+                      "primary": "#004d64",
+                      "on-tertiary-fixed-variant": "#6b3b00",
+                      "surface-container-high": "#e6e8eb",
+                      "on-primary-fixed-variant": "#004d64",
+                      "on-surface-variant": "#3f484d",
+                      "error-container": "#ffdad6",
+                      "on-primary": "#ffffff",
+                      "surface-container": "#eceef1",
+                      "inverse-surface": "#2d3133",
+                      "secondary": "#4d616c",
+                      "on-secondary-container": "#536772",
+                      "outline-variant": "#bfc8cd",
+                      "primary-fixed-dim": "#87d0f2",
+                      "on-tertiary-fixed": "#2d1600",
+                      "primary-container": "#006684",
+                      "surface-dim": "#D8E3E9",
+                      "tertiary": "#6b3a00",
+                      "status-warning": "#8B5000",
+                      "secondary-container": "#d0e6f3",
+                      "outline": "#70787e",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed-dim": "#ffb876",
+                      "surface-container-highest": "#e0e3e5",
+                      "primary-fixed": "#bee9ff",
+                      "error": "#ba1a1a",
+                      "on-tertiary": "#ffffff",
+                      "on-background": "#181c1e",
+                      "on-primary-container": "#a2e1ff",
+                      "inverse-on-surface": "#eff1f3",
+                      "secondary-fixed-dim": "#b4cad6",
+                      "surface-container-low": "#f2f4f6",
+                      "surface-tint": "#016684",
+                      "on-secondary": "#ffffff",
+                      "status-info": "#0061A4",
+                      "status-danger": "#BA1A1A",
+                      "surface": "#f7f9fc",
+                      "on-tertiary-container": "#ffcfa6",
+                      "tertiary-fixed": "#ffdcc0",
+                      "on-error": "#ffffff",
+                      "inverse-primary": "#87d0f2",
+                      "surface-variant": "#e0e3e5",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-fixed": "#d0e6f3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "card-padding": "16px",
+                      "bottom-bar-height": "80px",
+                      "gutter": "16px",
+                      "stack-gap": "12px",
+                      "appbar-height": "64px"
+              },
+              "fontFamily": {
+                      "body-source-lg": [
+                              "Noto Sans"
+                      ],
+                      "caption": [
+                              "Noto Sans"
+                      ],
+                      "label-mono": [
+                              "JetBrains Mono"
+                      ],
+                      "display-hero": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-sm": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-target-md": [
+                              "Noto Sans"
+                      ]
+              },
+              "fontSize": {
+                      "body-source-lg": [
+                              "22px",
+                              {
+                                      "lineHeight": "30px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "caption": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-mono": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-hero": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-sm": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-target-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .image-placeholder-pattern {
+            background-image: repeating-linear-gradient(45deg, var(--tw-colors-surface-container-high) 25%, transparent 25%, transparent 75%, var(--tw-colors-surface-container-high) 75%, var(--tw-colors-surface-container-high)), repeating-linear-gradient(45deg, var(--tw-colors-surface-container-high) 25%, var(--tw-colors-background) 25%, var(--tw-colors-background) 75%, var(--tw-colors-surface-container-high) 75%, var(--tw-colors-surface-container-high));
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col font-body-target-md">
+<!-- Top AppBar -->
+<header class="fixed top-0 w-full z-40 bg-surface/80 backdrop-blur-md flex justify-between items-center px-gutter h-appbar-height max-w-[600px] mx-auto left-0 right-0">
+<button aria-label="返回" class="w-10 h-10 flex items-center justify-center text-primary rounded-full hover:bg-surface-variant/50 transition-colors" type="button">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">圖片取字</h1>
+<div class="w-10 h-10"></div> <!-- Placeholder to balance layout -->
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 w-full max-w-[600px] mx-auto pt-appbar-height pb-bottom-bar-height flex flex-col px-gutter gap-stack-gap">
+<!-- Image Preview Area (Glassmorphism inspired container) -->
+<div class="mt-4 flex-1 min-h-[300px] w-full bg-surface-bright border border-outline-variant/30 rounded-xl overflow-hidden relative shadow-sm flex flex-col items-center justify-center group cursor-pointer transition-all hover:border-primary/50">
+<!-- Default Empty State -->
+<div class="absolute inset-0 image-placeholder-pattern opacity-50 z-0"></div>
+<div class="z-10 flex flex-col items-center justify-center p-6 text-center">
+<div class="w-16 h-16 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-4 shadow-sm group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="add_photo_alternate" data-weight="fill" style="font-variation-settings: 'FILL' 1;">add_photo_alternate</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-on-surface mb-2">選擇或拍攝圖片</p>
+<p class="font-body-target-md text-body-target-md text-on-surface-variant text-sm">請確保文字清晰可見，以獲得最佳辨識效果。</p>
+</div>
+<!-- Optional: Simulated active image overlay (hidden by default in this state) -->
+<!-- <img src="placeholder" data-alt="A modern, high-contrast close up of a printed document featuring traditional chinese characters. The lighting is soft and even, typical of a well-lit office environment, ensuring the text is crisp against the white paper. The visual style is practical and realistic." class="absolute inset-0 w-full h-full object-cover z-20 hidden" alt="Selected Document"> -->
+</div>
+<!-- Action Buttons (Side-by-side Bento style) -->
+<div class="grid grid-cols-2 gap-4 mt-2">
+<button class="flex flex-col items-center justify-center gap-2 py-4 px-2 bg-surface-container-low border border-outline-variant/50 rounded-xl hover:bg-surface-container hover:border-outline transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="photo_camera">photo_camera</span>
+<span class="font-label-mono text-label-mono text-on-surface">拍照</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-2 py-4 px-2 bg-surface-container-low border border-outline-variant/50 rounded-xl hover:bg-surface-container hover:border-outline transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="photo_library">photo_library</span>
+<span class="font-label-mono text-label-mono text-on-surface">相簿</span>
+</button>
+</div>
+<!-- Privacy Notice Panel (Safety-First Utility) -->
+<div class="mt-4 bg-surface-container-lowest border-l-4 border-status-info rounded-r-lg p-4 shadow-sm flex items-start gap-3">
+<span class="material-symbols-outlined text-status-info flex-shrink-0" data-icon="lock" data-weight="fill" style="font-variation-settings: 'FILL' 1;">lock</span>
+<p class="font-caption text-caption text-on-surface-variant">圖片僅在手機端辨識，不會上傳至伺服器。保障您的資料隱私與安全。</p>
+</div>
+<!-- Spacer to push content up if needed -->
+<div class="h-8"></div>
+</main>
+<!-- Sticky Bottom Bar (Critical Path Action) -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-surface-bright/90 backdrop-blur-lg shadow-[0_-4px_16px_0_rgba(0,0,0,0.05)] border-t border-outline-variant/20 px-gutter h-bottom-bar-height flex items-center justify-center pb-safe max-w-[600px] mx-auto right-0">
+<!-- Primary CTA - Disabled state initially since no image is selected, but shown active for UI demonstration -->
+<button aria-label="開始辨識" class="w-full max-w-[400px] h-14 bg-primary text-on-primary rounded-full font-headline-sm text-headline-sm font-bold flex items-center justify-center gap-2 shadow-md hover:opacity-90 transition-opacity disabled:bg-surface-variant disabled:text-on-surface-variant disabled:shadow-none" type="button">
+<span>開始辨識</span>
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+</button>
+</div>
+</body></html>

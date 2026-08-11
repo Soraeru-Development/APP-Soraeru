@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Soraeru.Pages.NotebookListPage"
+             Title="我的單字卡"
+             Shell.NavBarIsVisible="True"
+             BackgroundColor="{StaticResource SurfaceBright}">
+
+    <Grid RowDefinitions="Auto,*">
+        <VerticalStackLayout Grid.Row="0" Padding="20,12,20,0" Spacing="12">
+            <Border Style="{StaticResource InputBorder}">
+                <Entry Placeholder="搜尋單字…"
+                       PlaceholderColor="{StaticResource Outline}"
+                       TextChanged="OnSearchTextChanged" />
+            </Border>
+
+            <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                <HorizontalStackLayout Spacing="8">
+                    <Button x:Name="FilterAllButton"
+                            Text="全部"
+                            Style="{StaticResource PrimaryButton}"
+                            Padding="14,8"
+                            MinimumHeightRequest="36"
+                            FontSize="13"
+                            Clicked="OnFilterAllClicked" />
+                    <Button x:Name="FilterEnButton"
+                            Text="英"
+                            Style="{StaticResource SecondaryButton}"
+                            Padding="14,8"
+                            MinimumHeightRequest="36"
+                            FontSize="13"
+                            Clicked="OnFilterEnClicked" />
+                    <Button x:Name="FilterJaButton"
+                            Text="日"
+                            Style="{StaticResource SecondaryButton}"
+                            Padding="14,8"
+                            MinimumHeightRequest="36"
+                            FontSize="13"
+                            Clicked="OnFilterJaClicked" />
+                    <Button x:Name="FilterThButton"
+                            Text="泰"
+                            Style="{StaticResource SecondaryButton}"
+                            Padding="14,8"
+                            MinimumHeightRequest="36"
+                            FontSize="13"
+                            Clicked="OnFilterThClicked" />
+                    <Button x:Name="FilterOtherButton"
+                            Text="其他"
+                            Style="{StaticResource SecondaryButton}"
+                            Padding="14,8"
+                            MinimumHeightRequest="36"
+                            FontSize="13"
+                            Clicked="OnFilterOtherClicked" />
+                </HorizontalStackLayout>
+            </ScrollView>
+        </VerticalStackLayout>
+
+        <ScrollView x:Name="FilledState" Grid.Row="1" IsVisible="False">
+            <VerticalStackLayout x:Name="CardsHost"
+                                 Padding="20,12,20,32"
+                                 Spacing="12"
+                                 MaximumWidthRequest="480"
+                                 HorizontalOptions="Center" />
+        </ScrollView>
+
+        <VerticalStackLayout x:Name="EmptyState"
+                             Grid.Row="1"
+                             IsVisible="True"
+                             VerticalOptions="Center"
+                             Padding="32"
+                             Spacing="16"
+                             MaximumWidthRequest="360"
+                             HorizontalOptions="Center">
+            <Label x:Name="EmptyTitleLabel"
+                   Text="還沒有單字卡"
+                   Style="{StaticResource SectionTitle}"
+                   HorizontalTextAlignment="Center" />
+            <Label x:Name="EmptyBodyLabel"
+                   Text="分析第一個外語單字，存成可隨時查看的近似音卡片。"
+                   Style="{StaticResource BodyLabel}"
+                   HorizontalTextAlignment="Center" />
+            <Button Text="去輸入第一個字"
+                    Style="{StaticResource PrimaryButton}"
+                    Clicked="OnGoInputClicked"
+                    Margin="0,8,0,0" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>
