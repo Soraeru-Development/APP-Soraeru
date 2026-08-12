@@ -126,32 +126,14 @@ public partial class OcrSelectPage : ContentPage
         _ocrSession.RecognizedText = OcrEditor.Text;
 
         var sourceLanguage = ResolveSourceLanguage();
-        var match = await _notebook.FindActiveByLookupKeyAsync(text!, sourceLanguage);
-        var authenticated = await _notebook.CanWriteAsync();
-        var decision = AnalyzeEntryGate.DecideLookup(match, authenticated);
-
-        if (decision.Kind == AnalyzeEntryKind.OpenLocalDetail && decision.CardId is { } cardId)
-        {
-            await Routes.GoAsync($"{Routes.NotebookDetail}?cardId={cardId:D}");
-            return;
-        }
-
-        if (decision.Kind == AnalyzeEntryKind.RequireLogin)
-        {
-            await DisplayAlertAsync("需要登入", "登入後才能分析新單字。", "了解");
-            await Routes.GoAsync(Routes.Login);
-            return;
-        }
-
-        _flow.PendingRequest = new AnalyzeRequestDto(
+        await AnalyzeEntryFlow.RouteLookupAsync(
+            this,
+            _notebook,
+            _flow,
             text!,
             sourceLanguage,
-            MemoryLanguage: "zh-TW",
-            NotationPreference: "bopomofo",
-            ForceRefresh: decision.ForceRefresh);
-        _flow.ClearError();
-
-        await Routes.GoAsync(Routes.Analyzing);
+            memoryLanguage: "zh-TW",
+            notationPreference: "bopomofo");
     }
 
     string ResolveSourceLanguage() =>

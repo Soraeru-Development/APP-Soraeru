@@ -1,3 +1,4 @@
+using Soraeru.ClientLogic.Analyze;
 using Soraeru.ClientLogic.Notebook;
 using Soraeru.ClientLogic.Tts;
 using Soraeru.Languages;
@@ -11,18 +12,21 @@ public partial class NotebookDetailPage : ContentPage
     private readonly LocalNotebookService _notebook;
     private readonly IFormalTtsService _tts;
     private readonly IAnalyzeFlowStore _flow;
+    private readonly ISoraeruApiClient _api;
     private Guid? _cardId;
     private LocalWordCard? _card;
 
     public NotebookDetailPage(
         LocalNotebookService notebook,
         IFormalTtsService tts,
-        IAnalyzeFlowStore flow)
+        IAnalyzeFlowStore flow,
+        ISoraeruApiClient api)
     {
         InitializeComponent();
         _notebook = notebook;
         _tts = tts;
         _flow = flow;
+        _api = api;
 
         WordCardBorder.Shadow = new Shadow
         {
@@ -94,7 +98,7 @@ public partial class NotebookDetailPage : ContentPage
             MeaningLabel.Text = card.MeaningZh;
             ApplyMnemonicDisplay(card.SelectedMnemonic);
             SetWriteControls(await _notebook.CanWriteAsync());
-            ReanalyzeButton.IsEnabled = true;
+            await UpdateReanalyzeButtonStateAsync(card);
         }
         catch (Exception ex)
         {
@@ -107,6 +111,27 @@ public partial class NotebookDetailPage : ContentPage
             SetWriteControls(canWrite: false);
             ReanalyzeButton.IsEnabled = false;
         }
+    }
+
+    async Task UpdateReanalyzeButtonStateAsync(LocalWordCard card)
+    {
+        if (!await _notebook.CanWriteAsync())
+        {
+            ReanalyzeButton.IsEnabled = false;
+            return;
+        }
+
+        if (!ReanalyzeGuard.TryResolveSourceLanguage(
+                card.DetectedLanguage,
+                _flow.LastResult?.SourceLanguage,
+                out _))
+        {
+            ReanalyzeButton.IsEnabled = false;
+            return;
+        }
+
+        var remaining = await TryGetKnownRemainingRegenerationsAsync(card);
+        ReanalyzeButton.IsEnabled = remaining is null || !ReanalyzeGuard.IsRegenerationLimitReached(remaining.Value);
     }
 
     void SetWriteControls(bool canWrite)
@@ -190,17 +215,96 @@ public partial class NotebookDetailPage : ContentPage
             return;
         }
 
+        if (!ReanalyzeGuard.TryResolveSourceLanguage(
+                card.DetectedLanguage,
+                _flow.LastResult?.SourceLanguage,
+                out var sourceLanguage))
+        {
+            await DisplayAlertAsync("無法重新分析", "此卡缺少可用語言資訊，請改從輸入頁重新分析。", "了解");
+            return;
+        }
+
+        var remaining = await TryGetKnownRemainingRegenerationsAsync(card);
+        if (remaining is not null && ReanalyzeGuard.IsRegenerationLimitReached(remaining.Value))
+        {
+            await ShowRegenerationLimitAlertAsync();
+            return;
+        }
+
+        var notation = ResolveNotationPreference();
         // Shared contract with ticket 09: ForceRefresh counts regenerations + daily quota.
         _flow.PendingRequest = new AnalyzeRequestDto(
             card.SourceText,
-            string.IsNullOrWhiteSpace(card.DetectedLanguage) ? "auto" : card.DetectedLanguage,
+            sourceLanguage,
             MemoryLanguage: "zh-TW",
-            NotationPreference: "bopomofo",
+            NotationPreference: notation,
             ForceRefresh: decision.ForceRefresh);
         _flow.ClearError();
 
         await Routes.GoAsync(Routes.Analyzing);
     }
+
+    async Task<int?> TryGetKnownRemainingRegenerationsAsync(LocalWordCard card)
+    {
+        var last = _flow.LastResult;
+        if (last is not null
+            && ReanalyzeGuard.FlowResultMatchesCard(
+                card.NormalizedText,
+                card.DetectedLanguage,
+                last.NormalizedText,
+                last.SourceLanguage))
+        {
+            return last.RemainingRegenerations;
+        }
+
+        if (!ReanalyzeGuard.TryResolveSourceLanguage(
+                card.DetectedLanguage,
+                last?.SourceLanguage,
+                out var sourceLanguage))
+        {
+            return null;
+        }
+
+        var peek = await _api.AnalyzeWordAsync(new AnalyzeRequestDto(
+            card.SourceText,
+            sourceLanguage,
+            MemoryLanguage: "zh-TW",
+            NotationPreference: ResolveNotationPreference(),
+            ForceRefresh: false));
+
+        if (!peek.IsSuccess || peek.Result is null || !peek.Result.Cached)
+            return null;
+
+        return peek.Result.RemainingRegenerations;
+    }
+
+    string ResolveNotationPreference()
+    {
+        var last = _flow.LastResult;
+        var card = _card;
+        if (card is not null
+            && last is not null
+            && ReanalyzeGuard.FlowResultMatchesCard(
+                card.NormalizedText,
+                card.DetectedLanguage,
+                last.NormalizedText,
+                last.SourceLanguage))
+        {
+            return last.Mnemonics.FirstOrDefault()?.NotationType ?? "bopomofo";
+        }
+
+        return "bopomofo";
+    }
+
+    static Task ShowRegenerationLimitAlertAsync(ContentPage page) =>
+        page.DisplayAlertAsync(
+            AnalyzeFailureMessages.TitleFor(AnalyzeFailureMessages.RegenerationLimitCode),
+            AnalyzeFailureMessages.MessageOrDefault(
+                null,
+                AnalyzeFailureMessages.RegenerationLimitCode),
+            "了解");
+
+    Task ShowRegenerationLimitAlertAsync() => ShowRegenerationLimitAlertAsync(this);
 
     async void OnDeleteClicked(object? sender, EventArgs e)
     {
