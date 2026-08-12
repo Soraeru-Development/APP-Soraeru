@@ -10,7 +10,7 @@
 
 
 
-**Status:** in-progress（WIP）
+**Status:** done
 
 
 
@@ -88,7 +88,7 @@
 
 
 
-- 正在進行中（WIP），2026-08-12。
+- 完成（done），2026-08-12。
 
 - **與 09**：結果頁 ForceRefresh／重產仍允許打 AI；上限實作屬 09。本票負責詳情「重新分析」入口與「計額度」語意對齊，方便 09 接 shared contract。
 

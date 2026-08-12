@@ -10,17 +10,16 @@ Glossary: [`docs/glossary.md`](../glossary.md) · ADRs: [`docs/adr/`](../adr/)�
 
 | 指標 | 數量 |
 |---|---|
-| **done** | 13 |
-| **in-progress（WIP）** | 1（18） |
+| **done** | 14 |
+| **in-progress（WIP）** | 0 |
 | **ready-for-agent** | 1（11） |
 | **blocked** | 1（12） |
 | **deferred** | 2（05、06） |
-| **完成率** | 13／18＝72%（不含 deferred：13／16＝81%） |
+| **完成率** | 14／18＝78%（不含 deferred：14／16＝88%） |
 
 **Frontier（無 blocker／可立刻開工）：**
 
-- **[18](18-app-local-notebook-lookup-short-circuit.md)** — 同字再查本機短路＋詳情重新分析 — **in-progress（WIP）**（AC 全綠；殘餘實機煙測）
-- **[11](11-app-closed-testing.md)** — 封閉測試就緒與缺陷收斂（blocker 07–10 已全 done；與 18 平行）
+- **[11](11-app-closed-testing.md)** — 封閉測試就緒與缺陷收斂（blocker 07–10 已全 done）
 
 ## 策略（2026-08）
 
@@ -50,7 +49,7 @@ Glossary: [`docs/glossary.md`](../glossary.md) · ADRs: [`docs/adr/`](../adr/)�
 | [15](15-server-notebook-mirror-api.md) | Client-first | Server Notebook API 雲端鏡像語意 | done | `GET/PUT mirror`＋`HttpCloudWordCardMirror` 已接 | 未跑 | 自動+手動（雙端 demo 待驗） | 14 | 現場雙端推拉 demo | 雙端 demo AC 未勾；Id 衝突 CONFLICT | 2.5h（08-12） |
 | [16](16-app-edit-personal-mnemonic.md) | Client-first | 詳情頁隨時編修個人空耳 | done | `UpdateSelectedMnemonicAsync`＋詳情 UI | 未跑 | 自動+手動 | 13 | — | — | 1h（08-12） |
 | [17](17-verified-mnemonic-no-overwrite-saved-card.md) | Client-first | 金標不覆蓋已存卡個人空耳 | done | Save 同鍵回傳既有卡；TDD 回歸鎖住 | 未跑 | 自動（Application+ClientLogic） | 13；04 | — | — | 0.75h（08-12） |
-| [18](18-app-local-notebook-lookup-short-circuit.md) | Client-first | 同字再查本機短路＋詳情重新分析 | **in-progress（WIP）** | ClientLogic Gate＋App 短路／重新分析已接；AC 全綠 | 未跑 | 自動+手動（實機煙測待做） | 13（done） | 實機煙測（命中／未登入／計額） | 他機未同步卡仍會分析（ADR-0008 接受） | 1.5h（08-12） |
+| [18](18-app-local-notebook-lookup-short-circuit.md) | Client-first | 同字再查本機短路＋詳情重新分析 | done | ClientLogic Gate＋App 短路／重新分析已接；AC 全綠 | 未跑 | 自動+手動 | 13（done） | — | 他機未同步卡仍會分析（ADR-0008 接受） | 1.5h（08-12） |
 
 > **code-review-dual 語意**：`未跑`＝尚無 Station 5 雙軸審查紀錄；`不適用`＝未開工或延後；勿將 `未跑` 視為通過。
 
@@ -79,7 +78,7 @@ Client-first 單字本（App 主切片；與 08–10 平行安全）:
  │
  ├──► 16 (詳情頁編修個人空耳) ✓ done
  ├──► 17 (金標不覆蓋已存卡個人空耳) ✓ done
- └──► 18 (本機短路／詳情重新分析) ← **in-progress（WIP）**；重產 ≤3 銜接 09
+ └──► 18 (本機短路／詳情重新分析) ✓ done；重產 ≤3 銜接 09
 ```
 
 ## 與規劃書對照（缺口 → 票）
@@ -91,7 +90,7 @@ Client-first 單字本（App 主切片；與 08–10 平行安全）:
 | W4 OCR | 07 done（實機品質待驗） | 歷史 |
 | W4 TTS | 系統 TTS 已接（結果／詳情／列表） | **08** done |
 | 同字重產 ≤3／錯誤態 | 後端上限＋App 錯誤態 | **09** done |
-| 同字再查／本機短路 | App 本機查鍵短路＋詳情重新分析 — in-progress（WIP） | **18** |
+| 同字再查／本機短路 | App 本機查鍵短路＋詳情重新分析 | **18** done |
 | W5 設定／隱私／聲明 | 應用內隱私＋AI 聲明入口 | **10** done |
 | W6–W8 封閉測試／上架 | 未開始；單字本驗收對齊 ADR-0007 | **11–12** |
 | Web／策展 UI | 刻意延後；Web 單字本＝鏡像過渡 | **05–06 deferred** |
@@ -102,6 +101,6 @@ Client-first 單字本（App 主切片；與 08–10 平行安全）:
   
 - **08–10**：08／09／10 done。  
 - **封閉測試（11）**：blocker 07–10 已全 done → frontier。  
-- **Client-first 串**：**13–17 done**；**18 in-progress（WIP）**；與 11 平行。  
-- **本機短路（18）**：in-progress（WIP）（ClientLogic 查鍵＋AnalyzeEntryGate；App WordInput／OCR／詳情重新分析；`ForceRefresh` 銜接 09；殘餘見票 Notes）。  
+- **Client-first 串**：**13–18 done**。  
+- **本機短路（18）**：done（ClientLogic 查鍵＋AnalyzeEntryGate；App WordInput／OCR／詳情重新分析；`ForceRefresh` 銜接 09）。  
 - 封閉測試（11）驗單字本時以 ADR-0007／13–18 為準，勿假定 Server 為 App SoT；同字再查以 ADR-0008／票 18 為準。
