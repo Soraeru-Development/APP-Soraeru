@@ -2,9 +2,9 @@
 
 **What to build:** 功能閉環（07–10）完成後，產出可發給測試者的 Android 建置，跑過規劃書功能／資安檢核要點，並在封閉測試期收斂阻擋上架的缺陷。
 
-**Blocked by:** 07、08、09、10
+**Blocked by:** 07、08、09、10（皆 done）
 
-**Status:** blocked
+**Status:** ready-for-agent
 
 ## Parent
 

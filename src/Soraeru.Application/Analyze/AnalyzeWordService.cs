@@ -10,31 +10,37 @@ namespace Soraeru.Application.Analyze;
 /// <summary>
 /// Word analysis: validate → verified lookup → cache → quota →
 /// (hit: meaning/reading LLM + curated mnemonics) | (miss: full LLM → schema → hard gate) → consume.
+/// Verified／金標優先只影響本次結果候選，不回寫學習者 WordCards／個人空耳（ADR-0007／票 17）。
 /// </summary>
 public sealed class AnalyzeWordService : IAnalyzeWordService
 {
     public const string PromptVersion = "word-analysis.v1.3";
     public const int MaxTextLength = 50;
     public const int MaxLlmAttempts = 2;
+    public const int MaxRegenerationsPerWord = 3;
+    public const string RegenerationLimitErrorCode = "REGENERATION_LIMIT_EXCEEDED";
 
     private readonly IUserRepository _users;
     private readonly IQuotaService _quota;
     private readonly IWordAnalysisAgent _agent;
     private readonly IAnalysisResultCache _cache;
     private readonly IVerifiedMnemonicRepository _verified;
+    private readonly IWordRegenerationRepository _regenerations;
 
     public AnalyzeWordService(
         IUserRepository users,
         IQuotaService quota,
         IWordAnalysisAgent agent,
         IAnalysisResultCache cache,
-        IVerifiedMnemonicRepository verified)
+        IVerifiedMnemonicRepository verified,
+        IWordRegenerationRepository regenerations)
     {
         _users = users;
         _quota = quota;
         _agent = agent;
         _cache = cache;
         _verified = verified;
+        _regenerations = regenerations;
     }
 
     public async Task<ServiceResult<AnalyzeWordResult>> AnalyzeAsync(
@@ -81,6 +87,22 @@ public sealed class AnalyzeWordService : IAnalyzeWordService
             user.NotationPref);
 
         var normalizedText = NormalizeText(text);
+        var regenerationLanguageKey = sourceLanguage.ToLowerInvariant();
+
+        if (command.ForceRefresh)
+        {
+            var regenerationCount = await _regenerations.GetCountAsync(
+                user.Id,
+                regenerationLanguageKey,
+                normalizedText,
+                cancellationToken);
+            if (regenerationCount >= MaxRegenerationsPerWord)
+            {
+                return ServiceResult<AnalyzeWordResult>.Failure(
+                    RegenerationLimitErrorCode,
+                    $"同一單字最多重新產生 {MaxRegenerationsPerWord} 次，請稍後再試或改手動輸入空耳。");
+            }
+        }
 
         VerifiedMnemonicRecord? verifiedHit = null;
         if (!string.Equals(sourceLanguage, "auto", StringComparison.OrdinalIgnoreCase))
@@ -105,8 +127,18 @@ public sealed class AnalyzeWordService : IAnalyzeWordService
             && cached is not null)
         {
             var remainingCached = await _quota.GetRemainingAsync(user, cancellationToken);
+            var remainingRegenCached = await GetRemainingRegenerationsAsync(
+                user.Id,
+                regenerationLanguageKey,
+                normalizedText,
+                cancellationToken);
             return ServiceResult<AnalyzeWordResult>.Success(
-                ToResult(cached, Cached: true, remainingCached.RemainingDailyQuota, mnemonicSource));
+                ToResult(
+                    cached,
+                    Cached: true,
+                    remainingCached.RemainingDailyQuota,
+                    mnemonicSource,
+                    remainingRegenCached));
         }
 
         var remainingBefore = await _quota.GetRemainingAsync(user, cancellationToken);
@@ -126,6 +158,9 @@ public sealed class AnalyzeWordService : IAnalyzeWordService
                 verifiedHit,
                 cacheKey,
                 user,
+                command.ForceRefresh,
+                regenerationLanguageKey,
+                normalizedText,
                 cancellationToken);
         }
 
@@ -135,6 +170,9 @@ public sealed class AnalyzeWordService : IAnalyzeWordService
             notationPreference,
             cacheKey,
             user,
+            command.ForceRefresh,
+            regenerationLanguageKey,
+            normalizedText,
             cancellationToken);
     }
 
@@ -145,6 +183,9 @@ public sealed class AnalyzeWordService : IAnalyzeWordService
         VerifiedMnemonicRecord verifiedHit,
         string cacheKey,
         UserRecord user,
+        bool forceRefresh,
+        string regenerationLanguageKey,
+        string normalizedText,
         CancellationToken cancellationToken)
     {
         var request = new WordAnalysisAgentRequest(
@@ -252,10 +293,22 @@ public sealed class AnalyzeWordService : IAnalyzeWordService
                 "今日分析次數已用完，請明日再試。");
         }
 
+        var remainingRegenerations = await RecordRegenerationAndGetRemainingAsync(
+            user.Id,
+            regenerationLanguageKey,
+            normalizedText,
+            forceRefresh,
+            cancellationToken);
+
         _cache.Set(cacheKey, payload);
         var remainingAfter = await _quota.GetRemainingAsync(user, cancellationToken);
         return ServiceResult<AnalyzeWordResult>.Success(
-            ToResult(payload, Cached: false, remainingAfter.RemainingDailyQuota, AnalyzeMnemonicSources.Verified));
+            ToResult(
+                payload,
+                Cached: false,
+                remainingAfter.RemainingDailyQuota,
+                AnalyzeMnemonicSources.Verified,
+                remainingRegenerations));
     }
 
     private async Task<ServiceResult<AnalyzeWordResult>> AnalyzeLlmDraftAsync(
@@ -264,6 +317,9 @@ public sealed class AnalyzeWordService : IAnalyzeWordService
         string notationPreference,
         string cacheKey,
         UserRecord user,
+        bool forceRefresh,
+        string regenerationLanguageKey,
+        string normalizedText,
         CancellationToken cancellationToken)
     {
         var request = new WordAnalysisAgentRequest(
@@ -368,17 +424,57 @@ public sealed class AnalyzeWordService : IAnalyzeWordService
                 "今日分析次數已用完，請明日再試。");
         }
 
+        var remainingRegenerations = await RecordRegenerationAndGetRemainingAsync(
+            user.Id,
+            regenerationLanguageKey,
+            normalizedText,
+            forceRefresh,
+            cancellationToken);
+
         _cache.Set(cacheKey, payload);
         var remainingAfter = await _quota.GetRemainingAsync(user, cancellationToken);
         return ServiceResult<AnalyzeWordResult>.Success(
-            ToResult(payload, Cached: false, remainingAfter.RemainingDailyQuota, AnalyzeMnemonicSources.LlmDraft));
+            ToResult(
+                payload,
+                Cached: false,
+                remainingAfter.RemainingDailyQuota,
+                AnalyzeMnemonicSources.LlmDraft,
+                remainingRegenerations));
+    }
+
+    private async Task<int> GetRemainingRegenerationsAsync(
+        Guid userId,
+        string languageKey,
+        string normalizedText,
+        CancellationToken cancellationToken)
+    {
+        var count = await _regenerations.GetCountAsync(userId, languageKey, normalizedText, cancellationToken);
+        return Math.Max(0, MaxRegenerationsPerWord - count);
+    }
+
+    private async Task<int> RecordRegenerationAndGetRemainingAsync(
+        Guid userId,
+        string languageKey,
+        string normalizedText,
+        bool forceRefresh,
+        CancellationToken cancellationToken)
+    {
+        var count = await _regenerations.GetCountAsync(userId, languageKey, normalizedText, cancellationToken);
+        if (forceRefresh)
+        {
+            await _regenerations.IncrementAsync(userId, languageKey, normalizedText, cancellationToken);
+            count += 1;
+        }
+
+        return Math.Max(0, MaxRegenerationsPerWord - count);
     }
 
     private static AnalyzeWordResult ToResult(
         WordAnalysisPayload p,
         bool Cached,
         int remaining,
-        string mnemonicSource) =>
+        string mnemonicSource,
+        int remainingRegenerations) =>
         new(
             p.SourceText,
             p.NormalizedText,
@@ -396,7 +492,8 @@ public sealed class AnalyzeWordService : IAnalyzeWordService
             p.Notice,
             Cached,
             remaining,
-            mnemonicSource);
+            mnemonicSource,
+            remainingRegenerations);
 
     internal static bool TryValidateMeaningReadingPayload(
         WordAnalysisPayload payload,

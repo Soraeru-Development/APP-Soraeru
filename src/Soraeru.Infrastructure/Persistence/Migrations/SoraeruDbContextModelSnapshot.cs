@@ -154,6 +154,9 @@ namespace Soraeru.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("DetectedLanguage")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -184,6 +187,9 @@ namespace Soraeru.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("TEXT");
 
@@ -194,6 +200,27 @@ namespace Soraeru.Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId", "DetectedLanguage", "NormalizedText");
 
                     b.ToTable("WordCards", (string)null);
+                });
+
+            modelBuilder.Entity("Soraeru.Infrastructure.Persistence.Entities.WordRegenerationEntity", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SourceLanguage")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedText")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RegenerationCount")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("UserId", "SourceLanguage", "NormalizedText");
+
+                    b.ToTable("WordRegenerations", (string)null);
                 });
 #pragma warning restore 612, 618
         }

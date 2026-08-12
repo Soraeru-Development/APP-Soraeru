@@ -7,49 +7,95 @@
              BackgroundColor="{StaticResource SurfaceBright}">
 
     <ScrollView>
-        <VerticalStackLayout Padding="20,16,20,32" Spacing="10" MaximumWidthRequest="480" HorizontalOptions="Center">
+        <VerticalStackLayout Padding="20,16,20,32" Spacing="16" MaximumWidthRequest="480" HorizontalOptions="Center">
 
             <Label x:Name="StatusLabel"
                    Text="載入中…"
                    Style="{StaticResource CaptionLabel}"
                    IsVisible="False" />
 
-            <Label Text="帳號" Style="{StaticResource SectionTitle}" Margin="0,0,0,4" />
+            <Label Text="帳號"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="18"
+                   FontAttributes="Bold" />
             <Border Style="{StaticResource CardBorder}">
                 <VerticalStackLayout Spacing="6">
-                    <Label x:Name="DisplayNameLabel" Text="名稱：—" Style="{StaticResource BodyLabel}" FontSize="15" />
-                    <Label x:Name="EmailLabel" Text="Email：—" Style="{StaticResource BodyLabel}" FontSize="15" />
-                    <Label x:Name="LoginProviderLabel" Text="登入方式：—" Style="{StaticResource BodyLabel}" FontSize="15" />
+                    <Label x:Name="DisplayNameLabel" Text="—" TextColor="{StaticResource OnSurface}" FontSize="16" />
+                    <Label x:Name="EmailLabel" Text="—" Style="{StaticResource CaptionLabel}" />
+                    <Label x:Name="LoginProviderLabel" Text="登入方式：—" Style="{StaticResource CaptionLabel}" />
                 </VerticalStackLayout>
             </Border>
 
-            <Label Text="使用額度" Style="{StaticResource SectionTitle}" Margin="0,16,0,4" />
-            <Border Style="{StaticResource CardBorder}">
-                <VerticalStackLayout Spacing="6">
-                    <Label x:Name="QuotaLabel"
-                           Text="今日剩餘：—"
-                           TextColor="{StaticResource OnSurface}"
-                           FontSize="16"
-                           FontAttributes="Bold" />
-                    <Label x:Name="PlanLabel" Text="方案：—" Style="{StaticResource BodyLabel}" FontSize="15" />
-                    <Label Text="付費方案即將推出"
+            <Label Text="使用額度"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   Margin="0,8,0,0" />
+            <Border Style="{StaticResource CardBorder}"
+                    BackgroundColor="{StaticResource SurfaceContainerLow}"
+                    Padding="12">
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="4">
+                        <Label x:Name="PlanLabel"
+                               Text="免費方案"
+                               TextColor="{StaticResource OnSurface}"
+                               FontSize="16" />
+                        <Label x:Name="QuotaLabel"
+                               Text="今日剩餘：—"
+                               Style="{StaticResource CaptionLabel}" />
+                    </VerticalStackLayout>
+                    <Label Grid.Column="1"
+                           Text="付費方案即將推出"
                            Style="{StaticResource CaptionLabel}"
                            TextColor="{StaticResource Outline}"
-                           Margin="0,4,0,0" />
+                           FontAttributes="Italic"
+                           VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <Label Text="標記偏好預設"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   Margin="0,8,0,0" />
+            <Border Style="{StaticResource CardBorder}" Padding="16">
+                <VerticalStackLayout Spacing="14">
+                    <RadioButton Content="注音符號 (Zhuyin)"
+                                 IsChecked="True"
+                                 GroupName="DefaultNotation" />
+                    <RadioButton Content="漢語拼音 (Pinyin)"
+                                 GroupName="DefaultNotation" />
+                    <RadioButton Content="混合顯示 (Mixed)"
+                                 GroupName="DefaultNotation" />
+
+                    <Border StrokeThickness="0"
+                            BackgroundColor="{StaticResource SurfaceContainerLow}"
+                            StrokeShape="RoundRectangle 8"
+                            Padding="10,8"
+                            Margin="0,4,0,0">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
+                            <Image Source="ic_info.png"
+                                   HeightRequest="16"
+                                   WidthRequest="16"
+                                   Aspect="AspectFit"
+                                   VerticalOptions="Center" />
+                            <Label Grid.Column="1"
+                                   Text="此設定將套用至所有新產生的學習卡片。"
+                                   Style="{StaticResource CaptionLabel}"
+                                   VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
                 </VerticalStackLayout>
             </Border>
 
-            <Label Text="標記偏好預設" Style="{StaticResource SectionTitle}" Margin="0,16,0,4" />
-            <HorizontalStackLayout Spacing="16">
-                <RadioButton Content="注音" IsChecked="True" GroupName="DefaultNotation" />
-                <RadioButton Content="羅馬" GroupName="DefaultNotation" />
-                <RadioButton Content="混合" GroupName="DefaultNotation" />
-            </HorizontalStackLayout>
-
-            <Label Text="關於" Style="{StaticResource SectionTitle}" Margin="0,16,0,4" />
+            <Label Text="關於"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   Margin="0,8,0,0" />
             <Border Style="{StaticResource CardBorder}" Padding="8,4">
                 <VerticalStackLayout Spacing="0">
-                    <Button Text="再次查看使用說明"
+                    <Button Text="重新觀看教學導覽"
                             Style="{StaticResource LinkButton}"
                             HorizontalOptions="Start"
                             Clicked="OnOnboardingClicked" />
@@ -57,23 +103,31 @@
                             Style="{StaticResource LinkButton}"
                             HorizontalOptions="Start"
                             Clicked="OnPrivacyClicked" />
-                    <Label Text="版本 1.0.0"
-                           Style="{StaticResource CaptionLabel}"
-                           Margin="12,8,12,12" />
+                    <Button Text="AI 內容聲明"
+                            Style="{StaticResource LinkButton}"
+                            HorizontalOptions="Start"
+                            Clicked="OnAiDisclaimerClicked" />
+                    <Grid ColumnDefinitions="*,Auto" Padding="12,8,12,12">
+                        <Label Text="應用程式版本"
+                               Style="{StaticResource BodyLabel}"
+                               VerticalOptions="Center" />
+                        <Label Grid.Column="1"
+                               Text="v1.0.0"
+                               Style="{StaticResource CaptionLabel}"
+                               VerticalOptions="Center" />
+                    </Grid>
                 </VerticalStackLayout>
             </Border>
 
-            <Button Text="登出"
+            <Button Text="登出帳號"
                     Style="{StaticResource SecondaryButton}"
+                    CornerRadius="28"
                     Clicked="OnLogoutClicked"
-                    Margin="0,16,0,0" />
+                    Margin="0,8,0,0" />
             <Button Text="刪除帳號"
                     Style="{StaticResource DangerButton}"
                     Clicked="OnDeleteAccountClicked"
-                    Margin="0,8,0,0" />
-            <Label Text="提示：本機仍保有有效登入時，啟動會略過登入頁，直接進入首頁或首次說明。"
-                   Style="{StaticResource CaptionLabel}"
-                   Margin="4,8,4,0" />
+                    Margin="0,4,0,0" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

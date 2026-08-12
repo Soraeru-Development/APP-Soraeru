@@ -8,9 +8,27 @@
     FlyoutBehavior="Disabled"
     Shell.NavBarIsVisible="False">
 
+    <!-- Auth / cold start (no tab bar) -->
     <ShellContent
         Title="Splash"
         ContentTemplate="{DataTemplate pages:SplashPage}"
         Route="SplashPage" />
+
+    <!-- Main tabs: 首頁／單字本／設定（L11 HTML bottom nav） -->
+    <TabBar Route="main"
+            Shell.TabBarBackgroundColor="{StaticResource SurfaceContainer}">
+        <ShellContent x:Name="HomeTab"
+                      Title="首頁"
+                      Route="HomePage"
+                      Icon="ic_home.png" />
+        <ShellContent x:Name="NotebookTab"
+                      Title="單字本"
+                      Route="NotebookListPage"
+                      Icon="ic_import_contacts.png" />
+        <ShellContent x:Name="SettingsTab"
+                      Title="設定"
+                      Route="SettingsPage"
+                      Icon="ic_settings.png" />
+    </TabBar>
 
 </Shell>

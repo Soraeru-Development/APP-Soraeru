@@ -8,56 +8,199 @@
 
     <Grid RowDefinitions="*,Auto">
         <ScrollView Grid.Row="0">
-            <VerticalStackLayout Padding="20,16" Spacing="14" MaximumWidthRequest="480" HorizontalOptions="Center">
+            <VerticalStackLayout Padding="16,16,16,24"
+                                 Spacing="24"
+                                 MaximumWidthRequest="480"
+                                 HorizontalOptions="Center">
 
-                <Label Text="單字或短語" Style="{StaticResource FieldLabel}" />
-                <Border Style="{StaticResource InputBorder}" Padding="12,8">
-                    <Editor x:Name="WordEditor"
-                            Placeholder="例：ขอบคุณ / salamat / ありがとう"
-                            PlaceholderColor="{StaticResource Outline}"
-                            AutoSize="TextChanges"
-                            HeightRequest="100"
-                            TextChanged="OnWordTextChanged" />
+                <!-- 外語單字或短語 -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="外語單字或短語"
+                           TextColor="{StaticResource OnSurface}"
+                           FontSize="18"
+                           FontAttributes="Bold" />
+
+                    <Border Stroke="{StaticResource OutlineVariant}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 8"
+                            BackgroundColor="{StaticResource Surface}"
+                            Padding="16">
+                        <Grid>
+                            <Editor x:Name="WordEditor"
+                                    Placeholder="例如：ขอบคุณ / salamat / ありがとう"
+                                    PlaceholderColor="{StaticResource Outline}"
+                                    TextColor="{StaticResource OnSurface}"
+                                    FontSize="16"
+                                    AutoSize="Disabled"
+                                    HeightRequest="112"
+                                    Margin="0,0,0,20"
+                                    TextChanged="OnWordTextChanged" />
+                            <Label x:Name="CharCountLabel"
+                                   Text="0 / 50"
+                                   TextColor="{StaticResource Outline}"
+                                   FontSize="12"
+                                   HorizontalOptions="End"
+                                   VerticalOptions="End"
+                                   Margin="0,0,0,0" />
+                        </Grid>
+                    </Border>
+
+                    <Label Text="請輸入您想學習的外語單字，我們將為您生成好記的諧音與解釋。"
+                           Style="{StaticResource CaptionLabel}"
+                           LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+
+                <!-- 來源語言 -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="來源語言"
+                           TextColor="{StaticResource OnSurface}"
+                           FontSize="18"
+                           FontAttributes="Bold" />
+                    <Border Stroke="{StaticResource OutlineVariant}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 8"
+                            BackgroundColor="{StaticResource Surface}"
+                            Padding="12,4">
+                        <Picker x:Name="LanguagePicker"
+                                Title="選擇語言"
+                                SelectedIndex="0"
+                                TextColor="{StaticResource OnSurface}"
+                                TitleColor="{StaticResource Outline}"
+                                FontSize="16">
+                            <Picker.Items>
+                                <x:String>自動偵測</x:String>
+                                <x:String>日文 (Japanese)</x:String>
+                                <x:String>泰文 (Thai)</x:String>
+                                <x:String>他加祿語 (Tagalog)</x:String>
+                                <x:String>韓文 (Korean)</x:String>
+                                <x:String>越南文 (Vietnamese)</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- 標記偏好：豎向選項列表 -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="標記偏好"
+                           TextColor="{StaticResource OnSurface}"
+                           FontSize="18"
+                           FontAttributes="Bold" />
+
+                    <Border Stroke="{StaticResource OutlineVariant}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 8"
+                            BackgroundColor="{StaticResource Surface}"
+                            Padding="0">
+                        <VerticalStackLayout Spacing="0">
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="16"
+                                  Padding="16"
+                                  MinimumHeightRequest="64">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnBopomofoRowTapped" />
+                                </Grid.GestureRecognizers>
+                                <RadioButton x:Name="NotationBopomofo"
+                                             GroupName="Notation"
+                                             IsChecked="True"
+                                             VerticalOptions="Center" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="注音符號"
+                                           TextColor="{StaticResource OnSurface}"
+                                           FontSize="16" />
+                                    <Label Text="適合熟悉台灣注音拼寫的學習者"
+                                           Style="{StaticResource CaptionLabel}"
+                                           LineBreakMode="WordWrap" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <BoxView HeightRequest="1"
+                                     Color="{StaticResource OutlineVariant}"
+                                     Margin="0" />
+
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="16"
+                                  Padding="16"
+                                  MinimumHeightRequest="64">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnRomanRowTapped" />
+                                </Grid.GestureRecognizers>
+                                <RadioButton x:Name="NotationRoman"
+                                             GroupName="Notation"
+                                             VerticalOptions="Center" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="羅馬拼音"
+                                           TextColor="{StaticResource OnSurface}"
+                                           FontSize="16" />
+                                    <Label Text="使用英文字母標示發音"
+                                           Style="{StaticResource CaptionLabel}"
+                                           LineBreakMode="WordWrap" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <BoxView HeightRequest="1"
+                                     Color="{StaticResource OutlineVariant}"
+                                     Margin="0" />
+
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="16"
+                                  Padding="16"
+                                  MinimumHeightRequest="64">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnMixedRowTapped" />
+                                </Grid.GestureRecognizers>
+                                <RadioButton x:Name="NotationMixed"
+                                             GroupName="Notation"
+                                             VerticalOptions="Center" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="混合模式"
+                                           TextColor="{StaticResource OnSurface}"
+                                           FontSize="16" />
+                                    <Label Text="同時顯示兩種標音方式，提供更準確的參考"
+                                           Style="{StaticResource CaptionLabel}"
+                                           LineBreakMode="WordWrap" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- AI 免責資訊框 -->
+                <Border StrokeThickness="0"
+                        BackgroundColor="{StaticResource SurfaceContainerLow}"
+                        StrokeShape="RoundRectangle 0,8,0,8"
+                        Padding="0"
+                        Margin="0,4,0,0">
+                    <Grid ColumnDefinitions="4,*">
+                        <BoxView Grid.Column="0"
+                                 Color="{StaticResource StatusInfo}" />
+                        <Grid Grid.Column="1"
+                              ColumnDefinitions="Auto,*"
+                              ColumnSpacing="12"
+                              Padding="12,14">
+                            <Image Grid.Column="0"
+                                   Source="ic_info.png"
+                                   HeightRequest="20"
+                                   WidthRequest="20"
+                                   Aspect="AspectFit"
+                                   VerticalOptions="Start"
+                                   Margin="0,1,0,0" />
+                            <Label Grid.Column="1"
+                                   Text="分析結果由 AI 模型生成，可能會因語言特性產生些許誤差。建議搭配原生語音朗讀功能輔助學習。"
+                                   TextColor="{StaticResource OnSurfaceVariant}"
+                                   FontSize="12"
+                                   LineBreakMode="WordWrap" />
+                        </Grid>
+                    </Grid>
                 </Border>
-                <Label x:Name="CharCountLabel"
-                       Text="字數 0／50"
-                       Style="{StaticResource CaptionLabel}"
-                       HorizontalTextAlignment="End" />
-
-                <Label Text="來源語言" Style="{StaticResource FieldLabel}" Margin="0,8,0,0" />
-                <Border Style="{StaticResource InputBorder}">
-                    <Picker x:Name="LanguagePicker"
-                            Title="選擇語言"
-                            SelectedIndex="0">
-                        <Picker.Items>
-                            <x:String>自動偵測</x:String>
-                            <x:String>英語</x:String>
-                            <x:String>日語</x:String>
-                            <x:String>泰語</x:String>
-                            <x:String>韓語</x:String>
-                            <x:String>其他</x:String>
-                        </Picker.Items>
-                    </Picker>
-                </Border>
-                <Label Text="※ 可改為指定語言；不確定請留自動"
-                       Style="{StaticResource CaptionLabel}" />
-
-                <Label Text="標記偏好" Style="{StaticResource FieldLabel}" Margin="0,8,0,0" />
-                <HorizontalStackLayout Spacing="16">
-                    <RadioButton x:Name="NotationBopomofo" Content="注音" IsChecked="True" GroupName="Notation" />
-                    <RadioButton x:Name="NotationRoman" Content="羅馬" GroupName="Notation" />
-                    <RadioButton x:Name="NotationMixed" Content="混合" GroupName="Notation" />
-                </HorizontalStackLayout>
-
-                <Label Text="只支援單字或簡短詞組"
-                       Style="{StaticResource CaptionLabel}"
-                       Margin="0,8,0,0" />
             </VerticalStackLayout>
         </ScrollView>
 
-        <Grid Grid.Row="1" Style="{StaticResource StickyBar}">
-            <Button Text="開始分析"
+        <Grid Grid.Row="1"
+              Style="{StaticResource StickyBar}"
+              BackgroundColor="{StaticResource SurfaceBright}">
+            <Button Text="✨ 開始分析"
                     Style="{StaticResource PrimaryButton}"
+                    CornerRadius="28"
                     Clicked="OnAnalyzeClicked" />
         </Grid>
     </Grid>

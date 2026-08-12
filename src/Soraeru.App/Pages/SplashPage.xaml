@@ -1,193 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Soraeru.Controls"
              x:Class="Soraeru.Pages.SplashPage"
              Shell.NavBarIsVisible="False"
              BackgroundColor="{StaticResource SurfaceBright}">
 
     <Grid>
-        <!-- Soft atmospheric washes (Deep Teal / Cool Slate) -->
-        <BoxView Color="{StaticResource PrimaryContainer}"
-                 Opacity="0.12"
-                 HorizontalOptions="Fill"
-                 VerticalOptions="Start"
-                 HeightRequest="420"
-                 Margin="0,-40,0,0" />
-        <BoxView Color="{StaticResource SecondaryContainer}"
-                 Opacity="0.22"
-                 HorizontalOptions="Start"
-                 VerticalOptions="End"
-                 WidthRequest="280"
-                 HeightRequest="280"
-                 Margin="-60,0,0,-40" />
-
-        <!-- Floating multilingual mnemonic pills (Stitch L00 ambient layer) -->
-        <AbsoluteLayout x:Name="FloatingLayer"
-                        InputTransparent="True"
-                        Opacity="0">
-
-            <VerticalStackLayout x:Name="FloatCard1"
-                                 Spacing="-6"
-                                 Rotation="-14"
-                                 AbsoluteLayout.LayoutBounds="0.06,0.10,-1,-1"
-                                 AbsoluteLayout.LayoutFlags="PositionProportional">
-                <Label Text="สวัสดี"
-                       TextColor="{StaticResource Primary}"
-                       FontSize="22"
-                       FontAttributes="Bold"
-                       HorizontalOptions="Center"
-                       HorizontalTextAlignment="Center" />
-                <Border StrokeThickness="0"
-                        BackgroundColor="#CCFFFFFF"
-                        Padding="10,2"
-                        StrokeShape="RoundRectangle 12"
-                        HorizontalOptions="Center">
-                    <Border.Shadow>
-                        <Shadow Brush="Black" Offset="0,2" Radius="6" Opacity="0.06" />
-                    </Border.Shadow>
-                    <Label Text="薩瓦迪卡"
-                           TextColor="{StaticResource Secondary}"
-                           FontSize="14"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="Center" />
-                </Border>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout x:Name="FloatCard2"
-                                 Spacing="-6"
-                                 Rotation="10"
-                                 AbsoluteLayout.LayoutBounds="0.88,0.14,-1,-1"
-                                 AbsoluteLayout.LayoutFlags="PositionProportional">
-                <Label Text="Xin chào"
-                       TextColor="{StaticResource Primary}"
-                       FontSize="20"
-                       FontAttributes="Bold"
-                       HorizontalOptions="Center"
-                       HorizontalTextAlignment="Center" />
-                <Border StrokeThickness="0"
-                        BackgroundColor="#CCFFFFFF"
-                        Padding="10,2"
-                        StrokeShape="RoundRectangle 12"
-                        HorizontalOptions="Center">
-                    <Border.Shadow>
-                        <Shadow Brush="Black" Offset="0,2" Radius="6" Opacity="0.06" />
-                    </Border.Shadow>
-                    <Label Text="辛昭"
-                           TextColor="{StaticResource Secondary}"
-                           FontSize="14"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="Center" />
-                </Border>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout x:Name="FloatCard3"
-                                 Spacing="-6"
-                                 Rotation="-8"
-                                 AbsoluteLayout.LayoutBounds="0.12,0.78,-1,-1"
-                                 AbsoluteLayout.LayoutFlags="PositionProportional">
-                <Label Text="こんにちは"
-                       TextColor="{StaticResource Primary}"
-                       FontSize="18"
-                       FontAttributes="Bold"
-                       HorizontalOptions="Center"
-                       HorizontalTextAlignment="Center" />
-                <Border StrokeThickness="0"
-                        BackgroundColor="#CCFFFFFF"
-                        Padding="10,2"
-                        StrokeShape="RoundRectangle 12"
-                        HorizontalOptions="Center">
-                    <Border.Shadow>
-                        <Shadow Brush="Black" Offset="0,2" Radius="6" Opacity="0.06" />
-                    </Border.Shadow>
-                    <Label Text="摳尼吉哇"
-                           TextColor="{StaticResource Secondary}"
-                           FontSize="13"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="Center" />
-                </Border>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout x:Name="FloatCard4"
-                                 Spacing="-6"
-                                 Rotation="12"
-                                 AbsoluteLayout.LayoutBounds="0.90,0.72,-1,-1"
-                                 AbsoluteLayout.LayoutFlags="PositionProportional">
-                <Label Text="Bonjour"
-                       TextColor="{StaticResource Primary}"
-                       FontSize="20"
-                       FontAttributes="Bold"
-                       HorizontalOptions="Center"
-                       HorizontalTextAlignment="Center" />
-                <Border StrokeThickness="0"
-                        BackgroundColor="#CCFFFFFF"
-                        Padding="10,2"
-                        StrokeShape="RoundRectangle 12"
-                        HorizontalOptions="Center">
-                    <Border.Shadow>
-                        <Shadow Brush="Black" Offset="0,2" Radius="6" Opacity="0.06" />
-                    </Border.Shadow>
-                    <Label Text="崩啾"
-                           TextColor="{StaticResource Secondary}"
-                           FontSize="14"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="Center" />
-                </Border>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout x:Name="FloatCard5"
-                                 Spacing="-6"
-                                 Rotation="6"
-                                 AbsoluteLayout.LayoutBounds="0.72,0.42,-1,-1"
-                                 AbsoluteLayout.LayoutFlags="PositionProportional">
-                <Label Text="¡Hola!"
-                       TextColor="{StaticResource Primary}"
-                       FontSize="18"
-                       FontAttributes="Bold"
-                       HorizontalOptions="Center"
-                       HorizontalTextAlignment="Center" />
-                <Border StrokeThickness="0"
-                        BackgroundColor="#CCFFFFFF"
-                        Padding="10,2"
-                        StrokeShape="RoundRectangle 12"
-                        HorizontalOptions="Center">
-                    <Border.Shadow>
-                        <Shadow Brush="Black" Offset="0,2" Radius="6" Opacity="0.06" />
-                    </Border.Shadow>
-                    <Label Text="歐拉"
-                           TextColor="{StaticResource Secondary}"
-                           FontSize="13"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="Center" />
-                </Border>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout x:Name="FloatCard6"
-                                 Spacing="-6"
-                                 Rotation="-10"
-                                 AbsoluteLayout.LayoutBounds="0.18,0.40,-1,-1"
-                                 AbsoluteLayout.LayoutFlags="PositionProportional">
-                <Label Text="안녕하세요"
-                       TextColor="{StaticResource Primary}"
-                       FontSize="16"
-                       FontAttributes="Bold"
-                       HorizontalOptions="Center"
-                       HorizontalTextAlignment="Center" />
-                <Border StrokeThickness="0"
-                        BackgroundColor="#CCFFFFFF"
-                        Padding="10,2"
-                        StrokeShape="RoundRectangle 12"
-                        HorizontalOptions="Center">
-                    <Border.Shadow>
-                        <Shadow Brush="Black" Offset="0,2" Radius="6" Opacity="0.06" />
-                    </Border.Shadow>
-                    <Label Text="安妞哈塞唷"
-                           TextColor="{StaticResource Secondary}"
-                           FontSize="12"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="Center" />
-                </Border>
-            </VerticalStackLayout>
-        </AbsoluteLayout>
+        <!-- Stitch L00: fly-across multilingual mnemonic pairs -->
+        <controls:FloatingMnemonicBackground x:Name="AmbientBackground"
+                                             TargetOpacity="0.8"
+                                             SpawnIntervalMs="300" />
 
         <!-- Brand stack (Stitch L00 center) -->
         <VerticalStackLayout x:Name="BrandStack"
@@ -198,41 +21,64 @@
                              Padding="32"
                              MaximumWidthRequest="360">
 
-            <Image x:Name="BrandMark"
-                   Source="logo.png"
-                   HeightRequest="96"
-                   WidthRequest="96"
-                   Aspect="AspectFit"
-                   HorizontalOptions="Center"
-                   Margin="0,0,0,16">
-                <Image.Shadow>
-                    <Shadow Brush="Black" Offset="0,4" Radius="12" Opacity="0.16" />
-                </Image.Shadow>
-            </Image>
+            <Border x:Name="BrandMarkFrame"
+                    WidthRequest="96"
+                    HeightRequest="96"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 28"
+                    BackgroundColor="{StaticResource Primary}"
+                    HorizontalOptions="Center"
+                    Margin="0,0,0,16">
+                <Border.Shadow>
+                    <Shadow Brush="Black" Offset="0,4" Radius="12" Opacity="0.18" />
+                </Border.Shadow>
+                <Image x:Name="BrandMark"
+                       Source="logo.png"
+                       HeightRequest="56"
+                       WidthRequest="56"
+                       Aspect="AspectFit"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </Border>
 
-            <Label Text="空耳學單字"
+            <Label x:Name="TitleLabel"
+                   Text="空耳學單字"
                    TextColor="{StaticResource OnSurface}"
                    FontSize="36"
                    FontAttributes="Bold"
                    HorizontalTextAlignment="Center"
                    LineBreakMode="NoWrap" />
 
-            <Label Text="用發音，記住外語"
+            <Label x:Name="TaglineLabel"
+                   Text="用發音，記住外語"
                    TextColor="{StaticResource OnSurfaceVariant}"
                    FontSize="20"
                    HorizontalTextAlignment="Center"
                    Margin="0,4,0,0" />
         </VerticalStackLayout>
 
-        <!-- Loading indicator -->
-        <ActivityIndicator x:Name="Loader"
-                           IsRunning="True"
-                           Color="{StaticResource Primary}"
-                           Opacity="0"
-                           VerticalOptions="End"
-                           HorizontalOptions="Center"
-                           Margin="0,0,0,72"
-                           HeightRequest="32"
-                           WidthRequest="32" />
+        <!-- Three bounce dots (Stitch L00 loading-dot) -->
+        <HorizontalStackLayout x:Name="LoaderDots"
+                               Opacity="0"
+                               Spacing="8"
+                               VerticalOptions="End"
+                               HorizontalOptions="Center"
+                               Margin="0,0,0,72">
+            <Ellipse x:Name="Dot1"
+                     Fill="{StaticResource Primary}"
+                     WidthRequest="10"
+                     HeightRequest="10"
+                     Scale="0" />
+            <Ellipse x:Name="Dot2"
+                     Fill="{StaticResource Primary}"
+                     WidthRequest="10"
+                     HeightRequest="10"
+                     Scale="0" />
+            <Ellipse x:Name="Dot3"
+                     Fill="{StaticResource Primary}"
+                     WidthRequest="10"
+                     HeightRequest="10"
+                     Scale="0" />
+        </HorizontalStackLayout>
     </Grid>
 </ContentPage>

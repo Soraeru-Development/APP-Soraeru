@@ -1,3 +1,4 @@
+using Soraeru.ClientLogic.Notebook;
 using Soraeru.ClientLogic.Ocr;
 using Soraeru.Services.Interfaces;
 
@@ -7,14 +8,19 @@ public partial class OcrSelectPage : ContentPage
 {
     private readonly IOcrSessionStore _ocrSession;
     private readonly IAnalyzeFlowStore _flow;
+    private readonly LocalNotebookService _notebook;
     private string? _selectedToken;
     private bool _suppressTextChanged;
 
-    public OcrSelectPage(IOcrSessionStore ocrSession, IAnalyzeFlowStore flow)
+    public OcrSelectPage(
+        IOcrSessionStore ocrSession,
+        IAnalyzeFlowStore flow,
+        LocalNotebookService notebook)
     {
         InitializeComponent();
         _ocrSession = ocrSession;
         _flow = flow;
+        _notebook = notebook;
     }
 
     protected override void OnAppearing()
@@ -119,14 +125,43 @@ public partial class OcrSelectPage : ContentPage
         // Persist any user correction for back-navigation.
         _ocrSession.RecognizedText = OcrEditor.Text;
 
+        var sourceLanguage = ResolveSourceLanguage();
+        var match = await _notebook.FindActiveByLookupKeyAsync(text!, sourceLanguage);
+        var authenticated = await _notebook.CanWriteAsync();
+        var decision = AnalyzeEntryGate.DecideLookup(match, authenticated);
+
+        if (decision.Kind == AnalyzeEntryKind.OpenLocalDetail && decision.CardId is { } cardId)
+        {
+            await Routes.GoAsync($"{Routes.NotebookDetail}?cardId={cardId:D}");
+            return;
+        }
+
+        if (decision.Kind == AnalyzeEntryKind.RequireLogin)
+        {
+            await DisplayAlertAsync("需要登入", "登入後才能分析新單字。", "了解");
+            await Routes.GoAsync(Routes.Login);
+            return;
+        }
+
         _flow.PendingRequest = new AnalyzeRequestDto(
             text!,
-            SourceLanguage: "auto",
+            sourceLanguage,
             MemoryLanguage: "zh-TW",
             NotationPreference: "bopomofo",
-            ForceRefresh: false);
+            ForceRefresh: decision.ForceRefresh);
         _flow.ClearError();
 
         await Routes.GoAsync(Routes.Analyzing);
     }
+
+    string ResolveSourceLanguage() =>
+        LanguagePicker.SelectedIndex switch
+        {
+            1 => "ja",
+            2 => "th",
+            3 => "tl",
+            4 => "ko",
+            5 => "vi",
+            _ => "auto"
+        };
 }

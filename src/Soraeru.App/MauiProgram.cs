@@ -29,6 +29,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IImageCaptureService, MauiImageCaptureService>();
         builder.Services.AddSingleton(OcrPlugin.Default);
         builder.Services.AddSingleton<IDeviceOcrService, PluginDeviceOcrService>();
+        builder.Services.AddSingleton<IFormalTtsService, MauiFormalTtsService>();
         builder.Services.AddSingleton<ILocalWordCardStore>(_ =>
             new JsonFileLocalWordCardStore(
                 Path.Combine(FileSystem.AppDataDirectory, "local-wordcards.json")));
@@ -64,11 +65,29 @@ public static class MauiProgram
                 client.Timeout = TimeSpan.FromSeconds(90);
             })
             .AddHttpMessageHandler<AuthHeaderHandler>();
+        builder.Services.AddSingleton<ICloudWordCardMirror, HttpCloudWordCardMirror>();
+        builder.Services.AddSingleton<NotebookSyncCoordinator>(sp =>
+        {
+            var store = sp.GetRequiredService<ILocalWordCardStore>();
+            var mirror = sp.GetRequiredService<ICloudWordCardMirror>();
+            var sessionStore = sp.GetRequiredService<IAuthSessionStore>();
+            return new NotebookSyncCoordinator(store, mirror, async ct =>
+            {
+                if (!await sessionStore.HasSessionAsync())
+                    return LocalSession.Anonymous();
+
+                var userId = await sessionStore.GetUserIdAsync();
+                return userId is { } id && id != Guid.Empty
+                    ? LocalSession.SignedIn(id)
+                    : LocalSession.Anonymous();
+            });
+        });
 
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<RegisterPage>();
         builder.Services.AddTransient<ForgotPasswordPage>();
         builder.Services.AddTransient<OnboardingPage>();
+        builder.Services.AddTransient<LegalDocumentPage>();
         builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<WordInputPage>();

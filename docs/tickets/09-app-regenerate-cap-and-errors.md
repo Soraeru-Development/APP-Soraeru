@@ -4,7 +4,7 @@
 
 **Blocked by:** None — can start immediately（分析 API／結果頁已存在）
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Parent
 
@@ -17,12 +17,18 @@
 
 ## Acceptance criteria
 
-- [ ] 同使用者＋語言＋正規化字串：重產（強制刷新）超過 3 次被拒絕，並有清楚錯誤碼／文案。
-- [ ] 每次成功的重產仍計入每日 AI 額度（與規劃書一致）。
-- [ ] 額度用盡時 App 提示明確，不會假裝分析成功。
-- [ ] 硬閘／分析失敗路徑有可理解訊息（可返回重試或稍後再試）。
-- [ ] 以 Application／API 行為測試為主覆蓋上限與錯誤碼；App 手動煙測達上限與額度用盡。
+- [x] 同使用者＋語言＋正規化字串：重產（強制刷新）超過 3 次被拒絕，並有清楚錯誤碼／文案。
+- [x] 每次成功的重產仍計入每日 AI 額度（與規劃書一致）。
+- [x] 額度用盡時 App 提示明確，不會假裝分析成功。
+- [x] 硬閘／分析失敗路徑有可理解訊息（可返回重試或稍後再試）。
+- [x] 以 Application／API 行為測試為主覆蓋上限與錯誤碼；App 手動煙測達上限與額度用盡。
 
 ## Blocked by
 
 - None — can start immediately
+
+## Notes（Station 4）
+
+- 錯誤碼：`REGENERATION_LIMIT_EXCEEDED`（429）；成功重產寫入 `WordRegenerations` 並 `TryConsume` 日額度。
+- 回應欄：`remainingRegenerations`；與票 18「重新分析」共用 ForceRefresh／同一計數鍵語意。
+- 驗證：`dotnet test tests/Soraeru.Application.Tests`、`tests/Soraeru.ClientLogic.Tests`。

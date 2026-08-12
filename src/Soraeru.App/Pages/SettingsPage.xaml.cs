@@ -54,11 +54,11 @@ public partial class SettingsPage : ContentPage
                 return;
             }
 
-            DisplayNameLabel.Text = $"名稱：{me!.DisplayName}";
-            EmailLabel.Text = $"Email：{MaskEmail(me.Email)}";
+            DisplayNameLabel.Text = string.IsNullOrWhiteSpace(me!.DisplayName) ? "—" : me.DisplayName;
+            EmailLabel.Text = MaskEmail(me.Email);
             LoginProviderLabel.Text = $"登入方式：{FormatLoginProviders(me)}";
             QuotaLabel.Text = FormatQuota(me);
-            PlanLabel.Text = $"方案：{FormatPlanTier(me.PlanTier, me.IsDeveloper)}";
+            PlanLabel.Text = FormatPlanTier(me.PlanTier, me.IsDeveloper);
             StatusLabel.IsVisible = false;
         }
         catch (Exception ex)
@@ -82,7 +82,10 @@ public partial class SettingsPage : ContentPage
         await Routes.GoAsync(Routes.Onboarding);
 
     async void OnPrivacyClicked(object? sender, EventArgs e) =>
-        await DisplayAlertAsync("隱私權政策", "MVP 示範畫面，正式版本將提供完整政策連結。", "關閉");
+        await Routes.GoToPrivacyPolicyAsync();
+
+    async void OnAiDisclaimerClicked(object? sender, EventArgs e) =>
+        await Routes.GoToAiDisclaimerAsync();
 
     async void OnLogoutClicked(object? sender, EventArgs e)
     {

@@ -28,6 +28,70 @@ public static class NotebookEndpoints
             return Results.Ok(result.Value.Select(ToResponse).ToList());
         });
 
+        group.MapGet("/mirror", async (INotebookService notebook, ClaimsPrincipal user, CancellationToken ct) =>
+        {
+            var id = ResolveUserId(user);
+            if (id is null)
+            {
+                return Results.Unauthorized();
+            }
+
+            var result = await notebook.PullMirrorAsync(id.Value, ct);
+            if (!result.IsSuccess || result.Value is null)
+            {
+                return Results.Json(
+                    new ErrorResponse(result.ErrorCode ?? "ERROR", result.ErrorMessage ?? "Mirror pull failed."),
+                    statusCode: StatusCodes.Status400BadRequest);
+            }
+
+            return Results.Ok(result.Value.Select(ToMirrorResponse).ToList());
+        });
+
+        group.MapPut("/mirror", async (
+            IReadOnlyList<MirrorWordCardRequest> body,
+            INotebookService notebook,
+            ClaimsPrincipal user,
+            CancellationToken ct) =>
+        {
+            var id = ResolveUserId(user);
+            if (id is null)
+            {
+                return Results.Unauthorized();
+            }
+
+            var cards = (body ?? Array.Empty<MirrorWordCardRequest>())
+                .Select(c => new MirrorWordCard(
+                    c.Id,
+                    c.OwnerUserId,
+                    c.SourceText,
+                    c.NormalizedText,
+                    c.DetectedLanguage,
+                    c.MeaningZh,
+                    c.Pronunciation,
+                    c.SelectedMnemonic,
+                    c.CreatedAtUtc,
+                    c.UpdatedAtUtc,
+                    c.DeletedAtUtc))
+                .ToList();
+
+            var result = await notebook.PushMirrorAsync(id.Value, cards, ct);
+            if (!result.IsSuccess)
+            {
+                var status = result.ErrorCode switch
+                {
+                    "FORBIDDEN" => StatusCodes.Status403Forbidden,
+                    "CONFLICT" => StatusCodes.Status409Conflict,
+                    "VALIDATION" => StatusCodes.Status400BadRequest,
+                    _ => StatusCodes.Status400BadRequest
+                };
+                return Results.Json(
+                    new ErrorResponse(result.ErrorCode ?? "ERROR", result.ErrorMessage ?? "Mirror push failed."),
+                    statusCode: status);
+            }
+
+            return Results.NoContent();
+        });
+
         group.MapGet("/{cardId:guid}", async (
             Guid cardId,
             INotebookService notebook,
@@ -120,7 +184,22 @@ public static class NotebookEndpoints
             card.MeaningZh,
             card.Pronunciation,
             card.SelectedMnemonic,
-            card.CreatedAtUtc);
+            card.CreatedAtUtc,
+            card.UpdatedAtUtc);
+
+    private static MirrorWordCardResponse ToMirrorResponse(MirrorWordCard card) =>
+        new(
+            card.Id,
+            card.OwnerUserId,
+            card.SourceText,
+            card.NormalizedText,
+            card.DetectedLanguage,
+            card.MeaningZh,
+            card.Pronunciation,
+            card.SelectedMnemonic,
+            card.CreatedAtUtc,
+            card.UpdatedAtUtc,
+            card.DeletedAtUtc);
 
     private static Guid? ResolveUserId(ClaimsPrincipal user)
     {
@@ -143,4 +222,31 @@ public sealed record NotebookCardResponse(
     string MeaningZh,
     string Pronunciation,
     string SelectedMnemonic,
-    DateTimeOffset CreatedAtUtc);
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset UpdatedAtUtc);
+
+public sealed record MirrorWordCardRequest(
+    Guid Id,
+    Guid OwnerUserId,
+    string SourceText,
+    string NormalizedText,
+    string DetectedLanguage,
+    string MeaningZh,
+    string Pronunciation,
+    string SelectedMnemonic,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    DateTimeOffset? DeletedAtUtc);
+
+public sealed record MirrorWordCardResponse(
+    Guid Id,
+    Guid OwnerUserId,
+    string SourceText,
+    string NormalizedText,
+    string DetectedLanguage,
+    string MeaningZh,
+    string Pronunciation,
+    string SelectedMnemonic,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    DateTimeOffset? DeletedAtUtc);

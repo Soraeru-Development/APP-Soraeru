@@ -4,7 +4,7 @@
 
 **Blocked by:** None — can start immediately（設定／onboarding 骨架已有）
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Parent
 
@@ -17,12 +17,18 @@
 
 ## Acceptance criteria
 
-- [ ] 登入與設定可開啟隱私權政策內容（非「稍後再補」空殼告警）。
-- [ ] 有 AI 內容／空耳免責聲明入口，語意含「僅供記憶、請以正式發音為準」。
-- [ ] 設定可查看額度、方案預留欄位、登出；已登入會話行為正確。
-- [ ] 設定可再次開啟首次使用說明。
-- [ ] 不做實際金流／訂閱升級購買流程（Phase 2）。
+- [x] 登入與設定可開啟隱私權政策內容（非「稍後再補」空殼告警）。
+- [x] 有 AI 內容／空耳免責聲明入口，語意含「僅供記憶、請以正式發音為準」。
+- [x] 設定可查看額度、方案預留欄位、登出；已登入會話行為正確。
+- [x] 設定可再次開啟首次使用說明。
+- [x] 不做實際金流／訂閱升級購買流程（Phase 2）。
 
 ## Blocked by
 
 - None — can start immediately
+
+## Notes（Station 4）
+
+- Seam：`Soraeru.ClientLogic.Legal.LegalDocuments`（文案 oracle）＋ `LegalDocumentPage`（應用內頁，`?doc=privacy|ai`）。
+- 登入／設定／註冊入口改導應用內頁；商店託管 URL 留給票 12。
+- 驗證：`dotnet test …LegalDocumentsTests`（3 綠）；App Windows TFM 建置成功。額度／方案預留／登出／再看 onboarding 為既有行為。

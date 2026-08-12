@@ -6,43 +6,182 @@
              Shell.NavBarIsVisible="True"
              BackgroundColor="{StaticResource SurfaceBright}">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20,16,20,32" Spacing="12" MaximumWidthRequest="480" HorizontalOptions="Center">
+    <Grid RowDefinitions="*,Auto"
+          MaximumWidthRequest="600"
+          HorizontalOptions="Center">
 
-            <Label x:Name="SourceTextLabel"
-                   Text="…"
-                   FontSize="28"
-                   FontAttributes="Bold"
-                   TextColor="{StaticResource OnSurface}" />
-            <Label x:Name="LanguageLabel" Text="" Style="{StaticResource BodyLabel}" />
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="16,24,16,16" Spacing="12">
 
-            <Label x:Name="MeaningLabel" Text="" Style="{StaticResource BodyLabel}" FontSize="16" Margin="0,12,0,0" />
-            <Label x:Name="ReadingLabel" Text="" Style="{StaticResource BodyLabel}" FontSize="16" />
+                <!-- Vocabulary card (L12 bento) -->
+                <Border x:Name="WordCardBorder"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{StaticResource SurfaceContainer}"
+                        Padding="16">
+                    <VerticalStackLayout Spacing="0">
+                        <Grid ColumnDefinitions="*,Auto"
+                              ColumnSpacing="12"
+                              Margin="0,0,0,8">
+                            <Border Grid.Column="0"
+                                    Stroke="{StaticResource OutlineVariant}"
+                                    StrokeThickness="1"
+                                    StrokeShape="RoundRectangle 999"
+                                    BackgroundColor="{StaticResource Surface}"
+                                    Padding="10,4"
+                                    HorizontalOptions="Start"
+                                    VerticalOptions="Start">
+                                <Label x:Name="LanguagePillLabel"
+                                       Text=""
+                                       TextColor="{StaticResource OnSurfaceVariant}"
+                                       FontSize="12"
+                                       VerticalTextAlignment="Center" />
+                            </Border>
 
-            <Button Text="▶  播放正式發音"
-                    Style="{StaticResource SecondaryButton}"
-                    Clicked="OnPlayClicked"
-                    Margin="0,4,0,8" />
+                            <Border x:Name="PlayChrome"
+                                    Grid.Column="1"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 999"
+                                    BackgroundColor="{StaticResource PrimaryContainer}"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    HorizontalOptions="End"
+                                    VerticalOptions="Start">
+                                <ImageButton Source="ic_volume_up_on_primary.png"
+                                             BackgroundColor="Transparent"
+                                             WidthRequest="40"
+                                             HeightRequest="40"
+                                             Padding="8"
+                                             Aspect="AspectFit"
+                                             Clicked="OnPlayClicked"
+                                             SemanticProperties.Description="播放正式發音" />
+                            </Border>
+                        </Grid>
 
-            <BoxView HeightRequest="1" Color="{StaticResource OutlineVariant}" Margin="0,8" />
+                        <Label x:Name="SourceTextLabel"
+                               Text="…"
+                               FontSize="40"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource Primary}"
+                               LineBreakMode="WordWrap"
+                               Margin="0,8,0,0" />
+                        <Label x:Name="ReadingLabel"
+                               Text=""
+                               FontSize="22"
+                               TextColor="{StaticResource OnSurfaceVariant}"
+                               LineBreakMode="WordWrap"
+                               Margin="0,4,0,0" />
 
-            <Label Text="我的近似音" Style="{StaticResource SectionTitle}" />
-            <Label x:Name="MnemonicLabel"
-                   Text=""
-                   FontSize="22"
-                   FontAttributes="Bold"
-                   TextColor="{StaticResource Primary}" />
+                        <BoxView HeightRequest="1"
+                                 Color="{StaticResource OutlineVariant}"
+                                 Opacity="0.3"
+                                 Margin="0,16" />
 
-            <Label x:Name="CreatedAtLabel"
-                   Text=""
-                   Style="{StaticResource CaptionLabel}"
-                   Margin="0,16,0,8" />
+                        <Label Text="MEANING"
+                               TextColor="{StaticResource Secondary}"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               CharacterSpacing="1"
+                               Margin="0,0,0,4" />
+                        <Label x:Name="MeaningLabel"
+                               Text=""
+                               FontSize="16"
+                               TextColor="{StaticResource OnSurface}"
+                               LineBreakMode="WordWrap" />
+                    </VerticalStackLayout>
+                </Border>
 
-            <Button x:Name="DeleteButton"
+                <!-- Mnemonic section -->
+                <Border Stroke="{StaticResource OutlineVariant}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{StaticResource Surface}"
+                        Padding="16"
+                        Margin="0,4,0,0">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto"
+                              ColumnSpacing="8">
+                            <HorizontalStackLayout Grid.Column="0"
+                                                   Spacing="8"
+                                                   VerticalOptions="Center">
+                                <Image Source="ic_lightbulb.png"
+                                       WidthRequest="22"
+                                       HeightRequest="22"
+                                       Aspect="AspectFit"
+                                       VerticalOptions="Center" />
+                                <Label Text="我的近似音"
+                                       TextColor="{StaticResource Primary}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       VerticalTextAlignment="Center" />
+                            </HorizontalStackLayout>
+                            <Button x:Name="EditMnemonicButton"
+                                    Grid.Column="1"
+                                    Text="編輯"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource Primary}"
+                                    FontSize="14"
+                                    FontAttributes="Bold"
+                                    Padding="8,4"
+                                    MinimumHeightRequest="36"
+                                    IsVisible="False"
+                                    Clicked="OnEditMnemonicClicked" />
+                        </Grid>
+
+                        <Border Stroke="{StaticResource OutlineVariant}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8"
+                                BackgroundColor="{StaticResource SurfaceBright}"
+                                Padding="16">
+                            <Label x:Name="MnemonicLabel"
+                                   Text=""
+                                   FontSize="22"
+                                   TextColor="{StaticResource OnSurface}"
+                                   LineBreakMode="WordWrap" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Sticky actions: reanalyze + delete -->
+        <Grid Grid.Row="1"
+              RowDefinitions="1,Auto,Auto"
+              BackgroundColor="{StaticResource SurfaceBright}">
+            <BoxView Grid.Row="0"
+                     Color="{StaticResource OutlineVariant}"
+                     Opacity="0.2"
+                     HeightRequest="1"
+                     VerticalOptions="Start" />
+            <Button Grid.Row="1"
+                    x:Name="ReanalyzeButton"
+                    Text="重新分析"
+                    Style="{StaticResource PrimaryButton}"
+                    CornerRadius="8"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    HeightRequest="48"
+                    Margin="16,12,16,8"
+                    Padding="16,0"
+                    IsEnabled="False"
+                    Clicked="OnReanalyzeClicked" />
+            <Button Grid.Row="2"
+                    x:Name="DeleteButton"
                     Text="刪除單字卡"
-                    Style="{StaticResource DangerButton}"
-                    Clicked="OnDeleteClicked"
-                    IsEnabled="False" />
-        </VerticalStackLayout>
-    </ScrollView>
+                    ImageSource="ic_delete.png"
+                    ContentLayout="Left,8"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource Error}"
+                    BorderColor="{StaticResource Error}"
+                    BorderWidth="1"
+                    CornerRadius="8"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    HeightRequest="48"
+                    Margin="16,0,16,20"
+                    Padding="16,0"
+                    IsEnabled="False"
+                    Clicked="OnDeleteClicked" />
+        </Grid>
+    </Grid>
 </ContentPage>

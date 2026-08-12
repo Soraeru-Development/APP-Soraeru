@@ -18,6 +18,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>a305df7e-5da5-4a0d-be8c-ddd04389f8dd</UserSecretsId>
+    <!-- VS / `dotnet run` 預設用 http（5080），與 App / README 一致；勿用會開 7080 的 https -->
+    <LaunchProfile>http</LaunchProfile>
+    <ActiveDebugProfile>http</ActiveDebugProfile>
   </PropertyGroup>
 
 </Project>

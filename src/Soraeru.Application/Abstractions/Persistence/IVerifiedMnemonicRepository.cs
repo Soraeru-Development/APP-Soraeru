@@ -2,6 +2,7 @@ namespace Soraeru.Application.Abstractions.Persistence;
 
 /// <summary>
 /// Persistence boundary for curated verified empty-ear (空耳) entries — not learner WordCards.
+/// 金標庫與單字卡分離；命中只供分析候選，不得視為可覆蓋個人空耳的來源。
 /// </summary>
 public interface IVerifiedMnemonicRepository
 {

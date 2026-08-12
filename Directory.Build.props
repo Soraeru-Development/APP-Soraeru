@@ -1,0 +1,16 @@
+<Project>
+  <!--
+    Force short NuGet global packages path for all restores/builds (VS, CLI, Agent).
+    NUGET_PACKAGES env (incl. Cursor sandbox / Temp long paths) must not win over this:
+    RestorePackagesPath is honored by NuGet restore MSBuild integration and writes
+    short paths into obj\*.nuget.g.props / project.assets.json.
+    Keep in sync with nuget.config globalPackagesFolder and scripts/fix-nuget-path.ps1.
+  -->
+  <PropertyGroup>
+    <SoraeruNuGetPackages Condition="'$(SoraeruNuGetPackages)' == ''">D:\.nuget\packages</SoraeruNuGetPackages>
+    <RestorePackagesPath>$(SoraeruNuGetPackages)</RestorePackagesPath>
+    <!-- Trailing slash matches NuGet-generated nuget.g.props convention. -->
+    <NuGetPackageRoot>$(SoraeruNuGetPackages)\</NuGetPackageRoot>
+    <NuGetPackageFolders>$(SoraeruNuGetPackages)</NuGetPackageFolders>
+  </PropertyGroup>
+</Project>

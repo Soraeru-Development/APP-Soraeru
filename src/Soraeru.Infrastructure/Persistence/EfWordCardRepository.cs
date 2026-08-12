@@ -23,7 +23,7 @@ public sealed class EfWordCardRepository : IWordCardRepository
 
         // Sqlite cannot ORDER BY DateTimeOffset in SQL; sort on the client.
         return rows
-            .OrderByDescending(c => c.CreatedAt)
+            .OrderByDescending(c => c.UpdatedAt)
             .Select(ToRecord)
             .ToList();
     }
@@ -35,6 +35,15 @@ public sealed class EfWordCardRepository : IWordCardRepository
     {
         var entity = await _db.WordCards.AsNoTracking()
             .FirstOrDefaultAsync(c => c.UserId == userId && c.Id == cardId, cancellationToken);
+        return entity is null ? null : ToRecord(entity);
+    }
+
+    public async Task<WordCardRecord?> GetByIdAsync(
+        Guid cardId,
+        CancellationToken cancellationToken = default)
+    {
+        var entity = await _db.WordCards.AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == cardId, cancellationToken);
         return entity is null ? null : ToRecord(entity);
     }
 
@@ -50,6 +59,7 @@ public sealed class EfWordCardRepository : IWordCardRepository
         var entity = await _db.WordCards.AsNoTracking()
             .FirstOrDefaultAsync(
                 c => c.UserId == userId
+                    && c.DeletedAt == null
                     && c.DetectedLanguage.ToLower() == language.ToLower()
                     && c.NormalizedText == normalized,
                 cancellationToken);
@@ -64,6 +74,35 @@ public sealed class EfWordCardRepository : IWordCardRepository
         _db.WordCards.Add(ToEntity(card));
         await _db.SaveChangesAsync(cancellationToken);
         return card;
+    }
+
+    public async Task UpsertAsync(WordCardRecord card, CancellationToken cancellationToken = default)
+    {
+        // HasKey(Id) is global — detect cross-user occupancy before Add would 500 on PK.
+        var entity = await _db.WordCards
+            .FirstOrDefaultAsync(c => c.Id == card.Id, cancellationToken);
+        if (entity is null)
+        {
+            _db.WordCards.Add(ToEntity(card));
+        }
+        else if (entity.UserId != card.UserId)
+        {
+            throw new WordCardIdConflictException(card.Id);
+        }
+        else
+        {
+            entity.SourceText = card.SourceText;
+            entity.NormalizedText = card.NormalizedText;
+            entity.DetectedLanguage = card.DetectedLanguage;
+            entity.MeaningZh = card.MeaningZh;
+            entity.Pronunciation = card.Pronunciation;
+            entity.SelectedMnemonic = card.SelectedMnemonic;
+            entity.CreatedAt = card.CreatedAtUtc;
+            entity.UpdatedAt = card.UpdatedAtUtc;
+            entity.DeletedAt = card.DeletedAtUtc;
+        }
+
+        await _db.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(
@@ -104,7 +143,9 @@ public sealed class EfWordCardRepository : IWordCardRepository
             entity.MeaningZh,
             entity.Pronunciation,
             entity.SelectedMnemonic,
-            entity.CreatedAt);
+            entity.CreatedAt,
+            entity.UpdatedAt,
+            entity.DeletedAt);
 
     private static WordCardEntity ToEntity(WordCardRecord card) =>
         new()
@@ -117,6 +158,8 @@ public sealed class EfWordCardRepository : IWordCardRepository
             MeaningZh = card.MeaningZh,
             Pronunciation = card.Pronunciation,
             SelectedMnemonic = card.SelectedMnemonic,
-            CreatedAt = card.CreatedAtUtc
+            CreatedAt = card.CreatedAtUtc,
+            UpdatedAt = card.UpdatedAtUtc,
+            DeletedAt = card.DeletedAtUtc
         };
 }

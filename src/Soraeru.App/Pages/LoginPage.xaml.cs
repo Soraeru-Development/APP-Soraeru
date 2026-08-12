@@ -1,3 +1,4 @@
+using Soraeru.ClientLogic.Notebook;
 using Soraeru.Services.Interfaces;
 
 namespace Soraeru.Pages;
@@ -6,13 +7,19 @@ public partial class LoginPage : ContentPage
 {
     private readonly ISoraeruApiClient _api;
     private readonly IAuthSessionStore _session;
+    private readonly LocalNotebookService _notebook;
     private readonly IGoogleSignInService _googleSignIn;
 
-    public LoginPage(ISoraeruApiClient api, IAuthSessionStore session, IGoogleSignInService googleSignIn)
+    public LoginPage(
+        ISoraeruApiClient api,
+        IAuthSessionStore session,
+        LocalNotebookService notebook,
+        IGoogleSignInService googleSignIn)
     {
         InitializeComponent();
         _api = api;
         _session = session;
+        _notebook = notebook;
         _googleSignIn = googleSignIn;
     }
 
@@ -71,16 +78,25 @@ public partial class LoginPage : ContentPage
     }
 
     async void OnPrivacyClicked(object? sender, EventArgs e) =>
-        await DisplayAlertAsync("隱私權政策", "MVP 示範畫面，正式版本將提供完整政策連結。", "關閉");
+        await Routes.GoToPrivacyPolicyAsync();
+
+    async void OnAiDisclaimerClicked(object? sender, EventArgs e) =>
+        await Routes.GoToAiDisclaimerAsync();
 
     async Task CompleteLoginAsync(AuthSessionDto session)
     {
+        var previousUserId = await _session.GetUserIdAsync();
+        await SignInNotebookIsolation.ApplyAsync(_notebook, previousUserId, session.UserId);
+
         await _session.SetSessionAsync(
             session.AccessToken,
             session.UserId,
             session.Email,
             session.OnboardingCompleted);
 
-        await Routes.GoAsync(session.OnboardingCompleted ? Routes.Home : Routes.Onboarding);
+        await Routes.GoAsync(
+            session.OnboardingCompleted
+                ? $"//{Routes.Main}/{Routes.Home}"
+                : Routes.Onboarding);
     }
 }

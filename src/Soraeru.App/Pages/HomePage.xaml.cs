@@ -55,7 +55,7 @@ public partial class HomePage : ContentPage
     }
 
     async void OnSettingsClicked(object? sender, EventArgs e) =>
-        await Routes.GoAsync(Routes.Settings);
+        await Routes.GoToMainTabAsync(Routes.Settings);
 
     async void OnWordInputTapped(object? sender, TappedEventArgs e) =>
         await Routes.GoAsync(Routes.WordInput);
@@ -64,5 +64,5 @@ public partial class HomePage : ContentPage
         await Routes.GoAsync(Routes.ImagePick);
 
     async void OnNotebookTapped(object? sender, TappedEventArgs e) =>
-        await Routes.GoAsync(Routes.NotebookList);
+        await Routes.GoToMainTabAsync(Routes.NotebookList);
 }

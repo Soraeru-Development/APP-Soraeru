@@ -1,3 +1,4 @@
+using Soraeru.ClientLogic.Notebook;
 using Soraeru.Services.Interfaces;
 
 namespace Soraeru.Pages;
@@ -6,13 +7,18 @@ public partial class RegisterPage : ContentPage
 {
     private readonly ISoraeruApiClient _api;
     private readonly IAuthSessionStore _session;
+    private readonly LocalNotebookService _notebook;
 
-    public RegisterPage(ISoraeruApiClient api, IAuthSessionStore session)
+    public RegisterPage(ISoraeruApiClient api, IAuthSessionStore session, LocalNotebookService notebook)
     {
         InitializeComponent();
         _api = api;
         _session = session;
+        _notebook = notebook;
     }
+
+    async void OnPrivacyClicked(object? sender, EventArgs e) =>
+        await Routes.GoToPrivacyPolicyAsync();
 
     async void OnCreateClicked(object? sender, EventArgs e)
     {
@@ -54,6 +60,9 @@ public partial class RegisterPage : ContentPage
         }
 
         var session = result.Session;
+        var previousUserId = await _session.GetUserIdAsync();
+        await SignInNotebookIsolation.ApplyAsync(_notebook, previousUserId, session.UserId);
+
         await _session.SetSessionAsync(
             session.AccessToken,
             session.UserId,

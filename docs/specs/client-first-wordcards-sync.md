@@ -50,4 +50,5 @@
 ## Further Notes
 
 - **Next**：用 `to-tickets` 拆垂直切片（本機 DB → 同步協定 → 鏡像 API 語意調整 → App UI 編輯 → 回歸金標不蓋卡）。  
-- 與 [`parallel-web-curator-trust.md`](./parallel-web-curator-trust.md) 張力：Web／單字本「共用帳戶語意」保留，但**擁有權模型**以 ADR-0007 為準。
+- 與 [`parallel-web-curator-trust.md`](./parallel-web-curator-trust.md) 張力：Web／單字本「共用帳戶語意」保留，但**擁有權模型**以 ADR-0007 為準。  
+- **同字再查**：在本機 SoT 之上的開卡短路見 [`local-notebook-lookup-short-circuit.md`](./local-notebook-lookup-short-circuit.md)／ADR-0008（不併入本檔，以免擁有權與查重 UX 混寫）。

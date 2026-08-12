@@ -54,6 +54,8 @@ if (!string.Equals(provider, "InMemory", StringComparison.OrdinalIgnoreCase))
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Root has no product page; avoid Chrome "HTTP ERROR 404" when opening the listen URL.
+app.MapGet("/", () => Results.Redirect("/health"));
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "Soraeru.Api" }));
 
 app.MapAuthEndpoints();

@@ -41,6 +41,7 @@
 
             <Button Text="登入"
                     Style="{StaticResource PrimaryButton}"
+                    CornerRadius="28"
                     Clicked="OnLoginClicked"
                     Margin="0,8,0,0" />
 
@@ -69,6 +70,10 @@
             <Button Text="隱私權政策"
                     Style="{StaticResource LinkButton}"
                     Clicked="OnPrivacyClicked"
+                    HorizontalOptions="Center" />
+            <Button Text="AI 內容聲明"
+                    Style="{StaticResource LinkButton}"
+                    Clicked="OnAiDisclaimerClicked"
                     HorizontalOptions="Center" />
         </VerticalStackLayout>
     </ScrollView>

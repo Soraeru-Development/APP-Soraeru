@@ -18,6 +18,8 @@ public sealed class SoraeruDbContext : DbContext
 
     public DbSet<VerifiedMnemonicEntity> VerifiedMnemonics => Set<VerifiedMnemonicEntity>();
 
+    public DbSet<WordRegenerationEntity> WordRegenerations => Set<WordRegenerationEntity>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         var users = modelBuilder.Entity<UserEntity>();
@@ -59,5 +61,11 @@ public sealed class SoraeruDbContext : DbContext
         verified.Property(x => x.DisplayText).HasMaxLength(500).IsRequired();
         verified.Property(x => x.NotationText).HasMaxLength(500).IsRequired();
         verified.Property(x => x.Explanation).HasMaxLength(2000).IsRequired();
+
+        var regenerations = modelBuilder.Entity<WordRegenerationEntity>();
+        regenerations.ToTable("WordRegenerations");
+        regenerations.HasKey(x => new { x.UserId, x.SourceLanguage, x.NormalizedText });
+        regenerations.Property(x => x.SourceLanguage).HasMaxLength(32).IsRequired();
+        regenerations.Property(x => x.NormalizedText).HasMaxLength(200).IsRequired();
     }
 }

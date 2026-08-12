@@ -33,6 +33,14 @@ public interface ISoraeruApiClient
 
     Task<NotebookActionApiResult> DeleteNotebookCardAsync(Guid cardId, CancellationToken cancellationToken = default);
 
+    /// <summary>GET /api/v1/notebook/mirror — pull cloud mirror rows (includes tombstones).</summary>
+    Task<NotebookMirrorPullApiResult> PullNotebookMirrorAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>PUT /api/v1/notebook/mirror — whole-card LWW upsert push.</summary>
+    Task<NotebookActionApiResult> PushNotebookMirrorAsync(
+        IReadOnlyList<NotebookMirrorCardDto> cards,
+        CancellationToken cancellationToken = default);
+
     /// <summary>DELETE /api/v1/me — removes cloud notebook mirror + account.</summary>
     Task<DeleteAccountApiClientResult> DeleteAccountAsync(CancellationToken cancellationToken = default);
 }
@@ -75,7 +83,8 @@ public sealed record AnalyzeResultDto(
     string Notice,
     bool Cached,
     int RemainingDailyQuota,
-    string MnemonicSource = "llm_draft");
+    string MnemonicSource = "llm_draft",
+    int RemainingRegenerations = 3);
 
 public sealed record AnalyzeMnemonicDto(
     string DisplayText,
@@ -88,6 +97,8 @@ public enum AnalyzeFailureKind
     None,
     Validation,
     QuotaExceeded,
+    RegenerationLimit,
+    AnalyzeFailed,
     Unauthorized,
     LlmNotConfigured,
     ServerError,
@@ -119,7 +130,35 @@ public sealed record NotebookCardDto(
     string MeaningZh,
     string Pronunciation,
     string SelectedMnemonic,
-    DateTimeOffset CreatedAtUtc);
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset UpdatedAtUtc = default);
+
+public sealed record NotebookMirrorCardDto(
+    Guid Id,
+    Guid OwnerUserId,
+    string SourceText,
+    string NormalizedText,
+    string DetectedLanguage,
+    string MeaningZh,
+    string Pronunciation,
+    string SelectedMnemonic,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    DateTimeOffset? DeletedAtUtc);
+
+public sealed record NotebookMirrorPullApiResult(
+    IReadOnlyList<NotebookMirrorCardDto>? Cards,
+    NotebookFailureKind Failure,
+    string? Message)
+{
+    public bool IsSuccess => Cards is not null;
+
+    public static NotebookMirrorPullApiResult Success(IReadOnlyList<NotebookMirrorCardDto> cards) =>
+        new(cards, NotebookFailureKind.None, null);
+
+    public static NotebookMirrorPullApiResult Fail(NotebookFailureKind kind, string message) =>
+        new(null, kind, message);
+}
 
 public enum NotebookFailureKind
 {

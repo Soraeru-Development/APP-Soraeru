@@ -45,6 +45,7 @@ public static class DependencyInjection
             services.AddSingleton<IUsageRepository, InMemoryUsageRepository>();
             services.AddSingleton<IWordCardRepository, InMemoryWordCardRepository>();
             services.AddSingleton<IVerifiedMnemonicRepository, InMemoryVerifiedMnemonicRepository>();
+            services.AddSingleton<IWordRegenerationRepository, InMemoryWordRegenerationRepository>();
         }
         else
         {
@@ -56,6 +57,7 @@ public static class DependencyInjection
             services.AddScoped<IUsageRepository, EfUsageRepository>();
             services.AddScoped<IWordCardRepository, EfWordCardRepository>();
             services.AddScoped<IVerifiedMnemonicRepository, EfVerifiedMnemonicRepository>();
+            services.AddScoped<IWordRegenerationRepository, EfWordRegenerationRepository>();
         }
 
         services.AddSingleton<IPasswordHasher, AspNetIdentityPasswordHasher>();

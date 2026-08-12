@@ -39,25 +39,71 @@
                             TextChanged="OnOcrTextChanged" />
                 </Border>
 
-                <Label Text="點選要分析的單字（單選）" Style="{StaticResource FieldLabel}" Margin="0,8,0,0" />
+                <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                    <Label Text="候選單字"
+                           Style="{StaticResource FieldLabel}"
+                           Margin="0"
+                           VerticalOptions="End" />
+                    <Label x:Name="SelectionCountLabel"
+                           Grid.Column="1"
+                           Text="已選擇 0 個單字"
+                           Style="{StaticResource CaptionLabel}"
+                           VerticalOptions="End" />
+                </Grid>
                 <Border Style="{StaticResource CardBorder}" Padding="8,4">
                     <VerticalStackLayout x:Name="TokenList" Spacing="0" />
                 </Border>
 
-                <Button Text="＋ 手動輸入其他單字"
-                        Style="{StaticResource LinkButton}"
-                        HorizontalOptions="Start"
-                        Clicked="OnManualClicked" />
+                <Label Text="來源語言"
+                       Style="{StaticResource FieldLabel}"
+                       Margin="0,8,0,0" />
+                <Border Stroke="{StaticResource OutlineVariant}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
+                        BackgroundColor="{StaticResource Surface}"
+                        Padding="12,4">
+                    <Picker x:Name="LanguagePicker"
+                            Title="選擇語言"
+                            SelectedIndex="0"
+                            TextColor="{StaticResource OnSurface}"
+                            TitleColor="{StaticResource Outline}"
+                            FontSize="16">
+                        <Picker.Items>
+                            <x:String>自動偵測</x:String>
+                            <x:String>日文 (Japanese)</x:String>
+                            <x:String>泰文 (Thai)</x:String>
+                            <x:String>他加祿語 (Tagalog)</x:String>
+                            <x:String>韓文 (Korean)</x:String>
+                            <x:String>越南文 (Vietnamese)</x:String>
+                        </Picker.Items>
+                    </Picker>
+                </Border>
+                <Label Text="選定具體語言後，若本機已有同字卡會直接開詳情（不消耗分析額度）。"
+                       Style="{StaticResource CaptionLabel}"
+                       LineBreakMode="WordWrap" />
 
-                <Label x:Name="SelectionCountLabel"
-                       Text="已選擇 0 個單字"
-                       Style="{StaticResource CaptionLabel}" />
+                <Border Stroke="{StaticResource OutlineVariant}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{StaticResource SurfaceBright}"
+                        Padding="16">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnManualClicked" />
+                    </Border.GestureRecognizers>
+                    <Label Text="＋ 手動輸入其他單字"
+                           TextColor="{StaticResource Primary}"
+                           FontSize="14"
+                           HorizontalTextAlignment="Center" />
+                </Border>
             </VerticalStackLayout>
         </ScrollView>
 
-        <Grid Grid.Row="1" Style="{StaticResource StickyBar}">
-            <Button Text="分析選定單字"
+        <Grid Grid.Row="1"
+              Style="{StaticResource StickyBar}"
+              BackgroundColor="{StaticResource SurfaceBright}">
+            <Button Text="分析選定單字 →"
                     Style="{StaticResource PrimaryButton}"
+                    CornerRadius="28"
                     Clicked="OnAnalyzeClicked" />
         </Grid>
     </Grid>

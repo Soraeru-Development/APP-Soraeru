@@ -35,7 +35,8 @@
 - **審查補洞（2026-08-11）**：
   - Splash：本機有 token 且 API 不可達 → 進已登入離線流（依本機 onboarding flag）；**不**丟 Login。
   - Splash／Settings：GetMe 回傳 null（401/403）→ `ClearLocalNotebookAsync`＋清 session（與明確登出一致）；連線失敗不清庫。
-  - 同 normalized key 再存 → 更新 `SelectedMnemonic`／`UpdatedAtUtc`（非整卡假成功）。
+  - 同 normalized key 再存：票 **17** 起改為回傳既有卡、**不**覆寫 `SelectedMnemonic`（與 Server 鏡像 Save 一致；編修走票 16）。
   - Splash／Settings 路徑自動化測：`SessionAuthGateTests`（ClientLogic）；刪帳應用層：`MeServiceDeleteAccountTests`。
-- **煙測建議**：登入→離線重開 App 應進 Home／Onboarding 且可本機存刪；模擬 401 應清庫並回 Login；設定頁刪帳後雲端／本機皆空且回 Login；結果頁對同字再存不同空耳後列表可見新空耳。
+- **煙測建議**：登入→離線重開 App 應進 Home／Onboarding 且可本機存刪；模擬 401 應清庫並回 Login；設定頁刪帳後雲端／本機皆空且回 Login；結果頁對同字再存應開既有卡且個人空耳不變（改空耳用詳情編修）。
 - **殘餘**：離線時無法驗證 JWT 是否已過期（僅有 token＋網路失敗仍會進離線寫）；連回線後 GetMe 401 才清庫。刪帳不刪 UsageDaily 孤兒列（無 FK；完整法遵清檔可後做）。
+- **2026-08-11 午後視覺**：Stitch 對齊 NotebookList（細節／動態語言 chip）＋Shell 底欄、NotebookDetail 卡片化；不改本票 AC（已 done）。

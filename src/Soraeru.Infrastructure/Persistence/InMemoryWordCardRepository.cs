@@ -18,7 +18,7 @@ public sealed class InMemoryWordCardRepository : IWordCardRepository
         {
             IReadOnlyList<WordCardRecord> list = _cards
                 .Where(c => c.UserId == userId)
-                .OrderByDescending(c => c.CreatedAtUtc)
+                .OrderByDescending(c => c.UpdatedAtUtc)
                 .ToList();
             return Task.FromResult(list);
         }
@@ -36,6 +36,16 @@ public sealed class InMemoryWordCardRepository : IWordCardRepository
         }
     }
 
+    public Task<WordCardRecord?> GetByIdAsync(
+        Guid cardId,
+        CancellationToken cancellationToken = default)
+    {
+        lock (_gate)
+        {
+            return Task.FromResult(_cards.FirstOrDefault(c => c.Id == cardId));
+        }
+    }
+
     public Task<WordCardRecord?> FindByUserLanguageAndNormalizedAsync(
         Guid userId,
         string detectedLanguage,
@@ -47,6 +57,7 @@ public sealed class InMemoryWordCardRepository : IWordCardRepository
             return Task.FromResult(
                 _cards.FirstOrDefault(c =>
                     c.UserId == userId
+                    && c.DeletedAtUtc is null
                     && string.Equals(c.DetectedLanguage, detectedLanguage, StringComparison.OrdinalIgnoreCase)
                     && string.Equals(c.NormalizedText, normalizedText, StringComparison.Ordinal)));
         }
@@ -60,6 +71,28 @@ public sealed class InMemoryWordCardRepository : IWordCardRepository
         {
             _cards.Add(card);
             return Task.FromResult(card);
+        }
+    }
+
+    public Task UpsertAsync(WordCardRecord card, CancellationToken cancellationToken = default)
+    {
+        lock (_gate)
+        {
+            var index = _cards.FindIndex(c => c.Id == card.Id);
+            if (index < 0)
+            {
+                _cards.Add(card);
+            }
+            else if (_cards[index].UserId != card.UserId)
+            {
+                throw new WordCardIdConflictException(card.Id);
+            }
+            else
+            {
+                _cards[index] = card;
+            }
+
+            return Task.CompletedTask;
         }
     }
 

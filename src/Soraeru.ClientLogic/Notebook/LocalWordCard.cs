@@ -1,7 +1,7 @@
 namespace Soraeru.ClientLogic.Notebook;
 
 /// <summary>
-/// Local word-card document (App SoT). UpdatedAt / DeletedAt reserved for sync (ticket 14).
+/// Local word-card document (App SoT). UpdatedAt / DeletedAt used by sync LWW (ticket 14).
 /// </summary>
 public sealed record LocalWordCard(
     Guid Id,

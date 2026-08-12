@@ -2,87 +2,121 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Soraeru.Pages.NotebookListPage"
-             Title="我的單字卡"
-             Shell.NavBarIsVisible="True"
+             Shell.NavBarIsVisible="False"
              BackgroundColor="{StaticResource SurfaceBright}">
 
-    <Grid RowDefinitions="Auto,*">
-        <VerticalStackLayout Grid.Row="0" Padding="20,12,20,0" Spacing="12">
-            <Border Style="{StaticResource InputBorder}">
-                <Entry Placeholder="搜尋單字…"
-                       PlaceholderColor="{StaticResource Outline}"
-                       TextChanged="OnSearchTextChanged" />
+    <Grid RowDefinitions="Auto,Auto,*"
+          MaximumWidthRequest="600"
+          HorizontalOptions="Center">
+
+        <!-- AppBar: back + title + profile (L11 HTML) -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="48,*,48"
+              Padding="8,8,8,0"
+              HeightRequest="64">
+            <Button Grid.Column="0"
+                    Text="←"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource OnSurfaceVariant}"
+                    FontSize="22"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    Padding="0"
+                    Clicked="OnBackClicked"
+                    SemanticProperties.Description="返回首頁" />
+            <Label Grid.Column="1"
+                   Text="我的單字卡"
+                   TextColor="{StaticResource Primary}"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   VerticalTextAlignment="Center"
+                   LineBreakMode="TailTruncation" />
+            <ImageButton Grid.Column="2"
+                         Source="ic_account_circle.png"
+                         BackgroundColor="Transparent"
+                         WidthRequest="44"
+                         HeightRequest="44"
+                         Padding="8"
+                         Aspect="AspectFit"
+                         Clicked="OnProfileClicked"
+                         SemanticProperties.Description="個人設定" />
+        </Grid>
+
+        <!-- Sticky search + filter chips -->
+        <VerticalStackLayout Grid.Row="1"
+                             Padding="16,12,16,8"
+                             Spacing="12"
+                             BackgroundColor="{StaticResource SurfaceBright}">
+            <Border Style="{StaticResource InputBorder}" Padding="4,4,12,4">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4">
+                    <Image Grid.Column="0"
+                           Source="ic_search.png"
+                           HeightRequest="20"
+                           WidthRequest="20"
+                           Margin="8,0,4,0"
+                           Aspect="AspectFit"
+                           VerticalOptions="Center" />
+                    <Entry Grid.Column="1"
+                           Placeholder="搜尋單字、含義或諧音..."
+                           PlaceholderColor="{StaticResource Outline}"
+                           TextColor="{StaticResource OnSurface}"
+                           BackgroundColor="Transparent"
+                           TextChanged="OnSearchTextChanged" />
+                </Grid>
             </Border>
 
             <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                <HorizontalStackLayout Spacing="8">
-                    <Button x:Name="FilterAllButton"
-                            Text="全部"
-                            Style="{StaticResource PrimaryButton}"
-                            Padding="14,8"
-                            MinimumHeightRequest="36"
-                            FontSize="13"
-                            Clicked="OnFilterAllClicked" />
-                    <Button x:Name="FilterEnButton"
-                            Text="英"
-                            Style="{StaticResource SecondaryButton}"
-                            Padding="14,8"
-                            MinimumHeightRequest="36"
-                            FontSize="13"
-                            Clicked="OnFilterEnClicked" />
-                    <Button x:Name="FilterJaButton"
-                            Text="日"
-                            Style="{StaticResource SecondaryButton}"
-                            Padding="14,8"
-                            MinimumHeightRequest="36"
-                            FontSize="13"
-                            Clicked="OnFilterJaClicked" />
-                    <Button x:Name="FilterThButton"
-                            Text="泰"
-                            Style="{StaticResource SecondaryButton}"
-                            Padding="14,8"
-                            MinimumHeightRequest="36"
-                            FontSize="13"
-                            Clicked="OnFilterThClicked" />
-                    <Button x:Name="FilterOtherButton"
-                            Text="其他"
-                            Style="{StaticResource SecondaryButton}"
-                            Padding="14,8"
-                            MinimumHeightRequest="36"
-                            FontSize="13"
-                            Clicked="OnFilterOtherClicked" />
-                </HorizontalStackLayout>
+                <HorizontalStackLayout x:Name="FilterChipsHost" Spacing="8" />
             </ScrollView>
         </VerticalStackLayout>
 
-        <ScrollView x:Name="FilledState" Grid.Row="1" IsVisible="False">
+        <ScrollView x:Name="FilledState" Grid.Row="2" IsVisible="False">
             <VerticalStackLayout x:Name="CardsHost"
-                                 Padding="20,12,20,32"
-                                 Spacing="12"
-                                 MaximumWidthRequest="480"
-                                 HorizontalOptions="Center" />
+                                 Padding="16,8,16,24"
+                                 Spacing="12" />
         </ScrollView>
 
         <VerticalStackLayout x:Name="EmptyState"
-                             Grid.Row="1"
+                             Grid.Row="2"
                              IsVisible="True"
                              VerticalOptions="Center"
-                             Padding="32"
-                             Spacing="16"
+                             Padding="32,24"
+                             Spacing="0"
                              MaximumWidthRequest="360"
                              HorizontalOptions="Center">
+            <Border StrokeThickness="0"
+                    BackgroundColor="{StaticResource SurfaceContainerHigh}"
+                    StrokeShape="RoundRectangle 999"
+                    HeightRequest="64"
+                    WidthRequest="64"
+                    HorizontalOptions="Center"
+                    Margin="0,0,0,16"
+                    Padding="16">
+                <Image Source="ic_style.png"
+                       HeightRequest="32"
+                       WidthRequest="32"
+                       Aspect="AspectFit"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+            </Border>
             <Label x:Name="EmptyTitleLabel"
                    Text="還沒有單字卡"
-                   Style="{StaticResource SectionTitle}"
-                   HorizontalTextAlignment="Center" />
+                   TextColor="{StaticResource OnSurface}"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,8" />
             <Label x:Name="EmptyBodyLabel"
-                   Text="分析第一個外語單字，存成可隨時查看的近似音卡片。"
+                   Text="開始建立你的專屬單字庫吧！"
                    Style="{StaticResource BodyLabel}"
-                   HorizontalTextAlignment="Center" />
-            <Button Text="去輸入第一個字"
-                    Style="{StaticResource PrimaryButton}"
-                    Clicked="OnGoInputClicked"
-                    Margin="0,8,0,0" />
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,24" />
+            <Button x:Name="EmptyCtaButton"
+                    Text="去輸入第一個字"
+                    Style="{StaticResource PillPrimaryButton}"
+                    HorizontalOptions="Center"
+                    Clicked="OnGoInputClicked" />
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

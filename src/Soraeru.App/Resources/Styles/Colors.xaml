@@ -11,6 +11,7 @@
     <Color x:Key="OnPrimary">#ffffff</Color>
     <Color x:Key="OnPrimaryContainer">#a2e1ff</Color>
     <Color x:Key="InversePrimary">#87d0f2</Color>
+    <Color x:Key="PrimaryFixed">#bee9ff</Color>
 
     <Color x:Key="Secondary">#4d616c</Color>
     <Color x:Key="SecondaryDarkText">#536772</Color>
@@ -22,6 +23,8 @@
     <Color x:Key="TertiaryContainer">#885116</Color>
     <Color x:Key="OnTertiary">#ffffff</Color>
     <Color x:Key="OnTertiaryContainer">#ffcfa6</Color>
+    <Color x:Key="TertiaryFixedDim">#ffb876</Color>
+    <Color x:Key="OnTertiaryFixedVariant">#6b3b00</Color>
 
     <Color x:Key="Surface">#f7f9fc</Color>
     <Color x:Key="SurfaceBright">#F5FAFD</Color>

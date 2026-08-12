@@ -35,7 +35,8 @@ public static class AnalyzeEndpoints
             {
                 var status = result.ErrorCode switch
                 {
-                    "QUOTA_EXCEEDED" => StatusCodes.Status429TooManyRequests,
+                    "QUOTA_EXCEEDED" or AnalyzeWordService.RegenerationLimitErrorCode
+                        => StatusCodes.Status429TooManyRequests,
                     "LLM_NOT_CONFIGURED" => StatusCodes.Status503ServiceUnavailable,
                     "NOT_FOUND" => StatusCodes.Status404NotFound,
                     "UNANALYZABLE" or "SCHEMA_INVALID" or "ANALYZE_FAILED" or "LLM_HTTP_ERROR"
@@ -66,7 +67,8 @@ public static class AnalyzeEndpoints
                 value.Notice,
                 value.Cached,
                 value.RemainingDailyQuota,
-                value.MnemonicSource));
+                value.MnemonicSource,
+                value.RemainingRegenerations));
         });
 
         return group;
@@ -99,7 +101,8 @@ public sealed record AnalyzeResponse(
     string Notice,
     bool Cached,
     int RemainingDailyQuota,
-    string MnemonicSource);
+    string MnemonicSource,
+    int RemainingRegenerations);
 
 public sealed record AnalyzeMnemonicResponse(
     string DisplayText,

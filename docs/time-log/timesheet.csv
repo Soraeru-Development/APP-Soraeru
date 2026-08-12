@@ -23,3 +23,15 @@ date,person,hours,ticket,note,kind
 2026-08-11,Ashton,0.75,planning,ADR-0007 Client-first 拷問＋薄規格＋glossary,plan
 2026-08-11,Ashton,0.5,tickets,to-tickets 拆票 13–17＋README frontier,plan
 2026-08-11,Ashton,2.25,13,票13：本機 WordCard SoT 列表／存／刪＋review 補洞（Splash 離線／session 清庫／同字重存 mnemonic）,dev
+2026-08-11,Ashton,2.5,misc,Stitch 粗對齊：WordInput＋Login/Register/Forgot/ImagePick/OCR/Settings 多頁,dev
+2026-08-11,Ashton,1.25,13,Stitch：NotebookList 細節＋動態語言 chip＋Shell 底欄；NotebookDetail 卡片化,dev
+2026-08-11,Ashton,1.25,misc,Stitch：Analyzing＋FloatingMnemonicBackground（正弦漂浮）＋AnalysisResult 對齊,dev
+2026-08-11,Ashton,1,setup,"API 預設 http 5080／health／根 redirect；NuGet MAX_PATH 硬化（fix-nuget-path、Directory.Build.*、docs）；錯誤22排查",ops
+2026-08-12,Ashton,1.5,08,票08：系統 TTS 正式發音（ClientLogic locale＋結果頁／詳情／列表）,dev
+2026-08-12,Ashton,1.5,09,票09：同字重產≤3＋REGENERATION_LIMIT／額度錯誤態（App+API TDD）,dev
+2026-08-12,Ashton,1.25,10,票10：隱私／AI聲明應用內頁＋登入設定入口（TDD LegalDocuments）,dev
+2026-08-12,Ashton,1.5,14,票14：整卡 LWW／tombstone 合併＋推拉協調（假鏡像）＋換帳隔離＋App 前景觸發,dev
+2026-08-12,Ashton,2.5,15,票15：Server Notebook 雲端鏡像推拉（LWW/tombstone/migration）＋HttpCloudWordCardMirror,dev
+2026-08-12,Ashton,1,16,票16：詳情頁編修個人空耳（UpdateSelectedMnemonic＋UI TDD）,dev
+2026-08-12,Ashton,0.75,17,票17：金標不覆蓋已存卡個人空耳（Save 同鍵保全＋TDD 回歸）,dev
+2026-08-12,Ashton,1.5,18,票18：本機短路查鍵＋詳情重新分析（ClientLogic TDD＋App 接線）,dev

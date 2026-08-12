@@ -1,0 +1,13 @@
+<Project>
+  <!-- Fail early when Restore was done under Cursor sandbox NUGET_PACKAGES (MAX_PATH / VS Import). -->
+  <Target Name="RejectCursorSandboxNuGetPackages"
+          BeforeTargets="Build;Rebuild;CoreCompile;ResolvePackageAssets"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <_SoraeruNuGetProbe>$(NuGetPackageRoot);$(RestorePackagesPath);$(NuGetPackageFolders)</_SoraeruNuGetProbe>
+    </PropertyGroup>
+    <Error
+      Condition="$([System.String]::Copy('$(_SoraeruNuGetProbe)').Contains('cursor-sandbox'))"
+      Text="NuGet 路徑含 cursor-sandbox-cache（過長路徑會讓 VS/AndroidX Import 失敗）。請關閉 Visual Studio，在一般 PowerShell 執行: .\scripts\fix-nuget-path.ps1 -Build ，然後重新開啟方案。並檢查使用者環境變數 NUGET_PACKAGES 是否指向 Temp\cursor-sandbox-cache（應刪除或改為 D:\.nuget\packages）。見 docs/dev-setup-build.md" />
+  </Target>
+</Project>

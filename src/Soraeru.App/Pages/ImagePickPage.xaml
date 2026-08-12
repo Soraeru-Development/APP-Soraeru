@@ -8,27 +8,39 @@
 
     <Grid RowDefinitions="*,Auto">
         <ScrollView Grid.Row="0">
-            <VerticalStackLayout Padding="20,16" Spacing="16" MaximumWidthRequest="480" HorizontalOptions="Center">
+            <VerticalStackLayout Padding="16,16" Spacing="12" MaximumWidthRequest="480" HorizontalOptions="Center">
 
                 <Border Stroke="{StaticResource OutlineVariant}"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 12"
-                        BackgroundColor="{StaticResource SurfaceContainerLow}"
-                        HeightRequest="220">
+                        BackgroundColor="{StaticResource SurfaceBright}"
+                        MinimumHeightRequest="280">
                     <Grid>
                         <VerticalStackLayout x:Name="PreviewPlaceholder"
                                              VerticalOptions="Center"
                                              HorizontalOptions="Center"
-                                             Spacing="8">
-                            <Label Text="🖼"
-                                   FontSize="40"
-                                   HorizontalTextAlignment="Center" />
-                            <Label Text="圖片預覽區"
+                                             Spacing="10"
+                                             Padding="24">
+                            <Border StrokeThickness="0"
+                                    BackgroundColor="{StaticResource PrimaryContainer}"
+                                    HeightRequest="64"
+                                    WidthRequest="64"
+                                    StrokeShape="RoundRectangle 32"
+                                    HorizontalOptions="Center">
+                                <Image Source="ic_photo_camera.png"
+                                       HeightRequest="32"
+                                       WidthRequest="32"
+                                       Aspect="AspectFit"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                            </Border>
+                            <Label Text="選擇或拍攝圖片"
                                    Style="{StaticResource SectionTitle}"
                                    HorizontalTextAlignment="Center" />
-                            <Label Text="請拍照或從相簿選圖"
+                            <Label Text="請確保文字清晰可見，以獲得最佳辨識效果。"
                                    Style="{StaticResource CaptionLabel}"
-                                   HorizontalTextAlignment="Center" />
+                                   HorizontalTextAlignment="Center"
+                                   LineBreakMode="WordWrap" />
                         </VerticalStackLayout>
                         <Image x:Name="PreviewImage"
                                IsVisible="False"
@@ -36,21 +48,68 @@
                     </Grid>
                 </Border>
 
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                    <Button Grid.Column="0"
-                            Text="📷 拍照"
-                            Style="{StaticResource SecondaryButton}"
-                            Clicked="OnCameraClicked" />
-                    <Button Grid.Column="1"
-                            Text="🖼 相簿"
-                            Style="{StaticResource SecondaryButton}"
-                            Clicked="OnGalleryClicked" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,4,0,0">
+                    <Border Grid.Column="0"
+                            Stroke="{StaticResource OutlineVariant}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{StaticResource SurfaceContainerLow}"
+                            Padding="12,20">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCameraClicked" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                            <Image Source="ic_photo_camera.png"
+                                   HeightRequest="28"
+                                   WidthRequest="28"
+                                   Aspect="AspectFit"
+                                   HorizontalOptions="Center" />
+                            <Label Text="拍照"
+                                   TextColor="{StaticResource OnSurface}"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1"
+                            Stroke="{StaticResource OutlineVariant}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{StaticResource SurfaceContainerLow}"
+                            Padding="12,20">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnGalleryClicked" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                            <Image Source="ic_style.png"
+                                   HeightRequest="28"
+                                   WidthRequest="28"
+                                   Aspect="AspectFit"
+                                   HorizontalOptions="Center" />
+                            <Label Text="相簿"
+                                   TextColor="{StaticResource OnSurface}"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Border>
                 </Grid>
 
-                <Border Style="{StaticResource InfoBanner}">
-                    <Label Text="圖片僅在手機端辨識，不會上傳至伺服器。"
-                           TextColor="{StaticResource StatusInfo}"
-                           FontSize="14" />
+                <Border StrokeThickness="0"
+                        BackgroundColor="{StaticResource SurfaceContainerLowest}"
+                        StrokeShape="RoundRectangle 0,8,0,8"
+                        Padding="0"
+                        Margin="0,8,0,0">
+                    <Grid ColumnDefinitions="4,*">
+                        <BoxView Grid.Column="0"
+                                 Color="{StaticResource StatusInfo}" />
+                        <Label Grid.Column="1"
+                               Text="圖片僅在手機端辨識，不會上傳至伺服器。保障您的資料隱私與安全。"
+                               TextColor="{StaticResource OnSurfaceVariant}"
+                               FontSize="12"
+                               Padding="12,14"
+                               LineBreakMode="WordWrap" />
+                    </Grid>
                 </Border>
 
                 <ActivityIndicator x:Name="BusyIndicator"
@@ -63,10 +122,13 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <Grid Grid.Row="1" Style="{StaticResource StickyBar}">
+        <Grid Grid.Row="1"
+              Style="{StaticResource StickyBar}"
+              BackgroundColor="{StaticResource SurfaceBright}">
             <Button x:Name="StartOcrButton"
-                    Text="開始辨識"
+                    Text="✨ 開始辨識"
                     Style="{StaticResource PrimaryButton}"
+                    CornerRadius="28"
                     Clicked="OnOcrClicked" />
         </Grid>
     </Grid>

@@ -36,4 +36,5 @@
 - Web MVP1 可續打雲端鏡像，與 App 經同步會合；長期若 Web 也 Client-first 需另決策／ADR。  
 - 票 06 等「Web 單字本＝共用帳戶資料」仍成立，但資料面是**鏡像＋同步**，不是「Server 永遠擁有 App 的卡」。  
 - 時鐘偏移可能造成偶發錯序；本階段接受整卡 LWW，不以詢問 UI 補救。  
-- 薄規格見 `docs/specs/client-first-wordcards-sync.md`。
+- 薄規格見 `docs/specs/client-first-wordcards-sync.md`。  
+- 同字再查／本機短路（不查鏡像、命中開詳情）見 ADR-0008。

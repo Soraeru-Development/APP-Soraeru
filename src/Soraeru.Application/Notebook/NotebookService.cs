@@ -5,7 +5,8 @@ using Soraeru.Application.Common;
 namespace Soraeru.Application.Notebook;
 
 /// <summary>
-/// Notebook (word card) CRUD use cases for the signed-in learner.
+/// Cloud notebook mirror use cases (ADR-0007). CRUD hides tombstones for Web transition.
+/// Save 同鍵回傳既有鏡像列、不覆寫 SelectedMnemonic（金標／再存不得強蓋個人空耳）。
 /// </summary>
 public sealed class NotebookService : INotebookService
 {
@@ -26,7 +27,10 @@ public sealed class NotebookService : INotebookService
         }
 
         var records = await _cards.ListByUserAsync(userId, cancellationToken);
-        IReadOnlyList<NotebookCard> cards = records.Select(ToCard).ToList();
+        IReadOnlyList<NotebookCard> cards = records
+            .Where(r => r.DeletedAtUtc is null)
+            .Select(ToCard)
+            .ToList();
         return ServiceResult<IReadOnlyList<NotebookCard>>.Success(cards);
     }
 
@@ -41,7 +45,7 @@ public sealed class NotebookService : INotebookService
         }
 
         var record = await _cards.GetAsync(userId, cardId, cancellationToken);
-        if (record is null)
+        if (record is null || record.DeletedAtUtc is not null)
         {
             return ServiceResult<NotebookCard>.Failure("NOT_FOUND", "Word card not found.");
         }
@@ -74,11 +78,12 @@ public sealed class NotebookService : INotebookService
             language,
             normalizedText,
             cancellationToken);
-        if (existing is not null)
+        if (existing is not null && existing.DeletedAtUtc is null)
         {
             return ServiceResult<NotebookCard>.Success(ToCard(existing));
         }
 
+        var now = DateTimeOffset.UtcNow;
         var record = new WordCardRecord(
             Guid.NewGuid(),
             command.UserId,
@@ -88,7 +93,8 @@ public sealed class NotebookService : INotebookService
             command.MeaningZh?.Trim() ?? string.Empty,
             command.Pronunciation?.Trim() ?? string.Empty,
             command.SelectedMnemonic.Trim(),
-            DateTimeOffset.UtcNow);
+            now,
+            now);
 
         var saved = await _cards.AddAsync(record, cancellationToken);
         return ServiceResult<NotebookCard>.Success(ToCard(saved));
@@ -105,12 +111,77 @@ public sealed class NotebookService : INotebookService
         }
 
         var record = await _cards.GetAsync(userId, cardId, cancellationToken);
-        if (record is null)
+        if (record is null || record.DeletedAtUtc is not null)
         {
             return ServiceResult<bool>.Failure("NOT_FOUND", "Word card not found.");
         }
 
-        await _cards.DeleteAsync(userId, cardId, cancellationToken);
+        var now = DateTimeOffset.UtcNow;
+        var tombstone = record with { DeletedAtUtc = now, UpdatedAtUtc = now };
+        await _cards.UpsertAsync(tombstone, cancellationToken);
+        return ServiceResult<bool>.Success(true);
+    }
+
+    public async Task<ServiceResult<IReadOnlyList<MirrorWordCard>>> PullMirrorAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        if (userId == Guid.Empty)
+        {
+            return ServiceResult<IReadOnlyList<MirrorWordCard>>.Failure("VALIDATION", "User id is required.");
+        }
+
+        var records = await _cards.ListByUserAsync(userId, cancellationToken);
+        IReadOnlyList<MirrorWordCard> cards = records.Select(ToMirror).ToList();
+        return ServiceResult<IReadOnlyList<MirrorWordCard>>.Success(cards);
+    }
+
+    public async Task<ServiceResult<bool>> PushMirrorAsync(
+        Guid userId,
+        IReadOnlyList<MirrorWordCard> cards,
+        CancellationToken cancellationToken = default)
+    {
+        if (userId == Guid.Empty)
+        {
+            return ServiceResult<bool>.Failure("VALIDATION", "User id is required.");
+        }
+
+        cards ??= Array.Empty<MirrorWordCard>();
+        foreach (var card in cards)
+        {
+            if (card.Id == Guid.Empty)
+            {
+                return ServiceResult<bool>.Failure("VALIDATION", "Card id is required.");
+            }
+
+            if (card.OwnerUserId != userId)
+            {
+                return ServiceResult<bool>.Failure("FORBIDDEN", "Cannot write another user's mirror.");
+            }
+        }
+
+        // Pre-check global Id occupancy so a mid-batch conflict does not partially write.
+        foreach (var card in cards)
+        {
+            var byId = await _cards.GetByIdAsync(card.Id, cancellationToken);
+            if (byId is not null && byId.UserId != userId)
+            {
+                return ServiceResult<bool>.Failure(
+                    "CONFLICT",
+                    "Card id is already owned by another user.");
+            }
+        }
+
+        foreach (var card in cards)
+        {
+            var incoming = ToRecord(userId, card);
+            var existing = await _cards.GetAsync(userId, card.Id, cancellationToken);
+            if (existing is null || card.UpdatedAtUtc > existing.UpdatedAtUtc)
+            {
+                await _cards.UpsertAsync(incoming, cancellationToken);
+            }
+        }
+
         return ServiceResult<bool>.Success(true);
     }
 
@@ -122,7 +193,36 @@ public sealed class NotebookService : INotebookService
             record.MeaningZh,
             record.Pronunciation,
             record.SelectedMnemonic,
-            record.CreatedAtUtc);
+            record.CreatedAtUtc,
+            record.UpdatedAtUtc);
+
+    private static MirrorWordCard ToMirror(WordCardRecord record) =>
+        new(
+            record.Id,
+            record.UserId,
+            record.SourceText,
+            record.NormalizedText,
+            record.DetectedLanguage,
+            record.MeaningZh,
+            record.Pronunciation,
+            record.SelectedMnemonic,
+            record.CreatedAtUtc,
+            record.UpdatedAtUtc,
+            record.DeletedAtUtc);
+
+    private static WordCardRecord ToRecord(Guid userId, MirrorWordCard card) =>
+        new(
+            card.Id,
+            userId,
+            card.SourceText,
+            card.NormalizedText,
+            card.DetectedLanguage,
+            card.MeaningZh,
+            card.Pronunciation,
+            card.SelectedMnemonic,
+            card.CreatedAtUtc,
+            card.UpdatedAtUtc,
+            card.DeletedAtUtc);
 
     private static string NormalizeText(string text)
     {

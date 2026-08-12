@@ -139,34 +139,114 @@ public sealed class LocalNotebookServiceTests
     }
 
     [Fact]
-    public async Task SaveAsync_same_normalized_key_updates_selected_mnemonic_and_UpdatedAt()
+    public async Task SaveAsync_same_normalized_key_returns_existing_without_overwriting_personal_mnemonic()
     {
         var store = new InMemoryLocalWordCardStore();
         var sut = new LocalNotebookService(store, () => LocalSession.SignedIn(UserA));
 
-        var first = await sut.SaveAsync(SampleCommand(source: "hello", mnemonic: "哈囉"));
+        var first = await sut.SaveAsync(SampleCommand(source: "hello", mnemonic: "我的黑咯"));
         first.IsSuccess.ShouldBeTrue();
         var originalId = first.Value!.Id;
         var originalUpdatedAt = first.Value.UpdatedAtUtc;
 
         await Task.Delay(5);
 
-        var second = await sut.SaveAsync(SampleCommand(source: "hello", mnemonic: "黑咯"));
+        // 再存同鍵（例如結果頁選了金標候選）不得強蓋已存個人空耳（票 17／ADR-0007）。
+        var second = await sut.SaveAsync(SampleCommand(source: "hello", mnemonic: "哈囉核定"));
 
         second.IsSuccess.ShouldBeTrue();
         second.Value.ShouldNotBeNull();
         second.Value!.Id.ShouldBe(originalId);
-        second.Value.SelectedMnemonic.ShouldBe("黑咯");
-        second.Value.UpdatedAtUtc.ShouldBeGreaterThan(originalUpdatedAt);
+        second.Value.SelectedMnemonic.ShouldBe("我的黑咯");
+        second.Value.UpdatedAtUtc.ShouldBe(originalUpdatedAt);
+
+        var list = await sut.ListAsync();
+        list.Count.ShouldBe(1);
+        list[0].SelectedMnemonic.ShouldBe("我的黑咯");
+
+        var raw = await store.LoadAllAsync();
+        raw.Count.ShouldBe(1);
+        raw[0].SelectedMnemonic.ShouldBe("我的黑咯");
+        raw[0].UpdatedAtUtc.ShouldBe(originalUpdatedAt);
+    }
+
+    [Fact]
+    public async Task UpdateSelectedMnemonicAsync_when_authenticated_updates_mnemonic_and_UpdatedAt()
+    {
+        var store = new InMemoryLocalWordCardStore();
+        var sut = new LocalNotebookService(store, () => LocalSession.SignedIn(UserA));
+        var saved = await sut.SaveAsync(SampleCommand(source: "hello", mnemonic: "哈囉"));
+        saved.IsSuccess.ShouldBeTrue();
+        var cardId = saved.Value!.Id;
+        var originalUpdatedAt = saved.Value.UpdatedAtUtc;
+        var originalSource = saved.Value.SourceText;
+
+        await Task.Delay(5);
+
+        var updated = await sut.UpdateSelectedMnemonicAsync(cardId, "黑咯");
+
+        updated.IsSuccess.ShouldBeTrue();
+        updated.Value.ShouldNotBeNull();
+        updated.Value!.Id.ShouldBe(cardId);
+        updated.Value.SelectedMnemonic.ShouldBe("黑咯");
+        updated.Value.SourceText.ShouldBe(originalSource);
+        updated.Value.UpdatedAtUtc.ShouldBeGreaterThan(originalUpdatedAt);
 
         var list = await sut.ListAsync();
         list.Count.ShouldBe(1);
         list[0].SelectedMnemonic.ShouldBe("黑咯");
-        list[0].UpdatedAtUtc.ShouldBe(second.Value.UpdatedAtUtc);
 
-        var raw = await store.LoadAllAsync();
-        raw.Count.ShouldBe(1);
-        raw[0].SelectedMnemonic.ShouldBe("黑咯");
+        var again = await sut.GetAsync(cardId);
+        again.ShouldNotBeNull();
+        again!.SelectedMnemonic.ShouldBe("黑咯");
+    }
+
+    [Fact]
+    public async Task UpdateSelectedMnemonicAsync_when_anonymous_rejects_without_writing()
+    {
+        var store = new InMemoryLocalWordCardStore();
+        var now = DateTimeOffset.Parse("2026-08-12T02:00:00Z");
+        var cardId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
+        await store.SaveAllAsync(
+        [
+            new LocalWordCard(
+                cardId,
+                UserA,
+                "hello",
+                "hello",
+                "en",
+                "你好",
+                "heh-loh",
+                "哈囉",
+                now,
+                now,
+                null)
+        ]);
+
+        var sut = new LocalNotebookService(store, LocalSession.Anonymous);
+        var result = await sut.UpdateSelectedMnemonicAsync(cardId, "黑咯");
+
+        result.IsSuccess.ShouldBeFalse();
+        result.ErrorCode.ShouldBe("UNAUTHORIZED");
+        (await store.LoadAllAsync())[0].SelectedMnemonic.ShouldBe("哈囉");
+        (await store.LoadAllAsync())[0].UpdatedAtUtc.ShouldBe(now);
+    }
+
+    [Fact]
+    public async Task UpdateSelectedMnemonicAsync_when_blank_rejects_without_writing()
+    {
+        var store = new InMemoryLocalWordCardStore();
+        var sut = new LocalNotebookService(store, () => LocalSession.SignedIn(UserA));
+        var saved = await sut.SaveAsync(SampleCommand(mnemonic: "哈囉"));
+        var cardId = saved.Value!.Id;
+        var originalUpdatedAt = saved.Value.UpdatedAtUtc;
+
+        var result = await sut.UpdateSelectedMnemonicAsync(cardId, "   ");
+
+        result.IsSuccess.ShouldBeFalse();
+        result.ErrorCode.ShouldBe("VALIDATION");
+        (await sut.GetAsync(cardId))!.SelectedMnemonic.ShouldBe("哈囉");
+        (await sut.GetAsync(cardId))!.UpdatedAtUtc.ShouldBe(originalUpdatedAt);
     }
 
     [Fact]
@@ -181,6 +261,48 @@ public sealed class LocalNotebookServiceTests
 
         (await sut.ListAsync()).ShouldBeEmpty();
         (await store.LoadAllAsync()).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task EnsureOwnerIsolationAsync_drops_cards_owned_by_other_accounts()
+    {
+        var store = new InMemoryLocalWordCardStore();
+        var userB = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        var now = DateTimeOffset.Parse("2026-08-01T12:00:00Z");
+        await store.SaveAllAsync(
+        [
+            new LocalWordCard(
+                Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                UserA,
+                "a",
+                "a",
+                "en",
+                "甲",
+                "a",
+                "空耳A",
+                now,
+                now,
+                null),
+            new LocalWordCard(
+                Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                userB,
+                "b",
+                "b",
+                "en",
+                "乙",
+                "b",
+                "空耳B",
+                now,
+                now,
+                null)
+        ]);
+
+        var sut = new LocalNotebookService(store, () => LocalSession.SignedIn(userB));
+        await sut.EnsureOwnerIsolationAsync(userB);
+
+        var raw = await store.LoadAllAsync();
+        raw.Count.ShouldBe(1);
+        raw[0].OwnerUserId.ShouldBe(userB);
     }
 
     private static SaveLocalWordCardCommand SampleCommand(

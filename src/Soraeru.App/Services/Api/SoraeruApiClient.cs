@@ -117,23 +117,48 @@ public sealed class SoraeruApiClient : ISoraeruApiClient
             }
 
             var apiError = await TryReadErrorAsync(response, cancellationToken);
+            var code = apiError?.Code;
+            var message = apiError?.Message;
+
+            if (string.Equals(code, "REGENERATION_LIMIT_EXCEEDED", StringComparison.OrdinalIgnoreCase))
+            {
+                return AnalyzeApiResult.Fail(
+                    AnalyzeFailureKind.RegenerationLimit,
+                    message ?? "同一單字最多重新產生 3 次。");
+            }
+
+            if (string.Equals(code, "QUOTA_EXCEEDED", StringComparison.OrdinalIgnoreCase)
+                || response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                return AnalyzeApiResult.Fail(
+                    AnalyzeFailureKind.QuotaExceeded,
+                    message ?? "今日分析次數已用完。");
+            }
+
+            if (string.Equals(code, "HARD_GATE_FAILED", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code, "SCHEMA_INVALID", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code, "ANALYZE_FAILED", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code, "UNANALYZABLE", StringComparison.OrdinalIgnoreCase))
+            {
+                return AnalyzeApiResult.Fail(
+                    AnalyzeFailureKind.AnalyzeFailed,
+                    message ?? "分析失敗，請稍後再試。");
+            }
+
             return response.StatusCode switch
             {
                 HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => AnalyzeApiResult.Fail(
                     AnalyzeFailureKind.Unauthorized,
-                    apiError ?? "請重新登入。"),
-                HttpStatusCode.TooManyRequests => AnalyzeApiResult.Fail(
-                    AnalyzeFailureKind.QuotaExceeded,
-                    apiError ?? "今日分析次數已用完。"),
+                    message ?? "請重新登入。"),
                 HttpStatusCode.ServiceUnavailable => AnalyzeApiResult.Fail(
                     AnalyzeFailureKind.LlmNotConfigured,
-                    apiError ?? "伺服器尚未設定 LLM。"),
+                    message ?? "伺服器尚未設定 LLM。"),
                 HttpStatusCode.BadRequest => AnalyzeApiResult.Fail(
                     AnalyzeFailureKind.Validation,
-                    apiError ?? "輸入無法分析。"),
+                    message ?? "輸入無法分析。"),
                 _ => AnalyzeApiResult.Fail(
                     AnalyzeFailureKind.ServerError,
-                    apiError ?? $"分析失敗（{(int)response.StatusCode}）。")
+                    message ?? $"分析失敗（{(int)response.StatusCode}）。")
             };
         }
         catch (HttpRequestException ex)
@@ -174,7 +199,7 @@ public sealed class SoraeruApiClient : ISoraeruApiClient
                     : NotebookApiResult.Success(card);
             }
 
-            return MapNotebookFailure(response, await TryReadErrorAsync(response, cancellationToken));
+            return MapNotebookFailure(response, (await TryReadErrorAsync(response, cancellationToken))?.Message);
         }
         catch (HttpRequestException ex)
         {
@@ -197,7 +222,7 @@ public sealed class SoraeruApiClient : ISoraeruApiClient
                 return NotebookListApiResult.Success(cards ?? []);
             }
 
-            var message = await TryReadErrorAsync(response, cancellationToken);
+            var message = (await TryReadErrorAsync(response, cancellationToken))?.Message;
             return response.StatusCode switch
             {
                 HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => NotebookListApiResult.Fail(
@@ -233,7 +258,7 @@ public sealed class SoraeruApiClient : ISoraeruApiClient
                     : NotebookApiResult.Success(card);
             }
 
-            return MapNotebookFailure(response, await TryReadErrorAsync(response, cancellationToken));
+            return MapNotebookFailure(response, (await TryReadErrorAsync(response, cancellationToken))?.Message);
         }
         catch (HttpRequestException ex)
         {
@@ -255,9 +280,85 @@ public sealed class SoraeruApiClient : ISoraeruApiClient
             if (response.IsSuccessStatusCode)
                 return NotebookActionApiResult.Success();
 
-            var message = await TryReadErrorAsync(response, cancellationToken);
+            var message = (await TryReadErrorAsync(response, cancellationToken))?.Message;
             var fail = MapNotebookFailure(response, message);
             return NotebookActionApiResult.Fail(fail.Failure, fail.Message ?? "刪除失敗。");
+        }
+        catch (HttpRequestException ex)
+        {
+            return NotebookActionApiResult.Fail(NotebookFailureKind.Network, $"無法連線 API。\n{ex.Message}");
+        }
+        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            return NotebookActionApiResult.Fail(NotebookFailureKind.Network, "連線逾時，請稍後再試。");
+        }
+    }
+
+    public async Task<NotebookMirrorPullApiResult> PullNotebookMirrorAsync(
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var response = await _http.GetAsync("api/v1/notebook/mirror", cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                var cards = await response.Content.ReadFromJsonAsync<List<NotebookMirrorCardDto>>(
+                    JsonOptions,
+                    cancellationToken);
+                return NotebookMirrorPullApiResult.Success(cards ?? []);
+            }
+
+            var message = (await TryReadErrorAsync(response, cancellationToken))?.Message;
+            return response.StatusCode switch
+            {
+                HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => NotebookMirrorPullApiResult.Fail(
+                    NotebookFailureKind.Unauthorized,
+                    message ?? "請重新登入。"),
+                _ => NotebookMirrorPullApiResult.Fail(
+                    NotebookFailureKind.ServerError,
+                    message ?? $"讀取雲端鏡像失敗（{(int)response.StatusCode}）。")
+            };
+        }
+        catch (HttpRequestException ex)
+        {
+            return NotebookMirrorPullApiResult.Fail(NotebookFailureKind.Network, $"無法連線 API。\n{ex.Message}");
+        }
+        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            return NotebookMirrorPullApiResult.Fail(NotebookFailureKind.Network, "連線逾時，請稍後再試。");
+        }
+    }
+
+    public async Task<NotebookActionApiResult> PushNotebookMirrorAsync(
+        IReadOnlyList<NotebookMirrorCardDto> cards,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var response = await _http.PutAsJsonAsync(
+                "api/v1/notebook/mirror",
+                cards,
+                cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+                return NotebookActionApiResult.Success();
+
+            var message = (await TryReadErrorAsync(response, cancellationToken))?.Message;
+            return response.StatusCode switch
+            {
+                HttpStatusCode.Unauthorized => NotebookActionApiResult.Fail(
+                    NotebookFailureKind.Unauthorized,
+                    message ?? "請重新登入。"),
+                HttpStatusCode.Forbidden => NotebookActionApiResult.Fail(
+                    NotebookFailureKind.Unauthorized,
+                    message ?? "無法寫入他人鏡像。"),
+                HttpStatusCode.BadRequest => NotebookActionApiResult.Fail(
+                    NotebookFailureKind.Validation,
+                    message ?? "鏡像推送資料無效。"),
+                _ => NotebookActionApiResult.Fail(
+                    NotebookFailureKind.ServerError,
+                    message ?? $"推送雲端鏡像失敗（{(int)response.StatusCode}）。")
+            };
         }
         catch (HttpRequestException ex)
         {
@@ -278,7 +379,7 @@ public sealed class SoraeruApiClient : ISoraeruApiClient
             if (response.IsSuccessStatusCode)
                 return DeleteAccountApiClientResult.Success();
 
-            var message = await TryReadErrorAsync(response, cancellationToken);
+            var message = (await TryReadErrorAsync(response, cancellationToken))?.Message;
             return response.StatusCode switch
             {
                 HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => DeleteAccountApiClientResult.Fail(
@@ -335,20 +436,21 @@ public sealed class SoraeruApiClient : ISoraeruApiClient
             }
 
             var apiError = await TryReadErrorAsync(response, cancellationToken);
+            var message = apiError?.Message;
             return response.StatusCode switch
             {
                 HttpStatusCode.Unauthorized => AuthResult.Fail(
                     AuthFailureKind.InvalidCredentials,
-                    apiError ?? "Email 或密碼不正確。"),
+                    message ?? "Email 或密碼不正確。"),
                 HttpStatusCode.Conflict => AuthResult.Fail(
                     AuthFailureKind.Conflict,
-                    apiError ?? "此 Email 已被使用。"),
+                    message ?? "此 Email 已被使用。"),
                 HttpStatusCode.ServiceUnavailable => AuthResult.Fail(
                     AuthFailureKind.ServerRejected,
-                    apiError ?? "Google 登入尚未在伺服器設定完成。"),
+                    message ?? "Google 登入尚未在伺服器設定完成。"),
                 _ => AuthResult.Fail(
                     AuthFailureKind.ServerRejected,
-                    apiError ?? $"伺服器拒絕請求（{(int)response.StatusCode}）。")
+                    message ?? $"伺服器拒絕請求（{(int)response.StatusCode}）。")
             };
         }
         catch (HttpRequestException ex)
@@ -363,12 +465,11 @@ public sealed class SoraeruApiClient : ISoraeruApiClient
         }
     }
 
-    private static async Task<string?> TryReadErrorAsync(HttpResponseMessage response, CancellationToken ct)
+    private static async Task<ApiErrorDto?> TryReadErrorAsync(HttpResponseMessage response, CancellationToken ct)
     {
         try
         {
-            var err = await response.Content.ReadFromJsonAsync<ApiErrorDto>(JsonOptions, ct);
-            return string.IsNullOrWhiteSpace(err?.Message) ? null : err.Message;
+            return await response.Content.ReadFromJsonAsync<ApiErrorDto>(JsonOptions, ct);
         }
         catch
         {

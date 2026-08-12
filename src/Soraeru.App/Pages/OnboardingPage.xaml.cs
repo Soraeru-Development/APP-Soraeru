@@ -74,7 +74,7 @@ public partial class OnboardingPage : ContentPage
 
             await _session.SetSessionAsync(token, me.UserId, me.Email, me.OnboardingCompleted);
 
-            await Routes.GoAsync(Routes.Home);
+            await Routes.GoToMainTabAsync(Routes.Home);
 
         }
 

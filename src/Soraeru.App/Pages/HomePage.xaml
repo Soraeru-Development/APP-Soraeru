@@ -42,8 +42,10 @@
                         StrokeShape="RoundRectangle 999"
                         Padding="12,8"
                         Margin="0,8,0,0"
-                        HorizontalOptions="Start">
-                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        HorizontalOptions="Fill">
+                    <HorizontalStackLayout Spacing="6"
+                                           VerticalOptions="Center"
+                                           HorizontalOptions="Center">
                         <Image Source="ic_bolt.png"
                                HeightRequest="18"
                                WidthRequest="18"
@@ -54,7 +56,9 @@
                                TextColor="{StaticResource Primary}"
                                FontSize="13"
                                FontAttributes="Bold"
-                               VerticalOptions="Center" />
+                               VerticalOptions="Center"
+                               HorizontalTextAlignment="Center"
+                               LineBreakMode="NoWrap" />
                     </HorizontalStackLayout>
                 </Border>
             </VerticalStackLayout>

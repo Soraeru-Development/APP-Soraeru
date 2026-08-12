@@ -24,14 +24,18 @@ Application 只定義介面；Infrastructure 實作並在 API 的 DI 註冊。Ap
 
 ## 建置
 
-若 VS 出現 NuGet／Import 路徑超過 260 字元（或路徑含 `cursor-sandbox-cache`），見 [docs/dev-setup-build.md](docs/dev-setup-build.md)。
+NuGet 已強制短路徑（`Directory.Build.props` + `nuget.config` → `D:\.nuget\packages`）。若 VS 仍出現 Import／MAX_PATH 或路徑含 `cursor-sandbox-cache`（常見於 Agent restore 後殘留污染 `obj`），見 [docs/dev-setup-build.md](docs/dev-setup-build.md)。一鍵修復（請先關 VS，在一般 PowerShell）：
+
+```powershell
+.\scripts\fix-nuget-path.ps1 -Build
+```
 
 ```bash
 dotnet build Soraeru.slnx
 dotnet run --project src/Soraeru.Api
 ```
 
-API 預設：`http://localhost:5080`（健康檢查 `/health`）。
+API 預設聽在 `http://localhost:5080`。驗證請開 **`http://localhost:5080/health`**（應回 `{"status":"ok",...}`）；根路徑 `/` 會導向 `/health`。VS 選 `http` profile 時 `launchUrl` 已是 `health`。
 
 ## Auth（已打通 Email／JWT）
 

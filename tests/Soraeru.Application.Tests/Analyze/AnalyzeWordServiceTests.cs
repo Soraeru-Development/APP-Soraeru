@@ -18,18 +18,90 @@ public sealed class AnalyzeWordServiceTests
     private readonly IWordAnalysisAgent _agent = Substitute.For<IWordAnalysisAgent>();
     private readonly IAnalysisResultCache _cache = Substitute.For<IAnalysisResultCache>();
     private readonly IVerifiedMnemonicRepository _verified = Substitute.For<IVerifiedMnemonicRepository>();
+    private readonly IWordRegenerationRepository _regenerations = Substitute.For<IWordRegenerationRepository>();
     private readonly AnalyzeWordService _sut;
 
     private static readonly Guid UserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
     public AnalyzeWordServiceTests()
     {
-        _sut = new AnalyzeWordService(_users, _quota, _agent, _cache, _verified);
+        _sut = new AnalyzeWordService(_users, _quota, _agent, _cache, _verified, _regenerations);
         _verified.FindActiveByLanguageAndNormalizedAsync(
                 Arg.Any<string>(),
                 Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
             .Returns((VerifiedMnemonicRecord?)null);
+        _regenerations.GetCountAsync(
+                Arg.Any<Guid>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(0);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_force_refresh_when_regeneration_cap_reached_returns_clear_error()
+    {
+        ArrangeHappyUserAndQuota();
+        WordAnalysisPayload? cachedOut;
+        _cache.TryGet(Arg.Any<string>(), out cachedOut).Returns(false);
+        _regenerations.GetCountAsync(UserId, "en", "hello", Arg.Any<CancellationToken>())
+            .Returns(AnalyzeWordService.MaxRegenerationsPerWord);
+
+        var result = await _sut.AnalyzeAsync(
+            new AnalyzeWordCommand(UserId, "hello", "en", "zh-TW", "bopomofo", ForceRefresh: true));
+
+        result.IsSuccess.ShouldBeFalse();
+        result.ErrorCode.ShouldBe(AnalyzeWordService.RegenerationLimitErrorCode);
+        result.ErrorMessage.ShouldNotBeNullOrWhiteSpace();
+        result.Value.ShouldBeNull();
+        await _agent.DidNotReceive().AnalyzeAsync(Arg.Any<WordAnalysisAgentRequest>(), Arg.Any<CancellationToken>());
+        await _quota.DidNotReceive().TryConsumeAsync(Arg.Any<UserRecord>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_successful_force_refresh_increments_regeneration_and_consumes_quota()
+    {
+        ArrangeHappyUserAndQuota();
+        WordAnalysisPayload? cachedOut;
+        _cache.TryGet(Arg.Any<string>(), out cachedOut).Returns(false);
+        _regenerations.GetCountAsync(UserId, "en", "hello", Arg.Any<CancellationToken>())
+            .Returns(1);
+
+        _agent.AnalyzeAsync(Arg.Any<WordAnalysisAgentRequest>(), Arg.Any<CancellationToken>())
+            .Returns(new WordAnalysisAgentSuccess(ValidPayload("hello", "哈囉", "嘿囉")));
+
+        var result = await _sut.AnalyzeAsync(
+            new AnalyzeWordCommand(UserId, "hello", "en", "zh-TW", "bopomofo", ForceRefresh: true));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value!.RemainingRegenerations.ShouldBe(AnalyzeWordService.MaxRegenerationsPerWord - 2);
+        await _quota.Received(1).TryConsumeAsync(Arg.Any<UserRecord>(), Arg.Any<CancellationToken>());
+        await _regenerations.Received(1).IncrementAsync(UserId, "en", "hello", Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_non_force_refresh_does_not_increment_regeneration_count()
+    {
+        ArrangeHappyUserAndQuota();
+        WordAnalysisPayload? cachedOut;
+        _cache.TryGet(Arg.Any<string>(), out cachedOut).Returns(false);
+
+        _agent.AnalyzeAsync(Arg.Any<WordAnalysisAgentRequest>(), Arg.Any<CancellationToken>())
+            .Returns(new WordAnalysisAgentSuccess(ValidPayload("hello", "哈囉", "嘿囉")));
+
+        var result = await _sut.AnalyzeAsync(
+            new AnalyzeWordCommand(UserId, "hello", "en", "zh-TW", "bopomofo", ForceRefresh: false));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value!.RemainingRegenerations.ShouldBe(AnalyzeWordService.MaxRegenerationsPerWord);
+        await _quota.Received(1).TryConsumeAsync(Arg.Any<UserRecord>(), Arg.Any<CancellationToken>());
+        await _regenerations.DidNotReceive().IncrementAsync(
+            Arg.Any<Guid>(),
+            Arg.Any<string>(),
+            Arg.Any<string>(),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -156,6 +228,54 @@ public sealed class AnalyzeWordServiceTests
         await _agent.DidNotReceive().AnalyzeAsync(
             Arg.Is<WordAnalysisAgentRequest>(r => !r.SkipMnemonics),
             Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_verified_hit_only_affects_result_candidates_and_does_not_depend_on_word_cards()
+    {
+        // 票 17：金標優先只進分析結果候選；AnalyzeWordService 不得依賴／回寫 WordCards。
+        ArrangeHappyUserAndQuota();
+        WordAnalysisPayload? cachedOut;
+        _cache.TryGet(Arg.Any<string>(), out cachedOut).Returns(false);
+
+        _verified.FindActiveByLanguageAndNormalizedAsync("en", "hello", Arg.Any<CancellationToken>())
+            .Returns(new VerifiedMnemonicRecord(
+                Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                "en",
+                "hello",
+                "hello",
+                "哈囉核定",
+                "ㄏㄚ ㄌㄨㄛˊ",
+                "策展",
+                IsEnabled: true,
+                DateTimeOffset.Parse("2026-08-01T00:00:00Z"),
+                DateTimeOffset.Parse("2026-08-01T00:00:00Z")));
+
+        _agent.AnalyzeAsync(
+                Arg.Is<WordAnalysisAgentRequest>(r => r.SkipMnemonics),
+                Arg.Any<CancellationToken>())
+            .Returns(new WordAnalysisAgentSuccess(new WordAnalysisPayload(
+                "hello",
+                "hello",
+                "en",
+                "英語",
+                "你好",
+                "həˈləʊ",
+                Array.Empty<WordAnalysisMnemonic>(),
+                "notice")));
+
+        var result = await _sut.AnalyzeAsync(
+            new AnalyzeWordCommand(UserId, "hello", "en", "zh-TW", "bopomofo"));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value!.MnemonicSource.ShouldBe(AnalyzeMnemonicSources.Verified);
+        result.Value.Mnemonics.Count.ShouldBe(1);
+        result.Value.Mnemonics[0].DisplayText.ShouldBe("哈囉核定");
+
+        var ctorParams = typeof(AnalyzeWordService).GetConstructors().Single().GetParameters();
+        ctorParams.ShouldNotContain(p =>
+            p.ParameterType == typeof(IWordCardRepository)
+            || p.ParameterType.Name.Contains("WordCard", StringComparison.Ordinal));
     }
 
     [Fact]

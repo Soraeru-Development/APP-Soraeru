@@ -1,46 +1,273 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Soraeru.Controls"
              x:Class="Soraeru.Pages.AnalyzingPage"
              Shell.NavBarIsVisible="False"
              BackgroundColor="{StaticResource SurfaceBright}">
 
-    <VerticalStackLayout VerticalOptions="Center" Padding="32" Spacing="16" MaximumWidthRequest="420" HorizontalOptions="Center">
+    <Grid Padding="0,0,0,24" RowDefinitions="*,Auto">
+        <!-- L00-style fly-across mnemonic cards (behind analysis UI; InputTransparent) -->
+        <controls:FloatingMnemonicBackground x:Name="AmbientBackground"
+                                             Grid.RowSpan="2"
+                                             TargetOpacity="0.8"
+                                             SpawnIntervalMs="300" />
 
-        <Label Text="正在分析單字"
-               Style="{StaticResource PageTitle}"
-               FontSize="24"
-               HorizontalTextAlignment="Center" />
+        <!-- Soft blur blobs (L09 atmosphere) -->
+        <Grid Grid.RowSpan="2"
+              InputTransparent="True"
+              CascadeInputTransparent="True"
+              Opacity="0.35">
+            <Ellipse Fill="{StaticResource SecondaryContainer}"
+                     WidthRequest="500"
+                     HeightRequest="500"
+                     Opacity="0.55"
+                     HorizontalOptions="End"
+                     VerticalOptions="Start"
+                     Margin="0,-40,-120,0" />
+            <Ellipse Fill="{StaticResource PrimaryContainer}"
+                     WidthRequest="400"
+                     HeightRequest="400"
+                     Opacity="0.35"
+                     HorizontalOptions="Start"
+                     VerticalOptions="End"
+                     Margin="-80,0,0,-40" />
+        </Grid>
 
-        <Label x:Name="WordLabel"
-               Text=""
-               FontSize="28"
-               TextColor="{StaticResource Primary}"
-               HorizontalTextAlignment="Center"
-               Margin="0,0,0,8" />
+        <!-- Analysis card (Stitch L09) -->
+        <Border Grid.Row="0"
+                Stroke="{StaticResource OutlineVariant}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 16"
+                BackgroundColor="#CCF7F9FC"
+                Margin="20,24"
+                Padding="28,36"
+                VerticalOptions="Center"
+                MaximumWidthRequest="420"
+                HorizontalOptions="Center">
+            <Border.Shadow>
+                <Shadow Brush="Black" Offset="0,4" Radius="24" Opacity="0.06" />
+            </Border.Shadow>
 
-        <ActivityIndicator x:Name="BusyIndicator"
-                           IsRunning="True"
-                           Color="{StaticResource Primary}"
-                           HeightRequest="48"
-                           WidthRequest="48"
-                           HorizontalOptions="Center" />
+            <VerticalStackLayout Spacing="28">
+                <VerticalStackLayout Spacing="20">
+                    <ActivityIndicator x:Name="BusyIndicator"
+                                       IsRunning="True"
+                                       Color="{StaticResource Primary}"
+                                       HeightRequest="48"
+                                       WidthRequest="48"
+                                       HorizontalOptions="Center" />
 
-        <Label x:Name="StatusLabel"
-               Text="請稍候"
-               Style="{StaticResource BodyLabel}"
-               HorizontalTextAlignment="Center" />
+                    <Label x:Name="TitleLabel"
+                           Text="正在分析單字"
+                           TextColor="{StaticResource Primary}"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
 
-        <VerticalStackLayout Spacing="10" Margin="24,24,24,0" HorizontalOptions="Center">
-            <Label x:Name="StepLanguage" Text="○  偵測來源語言" TextColor="{StaticResource OnSurfaceVariant}" FontSize="15" />
-            <Label x:Name="StepMeaning" Text="○  整理詞義及讀音" TextColor="{StaticResource OnSurfaceVariant}" FontSize="15" />
-            <Label x:Name="StepMnemonics" Text="○  產生近似音候選" TextColor="{StaticResource OnSurfaceVariant}" FontSize="15" />
-        </VerticalStackLayout>
+                <Border Stroke="{StaticResource SurfaceContainerHighest}"
+                        StrokeThickness="1"
+                        BackgroundColor="{StaticResource SurfaceContainerLow}"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="20,22">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="目標單字"
+                               TextColor="{StaticResource OnSurfaceVariant}"
+                               FontSize="12"
+                               CharacterSpacing="1.2"
+                               HorizontalTextAlignment="Center" />
+                        <Label x:Name="WordLabel"
+                               Text=""
+                               FontSize="40"
+                               LineHeight="1.1"
+                               TextColor="{StaticResource OnSurface}"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               LineBreakMode="WordWrap" />
+                    </VerticalStackLayout>
+                </Border>
 
+                <Label x:Name="StatusLabel"
+                       Text="請稍候"
+                       TextColor="{StaticResource OnSurfaceVariant}"
+                       FontSize="14"
+                       HorizontalTextAlignment="Center"
+                       IsVisible="False" />
+
+                <VerticalStackLayout Spacing="12">
+                    <!-- Step 1 -->
+                    <Border x:Name="Step1Card"
+                            Stroke="{StaticResource OutlineVariant}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 10"
+                            BackgroundColor="{StaticResource SurfaceContainerLowest}"
+                            Padding="0">
+                        <Grid>
+                            <BoxView x:Name="Step1Accent"
+                                     Color="{StaticResource Primary}"
+                                     HeightRequest="3"
+                                     VerticalOptions="Start"
+                                     HorizontalOptions="Start"
+                                     WidthRequest="48"
+                                     CornerRadius="0,2,2,0"
+                                     IsVisible="False" />
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="14"
+                                  Padding="14,14">
+                                <Border x:Name="Step1IconCircle"
+                                        WidthRequest="32"
+                                        HeightRequest="32"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 16"
+                                        BackgroundColor="#33006684"
+                                        VerticalOptions="Center">
+                                    <Label x:Name="Step1Icon"
+                                           Text="✓"
+                                           TextColor="{StaticResource Primary}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           HorizontalTextAlignment="Center"
+                                           VerticalTextAlignment="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Spacing="2"
+                                                     VerticalOptions="Center">
+                                    <Label x:Name="Step1Title"
+                                           Text="偵測來源語言"
+                                           TextColor="{StaticResource OnSurface}"
+                                           FontSize="16"
+                                           FontAttributes="Bold" />
+                                    <Label x:Name="Step1Subtitle"
+                                           Text=""
+                                           TextColor="{StaticResource OnSurfaceVariant}"
+                                           FontSize="12" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Step 2 -->
+                    <Border x:Name="Step2Card"
+                            Stroke="{StaticResource OutlineVariant}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 10"
+                            BackgroundColor="{StaticResource SurfaceContainerLowest}"
+                            Padding="0">
+                        <Grid>
+                            <BoxView x:Name="Step2Accent"
+                                     Color="{StaticResource Primary}"
+                                     HeightRequest="3"
+                                     VerticalOptions="Start"
+                                     HorizontalOptions="Start"
+                                     WidthRequest="48"
+                                     CornerRadius="0,2,2,0"
+                                     IsVisible="False" />
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="14"
+                                  Padding="14,14">
+                                <Border x:Name="Step2IconCircle"
+                                        WidthRequest="32"
+                                        HeightRequest="32"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 16"
+                                        BackgroundColor="#33006684"
+                                        VerticalOptions="Center">
+                                    <Label x:Name="Step2Icon"
+                                           Text="✓"
+                                           TextColor="{StaticResource Primary}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           HorizontalTextAlignment="Center"
+                                           VerticalTextAlignment="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Spacing="2"
+                                                     VerticalOptions="Center">
+                                    <Label x:Name="Step2Title"
+                                           Text="整理詞義及讀音"
+                                           TextColor="{StaticResource OnSurface}"
+                                           FontSize="16"
+                                           FontAttributes="Bold" />
+                                    <Label x:Name="Step2Subtitle"
+                                           Text=""
+                                           TextColor="{StaticResource OnSurfaceVariant}"
+                                           FontSize="12" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Step 3 -->
+                    <Border x:Name="Step3Card"
+                            Stroke="{StaticResource OutlineVariant}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 10"
+                            BackgroundColor="{StaticResource SurfaceContainerLowest}"
+                            Padding="0">
+                        <Grid>
+                            <BoxView x:Name="Step3Accent"
+                                     Color="{StaticResource Primary}"
+                                     HeightRequest="3"
+                                     VerticalOptions="Start"
+                                     HorizontalOptions="Start"
+                                     WidthRequest="48"
+                                     CornerRadius="0,2,2,0"
+                                     IsVisible="False" />
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="14"
+                                  Padding="14,14">
+                                <Border x:Name="Step3IconCircle"
+                                        WidthRequest="32"
+                                        HeightRequest="32"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 16"
+                                        BackgroundColor="#33006684"
+                                        VerticalOptions="Center">
+                                    <Label x:Name="Step3Icon"
+                                           Text="✓"
+                                           TextColor="{StaticResource Primary}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           HorizontalTextAlignment="Center"
+                                           VerticalTextAlignment="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Spacing="2"
+                                                     VerticalOptions="Center">
+                                    <Label x:Name="Step3Title"
+                                           Text="產生近似音候選"
+                                           TextColor="{StaticResource OnSurface}"
+                                           FontSize="16"
+                                           FontAttributes="Bold" />
+                                    <Label x:Name="Step3Subtitle"
+                                           Text=""
+                                           TextColor="{StaticResource OnSurfaceVariant}"
+                                           FontSize="12" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Bottom pill cancel (outside modal) -->
         <Button x:Name="CancelButton"
+                Grid.Row="1"
                 Text="取消"
                 Style="{StaticResource SecondaryButton}"
-                Margin="0,24,0,0"
+                CornerRadius="28"
+                BackgroundColor="#CCF5FAFD"
+                TextColor="{StaticResource OnSurfaceVariant}"
+                BorderColor="{StaticResource Outline}"
+                BorderWidth="1"
+                FontSize="15"
+                Padding="36,14"
+                MinimumHeightRequest="48"
+                MinimumWidthRequest="140"
+                HorizontalOptions="Center"
+                Margin="0,8,0,16"
                 Clicked="OnCancelClicked" />
-    </VerticalStackLayout>
+    </Grid>
 </ContentPage>

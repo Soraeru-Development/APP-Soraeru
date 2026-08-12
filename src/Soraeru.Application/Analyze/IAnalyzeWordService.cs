@@ -28,7 +28,8 @@ public sealed record AnalyzeWordResult(
     string Notice,
     bool Cached,
     int RemainingDailyQuota,
-    string MnemonicSource);
+    string MnemonicSource,
+    int RemainingRegenerations = AnalyzeWordService.MaxRegenerationsPerWord);
 
 public sealed record AnalyzeMnemonicCandidate(
     string DisplayText,

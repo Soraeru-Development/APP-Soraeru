@@ -148,7 +148,10 @@ public sealed class CuratorMnemonicServiceTests
             .Returns(new WordAnalysisAgentSuccess(
                 AnalyzeWordServiceTests.ValidPayload("hello", "哈囉", "嘿囉")));
 
-        var analyze = new AnalyzeWordService(_users, quota, agent, cache, _verified);
+        var regenerations = Substitute.For<IWordRegenerationRepository>();
+        regenerations.GetCountAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(0);
+        var analyze = new AnalyzeWordService(_users, quota, agent, cache, _verified, regenerations);
         var result = await analyze.AnalyzeAsync(
             new AnalyzeWordCommand(LearnerId, "hello", "en", "zh-TW", "bopomofo"));
 
@@ -220,7 +223,10 @@ public sealed class CuratorMnemonicServiceTests
                 Array.Empty<WordAnalysisMnemonic>(),
                 "notice")));
 
-        var analyze = new AnalyzeWordService(_users, quota, agent, cache, _verified);
+        var regenerations = Substitute.For<IWordRegenerationRepository>();
+        regenerations.GetCountAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(0);
+        var analyze = new AnalyzeWordService(_users, quota, agent, cache, _verified, regenerations);
         var result = await analyze.AnalyzeAsync(
             new AnalyzeWordCommand(LearnerId, "hello", "en", "zh-TW", "bopomofo"));
 

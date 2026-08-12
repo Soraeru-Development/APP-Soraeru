@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace Soraeru.ClientLogic.Notebook;
 
 /// <summary>
@@ -86,26 +84,17 @@ public sealed class LocalNotebookService
             && string.Equals(c.DetectedLanguage, language, StringComparison.OrdinalIgnoreCase)
             && string.Equals(c.NormalizedText, normalizedText, StringComparison.Ordinal));
 
+        // 同鍵已有卡：回傳既有列，不覆寫個人空耳（ADR-0007／票 17：金標或再存不得強蓋）。
+        // 個人空耳編修走 UpdateSelectedMnemonicAsync（票 16）。
+        if (existing is not null)
+        {
+            return LocalNotebookResult<LocalWordCard>.Success(existing);
+        }
+
         var now = DateTimeOffset.UtcNow;
         var meaningZh = command.MeaningZh?.Trim() ?? string.Empty;
         var pronunciation = command.Pronunciation?.Trim() ?? string.Empty;
         var selectedMnemonic = command.SelectedMnemonic.Trim();
-
-        if (existing is not null)
-        {
-            var updated = existing with
-            {
-                SourceText = sourceText,
-                MeaningZh = meaningZh,
-                Pronunciation = pronunciation,
-                SelectedMnemonic = selectedMnemonic,
-                UpdatedAtUtc = now
-            };
-            var index = all.FindIndex(c => c.Id == existing.Id);
-            all[index] = updated;
-            await _store.SaveAllAsync(all, cancellationToken);
-            return LocalNotebookResult<LocalWordCard>.Success(updated);
-        }
 
         var card = new LocalWordCard(
             Guid.NewGuid(),
@@ -123,6 +112,54 @@ public sealed class LocalNotebookService
         all.Add(card);
         await _store.SaveAllAsync(all, cancellationToken);
         return LocalNotebookResult<LocalWordCard>.Success(card);
+    }
+
+    public async Task<LocalNotebookResult<LocalWordCard>> UpdateSelectedMnemonicAsync(
+        Guid cardId,
+        string selectedMnemonic,
+        CancellationToken cancellationToken = default)
+    {
+        var session = await _session(cancellationToken);
+        if (!session.IsAuthenticated || session.UserId is not { } userId || userId == Guid.Empty)
+        {
+            return LocalNotebookResult<LocalWordCard>.Failure(
+                "UNAUTHORIZED",
+                "登入後才能編修個人空耳。");
+        }
+
+        if (cardId == Guid.Empty)
+        {
+            return LocalNotebookResult<LocalWordCard>.Failure("VALIDATION", "單字卡編號無效。");
+        }
+
+        if (string.IsNullOrWhiteSpace(selectedMnemonic))
+        {
+            return LocalNotebookResult<LocalWordCard>.Failure(
+                "VALIDATION",
+                "個人空耳不可為空。");
+        }
+
+        var all = (await _store.LoadAllAsync(cancellationToken)).ToList();
+        var index = all.FindIndex(c =>
+            c.Id == cardId
+            && c.OwnerUserId == userId
+            && c.DeletedAtUtc is null);
+
+        if (index < 0)
+        {
+            return LocalNotebookResult<LocalWordCard>.Failure("NOT_FOUND", "找不到單字卡。");
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var existing = all[index];
+        var updated = existing with
+        {
+            SelectedMnemonic = selectedMnemonic.Trim(),
+            UpdatedAtUtc = now
+        };
+        all[index] = updated;
+        await _store.SaveAllAsync(all, cancellationToken);
+        return LocalNotebookResult<LocalWordCard>.Success(updated);
     }
 
     public async Task<LocalNotebookResult<bool>> DeleteAsync(
@@ -163,17 +200,50 @@ public sealed class LocalNotebookService
     public async Task ClearLocalNotebookAsync(CancellationToken cancellationToken = default) =>
         await _store.SaveAllAsync([], cancellationToken);
 
+    /// <summary>
+    /// Drop cards not owned by <paramref name="userId"/> (account-switch safety net).
+    /// </summary>
+    public async Task EnsureOwnerIsolationAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        if (userId == Guid.Empty)
+            return;
+
+        var all = (await _store.LoadAllAsync(cancellationToken)).ToList();
+        var owned = all.Where(c => c.OwnerUserId == userId).ToList();
+        if (owned.Count == all.Count)
+            return;
+
+        await _store.SaveAllAsync(owned, cancellationToken);
+    }
+
     public async Task<LocalWordCard?> GetAsync(Guid cardId, CancellationToken cancellationToken = default)
     {
         var list = await ListAsync(cancellationToken);
         return list.FirstOrDefault(c => c.Id == cardId);
     }
 
-    private static string NormalizeText(string text)
+    /// <summary>
+    /// Local SoT lookup for short-circuit (ticket 18). Never queries cloud mirror.
+    /// Requires a usable language code; otherwise returns null (caller must analyze).
+    /// </summary>
+    public async Task<LocalWordCard?> FindActiveByLookupKeyAsync(
+        string text,
+        string? detectedLanguage,
+        CancellationToken cancellationToken = default)
     {
-        var collapsed = string.Join(
-            ' ',
-            text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
-        return collapsed.Normalize(NormalizationForm.FormC);
+        if (!LocalNotebookLookupKey.HasUsableLanguageCode(detectedLanguage))
+            return null;
+
+        var language = detectedLanguage!.Trim();
+        var normalized = LocalNotebookLookupKey.NormalizeText(text);
+        if (string.IsNullOrWhiteSpace(normalized))
+            return null;
+
+        var list = await ListAsync(cancellationToken);
+        return list.FirstOrDefault(c =>
+            string.Equals(c.DetectedLanguage, language, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(c.NormalizedText, normalized, StringComparison.Ordinal));
     }
+
+    private static string NormalizeText(string text) => LocalNotebookLookupKey.NormalizeText(text);
 }
