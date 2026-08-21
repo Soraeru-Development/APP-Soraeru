@@ -44,4 +44,7 @@
   3. VS 2026 除錯中亦可先暫停 App → 斷網 → 繼續操作本機存刪。恢復網路後再測 Splash 離線／重連行為。
 - **殘餘**：離線時無法驗證 JWT 是否已過期（僅有 token＋網路失敗仍會進離線寫）；連回線後 GetMe 401 才清庫。刪帳不刪 UsageDaily 孤兒列（無 FK；完整法遵清檔可後做）。
 - **2026-08-11 午後視覺**：Stitch 對齊 NotebookList（細節／動態語言 chip）＋Shell 底欄、NotebookDetail 卡片化；不改本票 AC（已 done）。
-- **2026-08-13 UI／缺陷**：語言選項（不含「全部」）>5 改下拉 picker；注音直立排改橫向。**進行中**：阿語單字卡列表讀取失敗——`AutomationId may only be set one time`（`NotebookListPage.RebuildLanguageFilter`）；已加除錯日誌，根因修復尚未完成。
+- **2026-08-13 UI／缺陷**：語言選項（不含「全部」）>5 改下拉 picker；注音直立排改橫向。曾現：阿語／語言>5 picker 模式下單字卡列表「讀取失敗」——`AutomationId may only be set one time`（`NotebookListPage.RebuildLanguageFilter`）。
+- **2026-08-21 修復／調查**：
+  - **已修**：語言 >5 走 picker 時勿對同一控制重複設 `AutomationId`，列表「讀取失敗」UI bug 已消。
+  - **調查結論**：本機單字卡 SoT 為 **JSON**（`JsonFileLocalWordCardStore`／`local-wordcards.json`），**非** SQLite；模擬器資料仍在與「讀取失敗」為 UI／AutomationId 問題，非資料遺失。

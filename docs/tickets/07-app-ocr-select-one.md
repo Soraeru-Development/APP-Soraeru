@@ -34,7 +34,7 @@
 - 失敗／弱腳本：alert 引導改手動輸入（WordInput）。
 - 未驗證：實機 Android OCR 品質（CLI Android 建置刻意避開 VS lock）。
 
-## Notes（混合 OCR・2026-08-13）
+## Notes（混合 OCR・2026-08-13／08-21）
 
 - **引擎**：`HybridDeviceOcrService`＝**ML Kit on-device 多腳本**（Latin／中／日／韓／天城文）優先，失敗或空結果再走 **Tesseract + tessdata_fast**（圖不上雲）。
 - **ML Kit Manifest prefetch**：`ocr,ocr_chinese,ocr_japanese,ocr_korean,ocr_devanagari`（`AndroidManifest.xml`）。
@@ -42,5 +42,8 @@
   `eng, jpn, kor, tha, mya, lao, khm, ara, bod, hin, nep, chi_tra, chi_sim, fil, vie, rus`  
   （MauiAsset LogicalName 扁平化為 `*.traineddata` 供 `TesseractOcrMaui` 載入）
 - **路由**：泰／緬／寮／柬／阿／藏／俄／尼泊爾等無 ML Kit 模組的腳本 → Tesseract primary；必要時再 broad fallback（含 CJK／拉丁包）。
+- **2026-08-21 體驗收斂**：
+  - **Session 清空**：選圖後再進「圖片取字」不再殘留上一張舊圖／舊 OCR 結果。
+  - **來源語自動預選**：OCR 後依 Unicode 腳本推斷來源語言（韓／日／泰／越等）並預選，減少手動改語。
 - **殘餘風險**：實機品質／首次模型下載時間；多腳本序掃可能較慢；超大 APK（語言包）。
-- **2026-08-13 規劃討論（未落地）**：OCR 多語中期方案——亞洲語言包策略與體積／品質取捨；**尚未實作交付**，僅討論紀錄。
+- **中期亞洲語言包**：08-13 僅討論；08-21 已落地 **tessdata_fast 混合包**（見上）。進一步體積／品質取捨仍可後續優化，不阻擋本票 done。
