@@ -6,22 +6,22 @@
              CascadeInputTransparent="True">
 
     <Grid InputTransparent="True">
-        <!-- Soft atmospheric washes (Stitch L00 radial feel) -->
-        <BoxView Color="{StaticResource PrimaryContainer}"
-                 Opacity="0.18"
+        <!-- Soft atmospheric washes: light tints only (PrimaryContainer is too dark → solid black/gray blocks on Android). -->
+        <Ellipse Fill="{StaticResource PrimaryFixed}"
+                 Opacity="0.45"
                  HorizontalOptions="Center"
                  VerticalOptions="Start"
                  WidthRequest="520"
                  HeightRequest="420"
-                 Margin="0,-40,0,0"
+                 Margin="0,-80,-40,0"
                  InputTransparent="True" />
-        <BoxView Color="{StaticResource SecondaryContainer}"
-                 Opacity="0.22"
+        <Ellipse Fill="{StaticResource SecondaryContainer}"
+                 Opacity="0.55"
                  HorizontalOptions="Start"
                  VerticalOptions="End"
-                 WidthRequest="320"
-                 HeightRequest="280"
-                 Margin="-80,0,0,-20"
+                 WidthRequest="360"
+                 HeightRequest="320"
+                 Margin="-100,0,0,-60"
                  InputTransparent="True" />
 
         <!-- Spawned fly-across word pairs (Stitch L00 animation-layer) -->

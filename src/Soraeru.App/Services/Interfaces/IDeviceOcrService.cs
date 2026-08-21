@@ -23,7 +23,8 @@ public sealed record DeviceOcrResult(
 }
 
 /// <summary>
-/// On-device OCR only. Must not upload images to cloud OCR.
+/// On-device OCR only (ML Kit multi-script + Tesseract tessdata_fast hybrid).
+/// Must not upload images to cloud OCR.
 /// </summary>
 public interface IDeviceOcrService
 {

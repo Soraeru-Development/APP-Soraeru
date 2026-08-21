@@ -4,11 +4,15 @@ using System.Text.RegularExpressions;
 namespace Soraeru.Application.Analyze;
 
 /// <summary>
-/// Post-schema hard gate for LLM mnemonic displayText (兒化 / Latin residue / non-Han scripts).
+/// Post-schema hard gate for LLM mnemonic displayText (兒化 / Latin residue / non-learner scripts).
+/// Allowed learner scripts: Han, Bopomofo, limited Latin attachments — not source-language scripts.
 /// </summary>
 public static partial class MnemonicHardGate
 {
     public const string FailureCode = "HARD_GATE_FAILED";
+
+    public const string DisallowedScriptReason =
+        "近似音請用注音／羅馬拼音／漢字，不可含原文腳本（如韓文）。請重新產生。";
 
     private static readonly Regex MultiLatinRun = MultiLatinRunRegex();
     private static readonly Regex BannedLatinSyllable = BannedLatinSyllableRegex();
@@ -66,7 +70,7 @@ public static partial class MnemonicHardGate
 
         if (HasDisallowedScript(text))
         {
-            reason = "空耳含非許可文字腳本。";
+            reason = DisallowedScriptReason;
             return false;
         }
 
@@ -109,12 +113,16 @@ public static partial class MnemonicHardGate
         foreach (var rune in text.EnumerateRunes())
         {
             var ch = rune.Value;
-            if (IsHan(ch) || IsAllowedSeparator((char)ch) || IsLatinLetter((char)ch))
+            if (IsHan(ch)
+                || IsBopomofo(ch)
+                || IsAllowedToneOrStressMark(ch)
+                || IsAllowedSeparator((char)ch)
+                || IsLatinLetter((char)ch))
             {
                 continue;
             }
 
-            // Digits / other letters (Cyrillic, Hangul, …) rejected.
+            // Digits / other letters (Cyrillic, Hangul, Kana, Thai, …) rejected.
             if (Rune.IsLetter(rune) || Rune.IsDigit(rune))
             {
                 return true;
@@ -131,11 +139,26 @@ public static partial class MnemonicHardGate
         || (codePoint is >= 0x3400 and <= 0x4DBF)
         || (codePoint is >= 0xF900 and <= 0xFAFF);
 
+    /// <summary>Bopomofo (注音) letters — learner notation allowed in displayText.</summary>
+    private static bool IsBopomofo(int codePoint) =>
+        (codePoint is >= 0x3100 and <= 0x312F)
+        || (codePoint is >= 0x31A0 and <= 0x31BF);
+
+    private static bool IsAllowedToneOrStressMark(int codePoint) =>
+        codePoint is '\u02C7' // ˇ
+            or '\u02CA' // ˊ
+            or '\u02CB' // ˋ
+            or '\u02D9' // ˙
+            or '\u02C9' // ˉ
+            or '\u00B4' // ´
+            or '\u02DC'; // ˜
+
     private static bool IsLatinLetter(char c) =>
         c is (>= 'A' and <= 'Z') or (>= 'a' and <= 'z');
 
     private static bool IsAllowedSeparator(char c) =>
-        c is '－' or '—' or '、' or '，' or ',' or '-' or '·' or '・' or ' ' or '\u3000';
+        c is '－' or '—' or '、' or '，' or ',' or '-' or '·' or '・' or ' ' or '\u3000'
+            or '～' or '~' or '´';
 
     [GeneratedRegex(@"[A-Za-z]{2,}", RegexOptions.CultureInvariant)]
     private static partial Regex MultiLatinRunRegex();

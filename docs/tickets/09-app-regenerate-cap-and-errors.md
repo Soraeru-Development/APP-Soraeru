@@ -32,3 +32,5 @@
 - 錯誤碼：`REGENERATION_LIMIT_EXCEEDED`（429）；成功重產寫入 `WordRegenerations` 並 `TryConsume` 日額度。
 - 回應欄：`remainingRegenerations`；與票 18「重新分析」共用 ForceRefresh／同一計數鍵語意。
 - 驗證：`dotnet test tests/Soraeru.Application.Tests`、`tests/Soraeru.ClientLogic.Tests`。
+- **2026-08-13 手動**：行為已驗證（達上限不再分析）。UI 缺口已修——詳情「重新分析」／結果「重新產生」達上限改顯示「已達分析上限」並禁用。
+- **2026-08-13**：結果頁改經 `RegenerateActionPresentation` 統一文案／禁用；可重產 0 時按鈕必為「已達分析上限」。

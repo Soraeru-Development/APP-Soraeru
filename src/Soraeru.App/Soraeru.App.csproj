@@ -66,15 +66,17 @@
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
 
-		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix).
+		     tessdata: flat LogicalName so TesseractOcrMaui AddFile("eng.traineddata") resolves. -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" Exclude="Resources\Raw\tessdata\**" />
+		<MauiAsset Include="Resources\Raw\tessdata\*.traineddata" LogicalName="%(Filename)%(Extension)" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
-		<PackageReference Include="Plugin.Maui.OCR" Version="1.1.1" />
+		<PackageReference Include="TesseractOcrMaui" Version="1.5.2" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -94,6 +96,12 @@
 		<PackageReference Include="Xamarin.AndroidX.Lifecycle.Runtime.Ktx" Version="2.11.0.1" />
 		<PackageReference Include="Xamarin.AndroidX.Lifecycle.Runtime.Ktx.Android" Version="2.11.0.1" />
 		<PackageReference Include="Xamarin.AndroidX.Lifecycle.ViewModel.Ktx" Version="2.11.0.1" />
+		<!-- ML Kit on-device scripts: Latin / Chinese / Japanese / Korean / Devanagari (bundled models). -->
+		<PackageReference Include="Xamarin.Google.MLKit.TextRecognition" Version="116.0.1.8" />
+		<PackageReference Include="Xamarin.Google.MLKit.TextRecognition.Chinese" Version="116.0.1.8" />
+		<PackageReference Include="Xamarin.Google.MLKit.TextRecognition.Japanese" Version="116.0.1.8" />
+		<PackageReference Include="Xamarin.Google.MLKit.TextRecognition.Korean" Version="116.0.1.8" />
+		<PackageReference Include="Xamarin.Google.MLKit.TextRecognition.Devanagari" Version="116.0.1.8" />
 	</ItemGroup>
 
 </Project>

@@ -8,7 +8,7 @@ namespace Soraeru;
 /// </summary>
 public static class AnalyzeEntryFlow
 {
-    public static async Task RouteLookupAsync(
+    public static async Task<AnalyzeEntryKind> RouteLookupAsync(
         ContentPage page,
         LocalNotebookService notebook,
         IAnalyzeFlowStore flow,
@@ -24,14 +24,14 @@ public static class AnalyzeEntryFlow
         if (decision.Kind == AnalyzeEntryKind.OpenLocalDetail && decision.CardId is { } cardId)
         {
             await Routes.GoAsync($"{Routes.NotebookDetail}?cardId={cardId:D}");
-            return;
+            return AnalyzeEntryKind.OpenLocalDetail;
         }
 
         if (decision.Kind == AnalyzeEntryKind.RequireLogin)
         {
             await page.DisplayAlertAsync("需要登入", "登入後才能分析新單字。", "了解");
             await Routes.GoAsync(Routes.Login);
-            return;
+            return AnalyzeEntryKind.RequireLogin;
         }
 
         flow.PendingRequest = new AnalyzeRequestDto(
@@ -43,5 +43,6 @@ public static class AnalyzeEntryFlow
         flow.ClearError();
 
         await Routes.GoAsync(Routes.Analyzing);
+        return AnalyzeEntryKind.ProceedToAnalyze;
     }
 }

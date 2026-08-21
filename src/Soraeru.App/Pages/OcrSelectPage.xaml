@@ -67,7 +67,8 @@
                             SelectedIndex="0"
                             TextColor="{StaticResource OnSurface}"
                             TitleColor="{StaticResource Outline}"
-                            FontSize="16">
+                            FontSize="16"
+                            SelectedIndexChanged="OnLanguagePickerChanged">
                         <Picker.Items>
                             <x:String>自動偵測</x:String>
                             <x:String>日文 (Japanese)</x:String>
@@ -78,7 +79,8 @@
                         </Picker.Items>
                     </Picker>
                 </Border>
-                <Label Text="選定具體語言後，若本機已有同字卡會直接開詳情（不消耗分析額度）。"
+                <Label x:Name="LanguageHelperLabel"
+                       Text="無法從文字可靠推斷時維持自動偵測。選定具體語言後，若本機已有同字卡會直接開詳情（不消耗分析額度）。"
                        Style="{StaticResource CaptionLabel}"
                        LineBreakMode="WordWrap" />
 

@@ -57,7 +57,7 @@ public static class AnalyzeFailureMessages
 
         if (string.Equals(code, HardGateFailedCode, StringComparison.OrdinalIgnoreCase))
         {
-            return "空耳未通過聽感檢查，請返回重試或稍後再試。";
+            return "近似音請用注音／羅馬拼音／漢字，不可含原文腳本。請重新產生或稍後再試。";
         }
 
         if (string.Equals(fallbackKind, "Network", StringComparison.OrdinalIgnoreCase))

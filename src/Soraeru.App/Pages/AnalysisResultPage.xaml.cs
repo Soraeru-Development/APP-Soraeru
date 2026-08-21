@@ -12,18 +12,21 @@ public partial class AnalysisResultPage : ContentPage
     private readonly IAnalyzeFlowStore _flow;
     private readonly LocalNotebookService _notebook;
     private readonly IFormalTtsService _tts;
+    private readonly IOcrSessionStore _ocrSession;
     private readonly List<(Border Card, Border RadioDot)> _mnemonicVisuals = [];
     private int _selectedIndex;
 
     public AnalysisResultPage(
         IAnalyzeFlowStore flow,
         LocalNotebookService notebook,
-        IFormalTtsService tts)
+        IFormalTtsService tts,
+        IOcrSessionStore ocrSession)
     {
         InitializeComponent();
         _flow = flow;
         _notebook = notebook;
         _tts = tts;
+        _ocrSession = ocrSession;
 
         WordCardBorder.Shadow = new Shadow
         {
@@ -37,6 +40,8 @@ public partial class AnalysisResultPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        // Analysis finished — free OCR preview so back-nav to ImagePick is blank.
+        _ocrSession.Clear();
         BindResult(_flow.LastResult);
     }
 
@@ -56,7 +61,7 @@ public partial class AnalysisResultPage : ContentPage
             VerifiedBadgeBanner.IsVisible = false;
             NoticeLabel.Text = _flow.LastError ?? "請返回重新分析。";
             QuotaLabel.Text = string.Empty;
-            RegenerateButton.IsEnabled = false;
+            ApplyRegenerateButtonState(remainingRegenerations: 0);
             return;
         }
 
@@ -93,7 +98,7 @@ public partial class AnalysisResultPage : ContentPage
         QuotaLabel.Text = result.Cached
             ? $"快取結果 · 今日剩餘 {FormatQuota(result.RemainingDailyQuota)} · 可重產 {result.RemainingRegenerations}"
             : $"今日剩餘 {FormatQuota(result.RemainingDailyQuota)} · 可重產 {result.RemainingRegenerations}";
-        RegenerateButton.IsEnabled = result.RemainingRegenerations > 0;
+        ApplyRegenerateButtonState(result.RemainingRegenerations);
 
         var resources = Application.Current!.Resources;
         for (var i = 0; i < result.Mnemonics.Count; i++)
@@ -128,13 +133,14 @@ public partial class AnalysisResultPage : ContentPage
             Margin = new Thickness(0, 4, 0, 0)
         };
 
+        // L10: display + notation read left-to-right. Stack notation under display so MAUI
+        // WordWrap in a squeezed Auto column cannot force 注音／羅馬 into a vertical column.
         var displayLabel = new Label
         {
             Text = mnemonic.DisplayText,
             FontSize = 22,
             TextColor = onSurface,
             LineBreakMode = LineBreakMode.WordWrap,
-            VerticalOptions = LayoutOptions.Center,
             HorizontalOptions = LayoutOptions.Fill
         };
 
@@ -144,29 +150,18 @@ public partial class AnalysisResultPage : ContentPage
             StrokeShape = new RoundRectangle { CornerRadius = 4 },
             BackgroundColor = surfaceContainerHigh,
             Padding = new Thickness(8, 2),
-            VerticalOptions = LayoutOptions.Center,
-            HorizontalOptions = LayoutOptions.End,
+            HorizontalOptions = LayoutOptions.Start,
+            MaximumWidthRequest = 520,
             IsVisible = !string.IsNullOrWhiteSpace(mnemonic.NotationText),
             Content = new Label
             {
                 Text = mnemonic.NotationText,
                 FontSize = 14,
                 TextColor = onSurfaceVariant,
-                LineBreakMode = LineBreakMode.WordWrap
+                LineBreakMode = LineBreakMode.WordWrap,
+                HorizontalOptions = LayoutOptions.Start
             }
         };
-
-        var header = new Grid
-        {
-            ColumnDefinitions = new ColumnDefinitionCollection
-            {
-                new(GridLength.Star),
-                new(GridLength.Auto)
-            },
-            ColumnSpacing = 8
-        };
-        header.Add(displayLabel, 0);
-        header.Add(notationBadge, 1);
 
         var explanation = new FormattedString();
         explanation.Spans.Add(new Span
@@ -189,7 +184,8 @@ public partial class AnalysisResultPage : ContentPage
             HorizontalOptions = LayoutOptions.Fill,
             Children =
             {
-                header,
+                displayLabel,
+                notationBadge,
                 new Label
                 {
                     FormattedText = explanation,
@@ -269,6 +265,13 @@ public partial class AnalysisResultPage : ContentPage
         }
     }
 
+    void ApplyRegenerateButtonState(int remainingRegenerations)
+    {
+        var (text, enabled) = RegenerateActionPresentation.ForRemaining(remainingRegenerations);
+        RegenerateButton.Text = text;
+        RegenerateButton.IsEnabled = enabled;
+    }
+
     static string FormatQuota(int remaining) =>
         remaining >= int.MaxValue / 2 ? "無限制" : remaining.ToString();
 
@@ -310,7 +313,8 @@ public partial class AnalysisResultPage : ContentPage
             return;
         }
 
-        if (_flow.LastResult is not null && _flow.LastResult.RemainingRegenerations <= 0)
+        if (_flow.LastResult is not null
+            && ReanalyzeGuard.IsRegenerationLimitReached(_flow.LastResult.RemainingRegenerations))
         {
             await DisplayAlertAsync(
                 AnalyzeFailureMessages.TitleFor(AnalyzeFailureMessages.RegenerationLimitCode),

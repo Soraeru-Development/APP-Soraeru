@@ -7,11 +7,13 @@ public partial class HomePage : ContentPage
     private const int UnlimitedDailyQuota = int.MaxValue;
 
     private readonly ISoraeruApiClient _api;
+    private readonly IOcrSessionStore _ocrSession;
 
-    public HomePage(ISoraeruApiClient api)
+    public HomePage(ISoraeruApiClient api, IOcrSessionStore ocrSession)
     {
         InitializeComponent();
         _api = api;
+        _ocrSession = ocrSession;
         Shell.SetBackButtonBehavior(this, new BackButtonBehavior
         {
             IsVisible = false,
@@ -22,6 +24,8 @@ public partial class HomePage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        // Drop leftover camera/gallery preview when returning to Home (tab reset / back).
+        _ocrSession.Clear();
         await LoadQuotaAsync();
     }
 
@@ -60,8 +64,11 @@ public partial class HomePage : ContentPage
     async void OnWordInputTapped(object? sender, TappedEventArgs e) =>
         await Routes.GoAsync(Routes.WordInput);
 
-    async void OnImagePickTapped(object? sender, TappedEventArgs e) =>
+    async void OnImagePickTapped(object? sender, TappedEventArgs e)
+    {
+        _ocrSession.Clear();
         await Routes.GoAsync(Routes.ImagePick);
+    }
 
     async void OnNotebookTapped(object? sender, TappedEventArgs e) =>
         await Routes.GoToMainTabAsync(Routes.NotebookList);

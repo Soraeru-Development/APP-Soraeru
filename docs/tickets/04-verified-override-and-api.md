@@ -35,3 +35,9 @@
 - API：`/api/v1/curator/verified-mnemonics`（CRUD + enable）；允許清單＝`DeveloperAccounts`／`IDeveloperAccountPolicy`；FORBIDDEN→403。
 - 分析：命中 → `SkipMnemonics` 詞義／讀音 LLM + 金標空耳 + `mnemonicSource=verified`。
 - App：verified Info banner vs llm_draft Warning banner。
+
+## Notes（手動驗證／金標來源）
+
+- **金標 ≠ 使用者自建**：僅策展授權身分透過 `/api/v1/curator/verified-mnemonics` 寫入 `VerifiedMnemonics`；一般學習者 JWT 寫入 → 403。App 端**不能**自己建金標。
+- **MVP 現況**：策展 Blazor（票 05）仍 deferred；過渡以 API／腳本建立。若庫中尚無啟用中條目，分析不會出現「聽感已核定」——屬預期，非 App bug。
+- 學習者可改的是單字卡**個人空耳**（票 16），與金標庫分離（票 17：金標不覆蓋已存卡）。

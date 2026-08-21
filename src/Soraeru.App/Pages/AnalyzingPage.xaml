@@ -13,22 +13,22 @@
                                              TargetOpacity="0.8"
                                              SpawnIntervalMs="300" />
 
-        <!-- Soft blur blobs (L09 atmosphere) -->
+        <!-- Soft blur blobs (L09 atmosphere): light tints only — PrimaryContainer reads as black blocks. -->
         <Grid Grid.RowSpan="2"
               InputTransparent="True"
               CascadeInputTransparent="True"
-              Opacity="0.35">
+              Opacity="0.5">
             <Ellipse Fill="{StaticResource SecondaryContainer}"
                      WidthRequest="500"
                      HeightRequest="500"
-                     Opacity="0.55"
+                     Opacity="0.7"
                      HorizontalOptions="End"
                      VerticalOptions="Start"
                      Margin="0,-40,-120,0" />
-            <Ellipse Fill="{StaticResource PrimaryContainer}"
+            <Ellipse Fill="{StaticResource PrimaryFixed}"
                      WidthRequest="400"
                      HeightRequest="400"
-                     Opacity="0.35"
+                     Opacity="0.55"
                      HorizontalOptions="Start"
                      VerticalOptions="End"
                      Margin="-80,0,0,-40" />

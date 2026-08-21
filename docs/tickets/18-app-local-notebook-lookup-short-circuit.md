@@ -105,4 +105,5 @@
   - 驗證：`dotnet test tests/Soraeru.ClientLogic.Tests`（含 Lookup／Gate 24 測＋全套綠）。
 
   - 殘餘：實機煙測（手動／OCR 命中直開詳情、未登入門檻、重新分析計額）；Android 全量打包若遇本機 javac 環境問題與本票無關。
+- **2026-08-13**：票狀態仍為 **done**（交付不變）。封閉測試前相關列表缺陷見票 13（阿語 AutomationId WIP）；本票 AC 煙測仍待封閉輪次勾選。
 

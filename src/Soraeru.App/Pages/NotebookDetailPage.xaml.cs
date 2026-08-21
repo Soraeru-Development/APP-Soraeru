@@ -70,6 +70,7 @@ public partial class NotebookDetailPage : ContentPage
             MeaningLabel.Text = string.Empty;
             MnemonicLabel.Text = string.Empty;
             SetWriteControls(canWrite: false);
+            ReanalyzeButton.Text = "重新分析";
             ReanalyzeButton.IsEnabled = false;
             return;
         }
@@ -85,6 +86,7 @@ public partial class NotebookDetailPage : ContentPage
                 MeaningLabel.Text = string.Empty;
                 MnemonicLabel.Text = string.Empty;
                 SetWriteControls(canWrite: false);
+                ReanalyzeButton.Text = "重新分析";
                 ReanalyzeButton.IsEnabled = false;
                 return;
             }
@@ -109,14 +111,19 @@ public partial class NotebookDetailPage : ContentPage
             MeaningLabel.Text = ex.Message;
             MnemonicLabel.Text = string.Empty;
             SetWriteControls(canWrite: false);
+            ReanalyzeButton.Text = "重新分析";
             ReanalyzeButton.IsEnabled = false;
         }
     }
 
     async Task UpdateReanalyzeButtonStateAsync(LocalWordCard card)
     {
+        const string defaultLabel = "重新分析";
+        const string limitLabel = "已達分析上限";
+
         if (!await _notebook.CanWriteAsync())
         {
+            ReanalyzeButton.Text = defaultLabel;
             ReanalyzeButton.IsEnabled = false;
             return;
         }
@@ -126,12 +133,16 @@ public partial class NotebookDetailPage : ContentPage
                 _flow.LastResult?.SourceLanguage,
                 out _))
         {
+            ReanalyzeButton.Text = defaultLabel;
             ReanalyzeButton.IsEnabled = false;
             return;
         }
 
         var remaining = await TryGetKnownRemainingRegenerationsAsync(card);
-        ReanalyzeButton.IsEnabled = remaining is null || !ReanalyzeGuard.IsRegenerationLimitReached(remaining.Value);
+        var atLimit = remaining is not null
+            && ReanalyzeGuard.IsRegenerationLimitReached(remaining.Value);
+        ReanalyzeButton.Text = atLimit ? limitLabel : defaultLabel;
+        ReanalyzeButton.IsEnabled = !atLimit;
     }
 
     void SetWriteControls(bool canWrite)

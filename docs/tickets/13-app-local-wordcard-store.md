@@ -38,5 +38,10 @@
   - 同 normalized key 再存：票 **17** 起改為回傳既有卡、**不**覆寫 `SelectedMnemonic`（與 Server 鏡像 Save 一致；編修走票 16）。
   - Splash／Settings 路徑自動化測：`SessionAuthGateTests`（ClientLogic）；刪帳應用層：`MeServiceDeleteAccountTests`。
 - **煙測建議**：登入→離線重開 App 應進 Home／Onboarding 且可本機存刪；模擬 401 應清庫並回 Login；設定頁刪帳後雲端／本機皆空且回 Login；結果頁對同字再存應開既有卡且個人空耳不變（改空耳用詳情編修）。
+- **Android 模擬器斷網（票 13 離線煙測）**：
+  1. 模擬器右側工具列開 **⋯ Extended Controls** → **Cellular** → **Signal strength** 設 **None**（或開 **Airplane mode**）。
+  2. 或本機終端：`adb shell svc wifi disable` 再 `adb shell svc data disable`；恢復用 `enable`。
+  3. VS 2026 除錯中亦可先暫停 App → 斷網 → 繼續操作本機存刪。恢復網路後再測 Splash 離線／重連行為。
 - **殘餘**：離線時無法驗證 JWT 是否已過期（僅有 token＋網路失敗仍會進離線寫）；連回線後 GetMe 401 才清庫。刪帳不刪 UsageDaily 孤兒列（無 FK；完整法遵清檔可後做）。
 - **2026-08-11 午後視覺**：Stitch 對齊 NotebookList（細節／動態語言 chip）＋Shell 底欄、NotebookDetail 卡片化；不改本票 AC（已 done）。
+- **2026-08-13 UI／缺陷**：語言選項（不含「全部」）>5 改下拉 picker；注音直立排改橫向。**進行中**：阿語單字卡列表讀取失敗——`AutomationId may only be set one time`（`NotebookListPage.RebuildLanguageFilter`）；已加除錯日誌，根因修復尚未完成。

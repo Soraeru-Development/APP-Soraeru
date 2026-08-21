@@ -35,3 +35,13 @@ date,person,hours,ticket,note,kind
 2026-08-12,Ashton,1,16,票16：詳情頁編修個人空耳（UpdateSelectedMnemonic＋UI TDD）,dev
 2026-08-12,Ashton,0.75,17,票17：金標不覆蓋已存卡個人空耳（Save 同鍵保全＋TDD 回歸）,dev
 2026-08-12,Ashton,1.5,18,票18：本機短路查鍵＋詳情重新分析（ClientLogic TDD＋App 接線）,dev
+2026-08-13,Ashton,0.5,02,手動驗證＋韓文硬閘文案／允許注音腳本,dev
+2026-08-13,Ashton,0.25,08,手動驗證系統 TTS 正式發音,dev
+2026-08-13,Ashton,1,09,達上限行為驗證＋詳情／結果「已達分析上限」文案修復,dev
+2026-08-13,Ashton,0.25,10,手動驗證隱私權／AI 內容聲明頁,dev
+2026-08-13,Ashton,0.25,16,手動驗證詳情編修個人空耳,dev
+2026-08-13,Ashton,1.5,13,"單字本語言>5下拉／注音橫排；阿語 AutomationId 重複設值缺陷調查（WIP）",dev
+2026-08-13,Ashton,1.25,misc,L00／L09 動畫黑塊淺色修＋首頁 Tab 強制回 L05（Shell 絕對路由）,dev
+2026-08-13,Ashton,0.5,07,（規劃）OCR 多語中期方案討論：亞洲語言包；尚未落地實作,plan
+2026-08-13,Ashton,0.5,11,封閉測試前缺陷收斂紀錄與手動驗證快照,dev
+2026-08-14,Ashton,0.75,plan,對照 Railway+Docker+SQLite Volume 盤點 API 現況；寫部署計畫並比較 Fly/Render/VPS（未實作 Dockerfile）,plan

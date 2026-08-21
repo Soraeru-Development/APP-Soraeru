@@ -13,6 +13,8 @@ public partial class NotebookListPage : ContentPage
     private readonly IFormalTtsService _tts;
     private string _search = string.Empty;
     private string? _languageFilter;
+    private bool _suppressPickerChanged;
+    private IReadOnlyList<SourceLanguageCatalog.LanguagePresentation> _filterLanguages = [];
 
     public NotebookListPage(
         LocalNotebookService notebook,
@@ -46,6 +48,32 @@ public partial class NotebookListPage : ContentPage
     async void OnGoInputClicked(object? sender, EventArgs e) =>
         await Routes.GoAsync(Routes.WordInput);
 
+    async void OnFilterAllClicked(object? sender, EventArgs e)
+    {
+        if (_languageFilter is null)
+            return;
+
+        _languageFilter = null;
+        await ReloadAsync();
+    }
+
+    async void OnLanguageFilterPickerChanged(object? sender, EventArgs e)
+    {
+        if (_suppressPickerChanged)
+            return;
+
+        var index = LanguageFilterPicker.SelectedIndex;
+        if (index < 0 || index >= _filterLanguages.Count)
+            return;
+
+        var code = _filterLanguages[index].Code;
+        if (string.Equals(_languageFilter, code, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        _languageFilter = code;
+        await ReloadAsync();
+    }
+
     async Task ReloadAsync()
     {
         try
@@ -53,7 +81,7 @@ public partial class NotebookListPage : ContentPage
             var signedIn = await _session.HasSessionAsync();
             var allCards = (await _notebook.ListAsync()).ToList();
 
-            RebuildFilterChips(allCards);
+            RebuildLanguageFilter(allCards);
 
             IEnumerable<LocalWordCard> cards = allCards;
             if (!string.IsNullOrEmpty(_languageFilter))
@@ -119,9 +147,10 @@ public partial class NotebookListPage : ContentPage
         }
     }
 
-    void RebuildFilterChips(IReadOnlyList<LocalWordCard> allCards)
+    void RebuildLanguageFilter(IReadOnlyList<LocalWordCard> allCards)
     {
         var languages = SourceLanguageCatalog.PresentInLibrary(allCards.Select(c => c.DetectedLanguage));
+        _filterLanguages = languages;
 
         if (_languageFilter is not null
             && languages.All(l => !string.Equals(l.Code, _languageFilter, StringComparison.OrdinalIgnoreCase)))
@@ -129,21 +158,70 @@ public partial class NotebookListPage : ContentPage
             _languageFilter = null;
         }
 
+        var usePicker = NotebookLanguageFilterMode.ShouldUsePicker(languages.Count);
         FilterChipsHost.Children.Clear();
 
-        FilterChipsHost.Children.Add(CreateFilterChip(
-            label: "全部",
-            iconGlyph: null,
-            languageCode: null,
-            isSelected: _languageFilter is null));
-
-        foreach (var language in languages)
+        if (!usePicker)
         {
+            FilterAllButton.IsVisible = false;
+            LanguageFilterPicker.IsVisible = false;
+            FilterChipsScroll.IsVisible = true;
+
             FilterChipsHost.Children.Add(CreateFilterChip(
-                label: language.ChipLabel,
-                iconGlyph: language.IconGlyph,
-                languageCode: language.Code,
-                isSelected: string.Equals(_languageFilter, language.Code, StringComparison.OrdinalIgnoreCase)));
+                label: "全部",
+                iconGlyph: null,
+                languageCode: null,
+                isSelected: _languageFilter is null));
+
+            foreach (var language in languages)
+            {
+                FilterChipsHost.Children.Add(CreateFilterChip(
+                    label: language.ChipLabel,
+                    iconGlyph: language.IconGlyph,
+                    languageCode: language.Code,
+                    isSelected: string.Equals(_languageFilter, language.Code, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            return;
+        }
+
+        FilterChipsScroll.IsVisible = false;
+        FilterAllButton.IsVisible = true;
+        LanguageFilterPicker.IsVisible = true;
+
+        var allSelected = _languageFilter is null;
+        FilterAllButton.Style = (Style)Application.Current!.Resources[
+            allSelected ? "FilterChipSelected" : "FilterChip"];
+
+        _suppressPickerChanged = true;
+        try
+        {
+            LanguageFilterPicker.Items.Clear();
+            foreach (var language in languages)
+            {
+                var text = string.IsNullOrEmpty(language.IconGlyph)
+                    ? language.ChipLabel
+                    : $"{language.IconGlyph} {language.ChipLabel}";
+                LanguageFilterPicker.Items.Add(text);
+            }
+
+            if (_languageFilter is null)
+            {
+                LanguageFilterPicker.SelectedIndex = -1;
+                LanguageFilterPicker.Title = "選擇語言";
+            }
+            else
+            {
+                var selected = languages
+                    .Select((l, i) => (l, i))
+                    .FirstOrDefault(x =>
+                        string.Equals(x.l.Code, _languageFilter, StringComparison.OrdinalIgnoreCase));
+                LanguageFilterPicker.SelectedIndex = selected.l is null ? -1 : selected.i;
+            }
+        }
+        finally
+        {
+            _suppressPickerChanged = false;
         }
     }
 

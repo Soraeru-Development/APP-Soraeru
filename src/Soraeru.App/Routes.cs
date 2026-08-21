@@ -33,7 +33,16 @@ public static class Routes
 
     public static Task BackAsync() => Shell.Current.GoToAsync("..");
 
+    /// <summary>
+    /// Absolute route to L05 Home root. Prefer <c>//main/HomePage</c> over relative
+    /// routes so Shell clears WordInput／Analyzing／Result 等 pushed pages on that tab.
+    /// </summary>
+    public static Task GoToHomeRootAsync() =>
+        Shell.Current.GoToAsync($"//{Main}/{Home}");
+
     /// <summary>Absolute navigation to a main tab (shows Shell TabBar).</summary>
     public static Task GoToMainTabAsync(string pageRoute) =>
-        Shell.Current.GoToAsync($"//{Main}/{pageRoute}");
+        pageRoute == Home
+            ? GoToHomeRootAsync()
+            : Shell.Current.GoToAsync($"//{Main}/{pageRoute}");
 }

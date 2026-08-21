@@ -105,7 +105,10 @@ public partial class ImagePickPage : ContentPage
                     "改手動輸入",
                     "留下重試");
                 if (goManual)
+                {
+                    _ocrSession.Clear();
                     await Routes.GoAsync(Routes.WordInput);
+                }
                 return;
             }
 
@@ -125,7 +128,10 @@ public partial class ImagePickPage : ContentPage
                 "改手動輸入",
                 "留下重試");
             if (goManual)
+            {
+                _ocrSession.Clear();
                 await Routes.GoAsync(Routes.WordInput);
+            }
         }
         finally
         {

@@ -20,9 +20,13 @@ public sealed class AnalyzeFailureMessagesTests
     }
 
     [Fact]
-    public void MessageOrDefault_hard_gate_guides_retry()
+    public void MessageOrDefault_hard_gate_guides_regenerate()
     {
-        AnalyzeFailureMessages.MessageOrDefault(null, AnalyzeFailureMessages.HardGateFailedCode)
-            .ShouldContain("重試");
+        var message = AnalyzeFailureMessages.MessageOrDefault(
+            null,
+            AnalyzeFailureMessages.HardGateFailedCode);
+
+        message.ShouldContain("請重新產生");
+        message.ShouldContain("不可含原文腳本");
     }
 }

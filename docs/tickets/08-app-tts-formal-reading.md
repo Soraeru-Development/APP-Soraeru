@@ -26,3 +26,7 @@
 ## Blocked by
 
 - None — can start immediately
+
+## Notes
+
+- **2026-08-13 手動已驗證**：TTS 播放正式原文可用。

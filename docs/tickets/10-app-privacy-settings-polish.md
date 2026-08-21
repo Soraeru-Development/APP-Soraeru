@@ -32,3 +32,4 @@
 - Seam：`Soraeru.ClientLogic.Legal.LegalDocuments`（文案 oracle）＋ `LegalDocumentPage`（應用內頁，`?doc=privacy|ai`）。
 - 登入／設定／註冊入口改導應用內頁；商店託管 URL 留給票 12。
 - 驗證：`dotnet test …LegalDocumentsTests`（3 綠）；App Windows TFM 建置成功。額度／方案預留／登出／再看 onboarding 為既有行為。
+- **2026-08-13 手動已驗證**：隱私權政策、AI 內容聲明頁有內容。

@@ -11,6 +11,8 @@ public partial class OcrSelectPage : ContentPage
     private readonly LocalNotebookService _notebook;
     private string? _selectedToken;
     private bool _suppressTextChanged;
+    private bool _suppressLanguagePickerChanged;
+    private bool _languageTouchedByUser;
 
     public OcrSelectPage(
         IOcrSessionStore ocrSession,
@@ -43,6 +45,7 @@ public partial class OcrSelectPage : ContentPage
         OcrEditor.Text = _ocrSession.RecognizedText ?? string.Empty;
         _suppressTextChanged = false;
         RebuildTokenRadios(OcrEditor.Text);
+        MaybeApplyInferredSourceLanguage(OcrEditor.Text);
     }
 
     void OnOcrTextChanged(object? sender, TextChangedEventArgs e)
@@ -52,6 +55,16 @@ public partial class OcrSelectPage : ContentPage
 
         _ocrSession.RecognizedText = e.NewTextValue;
         RebuildTokenRadios(e.NewTextValue);
+        MaybeApplyInferredSourceLanguage(e.NewTextValue);
+    }
+
+    void OnLanguagePickerChanged(object? sender, EventArgs e)
+    {
+        if (_suppressLanguagePickerChanged)
+            return;
+
+        _languageTouchedByUser = true;
+        UpdateLanguageHelper(ResolveSourceLanguage(), inferred: false);
     }
 
     void RebuildTokenRadios(string? text)
@@ -111,8 +124,11 @@ public partial class OcrSelectPage : ContentPage
     async void OnReselectClicked(object? sender, EventArgs e) =>
         await Routes.BackAsync();
 
-    async void OnManualClicked(object? sender, EventArgs e) =>
+    async void OnManualClicked(object? sender, EventArgs e)
+    {
+        _ocrSession.Clear();
         await Routes.GoAsync(Routes.WordInput);
+    }
 
     async void OnAnalyzeClicked(object? sender, EventArgs e)
     {
@@ -122,11 +138,11 @@ public partial class OcrSelectPage : ContentPage
             return;
         }
 
-        // Persist any user correction for back-navigation.
+        // Persist any user correction for back-navigation / analyze-failure retry.
         _ocrSession.RecognizedText = OcrEditor.Text;
 
         var sourceLanguage = ResolveSourceLanguage();
-        await AnalyzeEntryFlow.RouteLookupAsync(
+        var kind = await AnalyzeEntryFlow.RouteLookupAsync(
             this,
             _notebook,
             _flow,
@@ -134,6 +150,49 @@ public partial class OcrSelectPage : ContentPage
             sourceLanguage,
             memoryLanguage: "zh-TW",
             notationPreference: "bopomofo");
+
+        // Keep session while Analyzing so hard-gate / network failure can return to L08.
+        // Local detail / login leave the OCR flow — drop the uploaded preview.
+        if (kind != AnalyzeEntryKind.ProceedToAnalyze)
+            _ocrSession.Clear();
+    }
+
+    void MaybeApplyInferredSourceLanguage(string? text)
+    {
+        if (_languageTouchedByUser)
+            return;
+
+        var code = OcrSourceLanguageInference.Infer(text);
+        var index = IndexForLanguageCode(code);
+
+        _suppressLanguagePickerChanged = true;
+        LanguagePicker.SelectedIndex = index;
+        _suppressLanguagePickerChanged = false;
+        UpdateLanguageHelper(code, inferred: true);
+    }
+
+    void UpdateLanguageHelper(string code, bool inferred)
+    {
+        if (string.Equals(code, "auto", StringComparison.OrdinalIgnoreCase))
+        {
+            LanguageHelperLabel.Text =
+                "無法從文字可靠推斷時維持自動偵測。選定具體語言後，若本機已有同字卡會直接開詳情（不消耗分析額度）。";
+            return;
+        }
+
+        var label = code switch
+        {
+            "ja" => "日文",
+            "th" => "泰文",
+            "tl" => "他加祿語",
+            "ko" => "韓文",
+            "vi" => "越南文",
+            _ => code
+        };
+
+        LanguageHelperLabel.Text = inferred
+            ? $"已依辨識文字預選為{label}（可手動更改）。選定具體語言後，若本機已有同字卡會直接開詳情（不消耗分析額度）。"
+            : $"已選定{label}。若本機已有同字卡會直接開詳情（不消耗分析額度）。";
     }
 
     string ResolveSourceLanguage() =>
@@ -145,5 +204,16 @@ public partial class OcrSelectPage : ContentPage
             4 => "ko",
             5 => "vi",
             _ => "auto"
+        };
+
+    static int IndexForLanguageCode(string code) =>
+        code.Trim().ToLowerInvariant() switch
+        {
+            "ja" => 1,
+            "th" => 2,
+            "tl" => 3,
+            "ko" => 4,
+            "vi" => 5,
+            _ => 0
         };
 }

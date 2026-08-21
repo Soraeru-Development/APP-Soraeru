@@ -66,9 +66,30 @@
                 </Grid>
             </Border>
 
-            <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                <HorizontalStackLayout x:Name="FilterChipsHost" Spacing="8" />
-            </ScrollView>
+            <Grid x:Name="FilterHost"
+                  ColumnDefinitions="Auto,*"
+                  ColumnSpacing="8"
+                  MinimumHeightRequest="40">
+                <ScrollView x:Name="FilterChipsScroll"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            Orientation="Horizontal"
+                            HorizontalScrollBarVisibility="Never">
+                    <HorizontalStackLayout x:Name="FilterChipsHost" Spacing="8" />
+                </ScrollView>
+                <Button x:Name="FilterAllButton"
+                        Grid.Column="0"
+                        Text="全部"
+                        AutomationId="filter_all"
+                        IsVisible="False"
+                        Clicked="OnFilterAllClicked" />
+                <Picker x:Name="LanguageFilterPicker"
+                        Grid.Column="1"
+                        Title="選擇語言"
+                        IsVisible="False"
+                        HorizontalOptions="Fill"
+                        SelectedIndexChanged="OnLanguageFilterPickerChanged" />
+            </Grid>
         </VerticalStackLayout>
 
         <ScrollView x:Name="FilledState" Grid.Row="2" IsVisible="False">
