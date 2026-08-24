@@ -4,7 +4,7 @@ Parent（App MVP）: [`docs/AI 空耳外語學習 APP－MVP 系統規劃書/Curs
 Parent（信任閘／Web／策展，已交付子切片＋延後前端）: [`docs/specs/parallel-web-curator-trust.md`](../specs/parallel-web-curator-trust.md)  
 Parent（Client-first 單字本）: [`docs/specs/client-first-wordcards-sync.md`](../specs/client-first-wordcards-sync.md) · ADR-0007  
 Parent（同字再查／本機短路）: [`docs/specs/local-notebook-lookup-short-circuit.md`](../specs/local-notebook-lookup-short-circuit.md) · ADR-0008  
-Glossary: [`docs/glossary.md`](../glossary.md) · ADRs: [`docs/adr/`](../adr/)（0001–0008）
+Glossary: [`docs/glossary.md`](../glossary.md) · ADRs: [`docs/adr/`](../adr/)（0001–0009）
 
 ## 總覽（2026-08-21）
 

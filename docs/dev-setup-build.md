@@ -8,9 +8,11 @@
 
 | 機制 | 作用 |
 |---|---|
-| `nuget.config` → `globalPackagesFolder` | 預設套件目錄 `D:\.nuget\packages` |
-| `Directory.Build.props` → `RestorePackagesPath`／`NuGetPackageRoot`／`NuGetPackageFolders` | **MSBuild 屬性壓過**錯誤的 `NUGET_PACKAGES`，restore 寫入 `obj` 時用短路徑 |
+| `Directory.Build.props` → `RestorePackagesPath`／`NuGetPackageRoot`／`NuGetPackageFolders` | **僅 Windows**：MSBuild 屬性壓過錯誤的 `NUGET_PACKAGES`，restore 寫入 `obj` 時用 `D:\.nuget\packages` |
+| `nuget.config` | 只鎖定套件來源 `nuget.org`（**不再**寫 `globalPackagesFolder`，否則 Linux Docker restore 會因沒有 `D:\` 失敗） |
 | `Directory.Build.targets` | 若仍偵測到 `cursor-sandbox` 則建置立刻失敗並提示修 |
+
+本機（Windows）仍走短路徑 `D:\.nuget\packages`；Linux／Docker 走預設 `~/.nuget/packages`。
 
 請先建立資料夾（只需一次）：
 
@@ -97,7 +99,7 @@ $env:NUGET_PACKAGES   # 目前程序
 
 ## Windows 長路徑（可選）
 
-可啟用 Windows「長路徑」群組原則／登錄，但 **MAUI／AndroidX 仍建議以短 `globalPackagesFolder` 為主**，比只開長路徑更穩。
+可啟用 Windows「長路徑」群組原則／登錄，但 **MAUI／AndroidX 仍建議以短 `RestorePackagesPath`（`D:\.nuget\packages`）為主**，比只開長路徑更穩。
 
 ## Android 部署：「裝置無法辨識命令。(22)」
 

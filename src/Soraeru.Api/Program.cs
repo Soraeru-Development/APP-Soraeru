@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Soraeru.Api.Endpoints;
+using Soraeru.Api.Hosting;
 using Soraeru.Application;
 using Soraeru.Infrastructure;
 using Soraeru.Infrastructure.Auth;
@@ -10,8 +11,29 @@ using Soraeru.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+var corsOrigins = (builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [])
+    .Where(origin => !string.IsNullOrWhiteSpace(origin))
+    .Select(origin => origin.Trim())
+    .ToArray();
+if (corsOrigins.Length > 0)
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+            policy.WithOrigins(corsOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod());
+    });
+}
 
 var jwt = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
     ?? throw new InvalidOperationException("Jwt configuration section is missing.");
@@ -46,9 +68,15 @@ var app = builder.Build();
 var provider = app.Configuration.GetValue<string>("Persistence:Provider") ?? "Sqlite";
 if (!string.Equals(provider, "InMemory", StringComparison.OrdinalIgnoreCase))
 {
+    SqliteDataDirectory.EnsureExists(app.Configuration.GetConnectionString("Default"));
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<SoraeruDbContext>();
     db.Database.Migrate();
+}
+
+if (corsOrigins.Length > 0)
+{
+    app.UseCors();
 }
 
 app.UseAuthentication();

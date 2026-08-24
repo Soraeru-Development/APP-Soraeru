@@ -33,7 +33,7 @@ dotnet tool install --global dotnet-ef
 - 改成 InMemory（無檔案、重啟清空）：`"Provider": "InMemory"`。
 - 未來 SQL Server：將 `Provider` 換成對應實作並改連線字串（目前正式預設為 Sqlite）。
 
-JWT 開發用密鑰同檔 `Jwt:SigningKey`（僅限 Development）。正式環境請用 **User Secrets／環境變數**，勿提交真實金鑰。
+JWT 開發用密鑰同檔 `Jwt:SigningKey`（僅限 Development）。正式環境請用 **User Secrets／環境變數**，勿提交真實金鑰。生產 SQLite（Railway Volume）見 [`dev-setup-railway.md`](dev-setup-railway.md)。
 
 ## 3. 如何套用 Migration
 

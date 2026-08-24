@@ -5,11 +5,12 @@
 
 .DESCRIPTION
   Cursor Agent sandbox may inject NUGET_PACKAGES under %TEMP%\cursor-sandbox-cache\...
-  That can override nuget.config globalPackagesFolder and write long paths into
+  That can override Directory.Build.props RestorePackagesPath and write long paths into
   obj\*.nuget.g.props / *.nuget.g.targets / project.assets.json, breaking VS (MAX_PATH).
 
-  This repo hardens via Directory.Build.props (RestorePackagesPath / NuGetPackageRoot)
-  + nuget.config. This script still clears polluted bin/obj, forces process env away from
+  This repo hardens via Directory.Build.props on Windows (RestorePackagesPath / NuGetPackageRoot).
+  nuget.config no longer sets globalPackagesFolder (Linux Docker restore must not see D:\).
+  This script still clears polluted bin/obj, forces process env away from
   sandbox, restores, optionally builds, and verifies no sandbox path remains.
 
 .EXAMPLE

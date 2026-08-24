@@ -1,0 +1,10 @@
+# Optional hint. New Railway services: set Dockerfile + Healthcheck Path=/health
+# and Replicas = 1 in the dashboard (Config as Code is deprecated for new services).
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
