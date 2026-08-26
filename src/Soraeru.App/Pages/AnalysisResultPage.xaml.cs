@@ -1,6 +1,7 @@
 using Microsoft.Maui.Controls.Shapes;
 using Soraeru.ClientLogic.Analyze;
 using Soraeru.ClientLogic.Notebook;
+using Soraeru.ClientLogic.Ocr;
 using Soraeru.ClientLogic.Tts;
 using Soraeru.Languages;
 using Soraeru.Services.Interfaces;
@@ -40,10 +41,44 @@ public partial class AnalysisResultPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        // Analysis finished — free OCR preview so back-nav to ImagePick is blank.
-        _ocrSession.Clear();
         BindResult(_flow.LastResult);
+        BindContinueOcrChrome();
     }
+
+    protected override bool OnBackButtonPressed()
+    {
+        if (OcrSessionRetention.ShouldReturnToOcrSelectOnBack(_ocrSession.RecognizedText))
+        {
+            Dispatcher.Dispatch(() => Routes.GoToContinueOcrSelectAsync());
+            return true;
+        }
+
+        return base.OnBackButtonPressed();
+    }
+
+    void BindContinueOcrChrome()
+    {
+        var show = OcrSessionRetention.ShouldShowContinueOcrCta(
+            _ocrSession.RecognizedText,
+            _ocrSession.LocalImagePath);
+        ContinueOcrButton.Text = OcrSessionRetention.ContinueSamePhotoCta;
+        ContinueOcrButton.IsVisible = show;
+        Shell.SetBackButtonBehavior(this, new BackButtonBehavior
+        {
+            Command = new Command(async () => await OnOcrAwareBackAsync())
+        });
+    }
+
+    async Task OnOcrAwareBackAsync()
+    {
+        if (OcrSessionRetention.ShouldReturnToOcrSelectOnBack(_ocrSession.RecognizedText))
+            await Routes.GoToContinueOcrSelectAsync();
+        else
+            await Routes.BackAsync();
+    }
+
+    async void OnContinueOcrClicked(object? sender, EventArgs e) =>
+        await Routes.GoToContinueOcrSelectAsync();
 
     void BindResult(AnalyzeResultDto? result)
     {
@@ -290,8 +325,12 @@ public partial class AnalysisResultPage : ContentPage
             await DisplayAlertAsync("播放", play.Message ?? FormalTtsMessages.SpeakFailed, "了解");
     }
 
-    async void OnFixLanguageClicked(object? sender, EventArgs e) =>
+    async void OnFixLanguageClicked(object? sender, EventArgs e)
+    {
+        if (OcrSessionRetention.ShouldClearOn(OcrSessionLeaveTarget.WordInput))
+            _ocrSession.Clear();
         await Routes.GoAsync(Routes.WordInput);
+    }
 
     async void OnRegenerateClicked(object? sender, EventArgs e)
     {

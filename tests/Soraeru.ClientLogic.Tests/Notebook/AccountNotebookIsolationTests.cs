@@ -9,9 +9,10 @@ public sealed class AccountNotebookIsolationTests
     private static readonly Guid UserB = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
 
     [Fact]
-    public void ShouldClearLocalOnSignIn_when_switching_accounts()
+    public void ShouldClearLocalOnSignIn_when_switching_accounts_does_not_clear_store()
     {
-        AccountNotebookIsolation.ShouldClearLocalOnSignIn(UserA, UserB).ShouldBeTrue();
+        // Multi-user coexistence: switch only changes session filter; never wipe other owners.
+        AccountNotebookIsolation.ShouldClearLocalOnSignIn(UserA, UserB).ShouldBeFalse();
     }
 
     [Fact]

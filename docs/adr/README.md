@@ -18,4 +18,4 @@
 | Status | `proposed` → `accepted`；被取代時改 `superseded by ADR-NNNN` |
 | 內容 | 背景＋決定＋取捨；夠短即可 |
 
-現有紀錄從 `0001` 起；產品領域詞見 `../glossary.md`。
+現有：`0001`…`0009`；OCR 腳本族／按需包見 **`0010-ocr-script-family-ondemand-tessdata.md`**。產品領域詞見 `../glossary.md`。

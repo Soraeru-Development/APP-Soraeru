@@ -8,6 +8,8 @@ public partial class AppShell : Shell
 {
     bool _mainTabsWired;
     bool _resettingHome;
+    bool _refreshingNotebook;
+    bool _suppressHomeRootResetOnce;
     ShellItem? _watchedItem;
 
     public AppShell()
@@ -42,6 +44,24 @@ public partial class AppShell : Shell
         _mainTabsWired = true;
     }
 
+    /// <summary>
+    /// Skip the next Home-tab root reset so login can restore ImagePick／OcrSelect.
+    /// </summary>
+    public void SuppressHomeRootResetOnce() => _suppressHomeRootResetOnce = true;
+
+    /// <summary>
+    /// Drop the cached notebook list page so the next show reloads after login/sync.
+    /// </summary>
+    public void ResetNotebookListPage()
+    {
+        var services = Handler?.MauiContext?.Services
+            ?? Application.Current?.Handler?.MauiContext?.Services;
+        if (services is null || !_mainTabsWired)
+            return;
+
+        NotebookTab.Content = services.GetRequiredService<NotebookListPage>();
+    }
+
     void OnShellPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(CurrentItem))
@@ -49,6 +69,7 @@ public partial class AppShell : Shell
 
         WatchCurrentItem();
         _ = EnsureHomeRootIfSelectedAsync();
+        _ = EnsureNotebookListFreshIfSelectedAsync();
     }
 
     void WatchCurrentItem()
@@ -67,6 +88,7 @@ public partial class AppShell : Shell
             return;
 
         _ = EnsureHomeRootIfSelectedAsync();
+        _ = EnsureNotebookListFreshIfSelectedAsync();
     }
 
     /// <summary>
@@ -77,6 +99,12 @@ public partial class AppShell : Shell
 
     async Task EnsureHomeRootIfSelectedAsync()
     {
+        if (_suppressHomeRootResetOnce)
+        {
+            _suppressHomeRootResetOnce = false;
+            return;
+        }
+
         if (_resettingHome || !IsHomeSectionSelected() || IsAtHomeRoot())
             return;
 
@@ -91,6 +119,28 @@ public partial class AppShell : Shell
         }
     }
 
+    async Task EnsureNotebookListFreshIfSelectedAsync()
+    {
+        if (_refreshingNotebook || !IsNotebookSectionSelected())
+            return;
+
+        if (NotebookTab.Content is not NotebookListPage page)
+            return;
+
+        _refreshingNotebook = true;
+        try
+        {
+            await page.EnsureFreshAsync();
+        }
+        finally
+        {
+            _refreshingNotebook = false;
+        }
+    }
+
+    /// <summary>Public entry for resume/login sync when the notebook tab is already visible.</summary>
+    public Task RefreshNotebookListIfSelectedAsync() => EnsureNotebookListFreshIfSelectedAsync();
+
     bool IsHomeSectionSelected()
     {
         var section = CurrentItem?.CurrentItem;
@@ -102,6 +152,19 @@ public partial class AppShell : Shell
 
         return section.Items.Any(c =>
             string.Equals(c.Route, Routes.Home, StringComparison.Ordinal));
+    }
+
+    bool IsNotebookSectionSelected()
+    {
+        var section = CurrentItem?.CurrentItem;
+        if (section is null)
+            return false;
+
+        if (string.Equals(section.Route, Routes.NotebookList, StringComparison.Ordinal))
+            return true;
+
+        return section.Items.Any(c =>
+            string.Equals(c.Route, Routes.NotebookList, StringComparison.Ordinal));
     }
 
     bool IsAtHomeRoot()

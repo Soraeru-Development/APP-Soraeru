@@ -18,6 +18,8 @@ public partial class SettingsPage : ContentPage
         _api = api;
         _session = session;
         _notebook = notebook;
+        AppVersionLabel.Text = AppReleaseInfo.VersionLabel;
+        AppBuiltAtLabel.Text = AppReleaseInfo.BuiltAtLabel;
     }
 
     protected override async void OnAppearing()
@@ -93,8 +95,12 @@ public partial class SettingsPage : ContentPage
         if (!ok)
             return;
 
-        await _notebook.ClearLocalNotebookAsync();
-        await _session.ClearAsync();
+        // Keep local SoT on logout (same-account re-login). Isolation on account switch / delete.
+        var decision = SessionAuthGate.DecideLogout();
+        if (decision.ClearLocalNotebook)
+            await _notebook.ClearLocalNotebookAsync();
+        if (decision.ClearSession)
+            await _session.ClearAsync();
         await GoToLoginAsync();
     }
 
@@ -102,7 +108,7 @@ public partial class SettingsPage : ContentPage
     {
         var ok = await DisplayAlertAsync(
             "刪除帳號",
-            "將永久刪除雲端單字本與帳號，並清除本機單字本與登入狀態。此操作無法復原。",
+            "將永久刪除雲端單字本與帳號，並清除本機此帳號的單字卡與登入狀態（同裝置其他帳號資料不受影響）。此操作無法復原。",
             "刪除帳號",
             "取消");
         if (!ok)

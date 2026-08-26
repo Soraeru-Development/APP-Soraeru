@@ -40,6 +40,13 @@ public static class Routes
     public static Task GoToHomeRootAsync() =>
         Shell.Current.GoToAsync($"//{Main}/{Home}");
 
+    /// <summary>
+    /// Restore the same-photo OCR candidate list from session (OnAppearing rebinds).
+    /// Includes ImagePick so 「重選圖片」 still has a page underneath.
+    /// </summary>
+    public static Task GoToContinueOcrSelectAsync() =>
+        Shell.Current.GoToAsync($"//{Main}/{Home}/{ImagePick}/{OcrSelect}");
+
     /// <summary>Absolute navigation to a main tab (shows Shell TabBar).</summary>
     public static Task GoToMainTabAsync(string pageRoute) =>
         pageRoute == Home

@@ -25,17 +25,19 @@ public static class TessdataCatalog
         "fil.traineddata",
         "vie.traineddata",
         "rus.traineddata",
+        "spa.traineddata",
     ];
 
     /// <summary>
-    /// Scripts without ML Kit on-device modules — primary Tesseract route.
+    /// Scripts without ML Kit on-device modules — primary Tesseract route (Auto hint).
+    /// Kept in sync with <c>OcrEngineRouter.AutoPrimaryLanguages</c>.
     /// </summary>
     public static readonly string TesseractPrimaryLanguages =
         "tha+mya+lao+khm+ara+bod+rus+nep";
 
     /// <summary>
-    /// Broader Tesseract fallback when ML Kit returned empty (includes CJK / Latin / Devanagari packs).
+    /// Broader Tesseract fallback when ML Kit returned empty (includes CJK / Latin / spa / Devanagari packs).
     /// </summary>
     public static readonly string TesseractBroadFallbackLanguages =
-        "eng+jpn+kor+chi_tra+chi_sim+hin+fil+vie+" + TesseractPrimaryLanguages;
+        "eng+spa+jpn+kor+chi_tra+chi_sim+hin+fil+vie+" + TesseractPrimaryLanguages;
 }

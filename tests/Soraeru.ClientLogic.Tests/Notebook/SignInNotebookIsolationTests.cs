@@ -10,13 +10,14 @@ public sealed class SignInNotebookIsolationTests
     private static readonly DateTimeOffset T0 = DateTimeOffset.Parse("2026-08-01T10:00:00Z");
 
     [Fact]
-    public async Task ApplyAsync_when_switching_accounts_clears_entire_local_notebook()
+    public async Task ApplyAsync_when_switching_accounts_keeps_previous_users_cards_in_store()
     {
         var store = new InMemoryLocalWordCardStore();
+        var cardAId = Guid.Parse("11111111-1111-1111-1111-111111111111");
         await store.SaveAllAsync(
         [
             new LocalWordCard(
-                Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                cardAId,
                 UserA,
                 "a",
                 "a",
@@ -32,7 +33,11 @@ public sealed class SignInNotebookIsolationTests
         var notebook = new LocalNotebookService(store, () => LocalSession.SignedIn(UserB));
         await SignInNotebookIsolation.ApplyAsync(notebook, UserA, UserB);
 
-        (await store.LoadAllAsync()).ShouldBeEmpty();
+        var raw = await store.LoadAllAsync();
+        raw.Count.ShouldBe(1);
+        raw[0].Id.ShouldBe(cardAId);
+        raw[0].OwnerUserId.ShouldBe(UserA);
+        (await notebook.ListAsync()).ShouldBeEmpty();
     }
 
     [Fact]

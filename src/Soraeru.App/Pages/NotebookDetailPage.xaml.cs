@@ -1,5 +1,6 @@
 using Soraeru.ClientLogic.Analyze;
 using Soraeru.ClientLogic.Notebook;
+using Soraeru.ClientLogic.Ocr;
 using Soraeru.ClientLogic.Tts;
 using Soraeru.Languages;
 using Soraeru.Services.Interfaces;
@@ -13,6 +14,7 @@ public partial class NotebookDetailPage : ContentPage
     private readonly IFormalTtsService _tts;
     private readonly IAnalyzeFlowStore _flow;
     private readonly ISoraeruApiClient _api;
+    private readonly IOcrSessionStore _ocrSession;
     private Guid? _cardId;
     private LocalWordCard? _card;
 
@@ -20,13 +22,15 @@ public partial class NotebookDetailPage : ContentPage
         LocalNotebookService notebook,
         IFormalTtsService tts,
         IAnalyzeFlowStore flow,
-        ISoraeruApiClient api)
+        ISoraeruApiClient api,
+        IOcrSessionStore ocrSession)
     {
         InitializeComponent();
         _notebook = notebook;
         _tts = tts;
         _flow = flow;
         _api = api;
+        _ocrSession = ocrSession;
 
         WordCardBorder.Shadow = new Shadow
         {
@@ -56,8 +60,44 @@ public partial class NotebookDetailPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        BindContinueOcrChrome();
         await LoadAsync();
     }
+
+    protected override bool OnBackButtonPressed()
+    {
+        if (OcrSessionRetention.ShouldReturnToOcrSelectOnBack(_ocrSession.RecognizedText))
+        {
+            Dispatcher.Dispatch(() => Routes.GoToContinueOcrSelectAsync());
+            return true;
+        }
+
+        return base.OnBackButtonPressed();
+    }
+
+    void BindContinueOcrChrome()
+    {
+        var show = OcrSessionRetention.ShouldShowContinueOcrCta(
+            _ocrSession.RecognizedText,
+            _ocrSession.LocalImagePath);
+        ContinueOcrButton.Text = OcrSessionRetention.ContinueSamePhotoCta;
+        ContinueOcrButton.IsVisible = show;
+        Shell.SetBackButtonBehavior(this, new BackButtonBehavior
+        {
+            Command = new Command(async () => await OnOcrAwareBackAsync())
+        });
+    }
+
+    async Task OnOcrAwareBackAsync()
+    {
+        if (OcrSessionRetention.ShouldReturnToOcrSelectOnBack(_ocrSession.RecognizedText))
+            await Routes.GoToContinueOcrSelectAsync();
+        else
+            await Routes.BackAsync();
+    }
+
+    async void OnContinueOcrClicked(object? sender, EventArgs e) =>
+        await Routes.GoToContinueOcrSelectAsync();
 
     async Task LoadAsync()
     {

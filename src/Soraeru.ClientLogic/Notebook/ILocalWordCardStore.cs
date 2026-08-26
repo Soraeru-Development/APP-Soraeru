@@ -1,7 +1,8 @@
 namespace Soraeru.ClientLogic.Notebook;
 
 /// <summary>
-/// Raw persistence for local word cards (device file / in-memory).
+/// Raw persistence for local word cards (SQLite / in-memory / legacy JSON).
+/// Implementations must retain rows for multiple OwnerUserId values in one store.
 /// </summary>
 public interface ILocalWordCardStore
 {

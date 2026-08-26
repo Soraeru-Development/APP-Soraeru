@@ -1,4 +1,5 @@
 using Soraeru.ClientLogic.Notebook;
+using Soraeru.ClientLogic.Ocr;
 using Soraeru.Services.Interfaces;
 
 namespace Soraeru.Pages;
@@ -8,19 +9,28 @@ public partial class LoginPage : ContentPage
     private readonly ISoraeruApiClient _api;
     private readonly IAuthSessionStore _session;
     private readonly LocalNotebookService _notebook;
+    private readonly NotebookSyncCoordinator _sync;
+    private readonly NotebookListRefreshGate _notebookListRefresh;
     private readonly IGoogleSignInService _googleSignIn;
+    private readonly IOcrSessionStore _ocrSession;
 
     public LoginPage(
         ISoraeruApiClient api,
         IAuthSessionStore session,
         LocalNotebookService notebook,
-        IGoogleSignInService googleSignIn)
+        NotebookSyncCoordinator sync,
+        NotebookListRefreshGate notebookListRefresh,
+        IGoogleSignInService googleSignIn,
+        IOcrSessionStore ocrSession)
     {
         InitializeComponent();
         _api = api;
         _session = session;
         _notebook = notebook;
+        _sync = sync;
+        _notebookListRefresh = notebookListRefresh;
         _googleSignIn = googleSignIn;
+        _ocrSession = ocrSession;
     }
 
     async void OnLoginClicked(object? sender, EventArgs e)
@@ -94,9 +104,36 @@ public partial class LoginPage : ContentPage
             session.Email,
             session.OnboardingCompleted);
 
-        await Routes.GoAsync(
-            session.OnboardingCompleted
-                ? $"//{Routes.Main}/{Routes.Home}"
-                : Routes.Onboarding);
+        // Login skips Splash; pull/push here so notebook is not empty until next resume.
+        try
+        {
+            await _sync.SyncAsync();
+        }
+        catch
+        {
+            // Best-effort; offline / unavailable mirror is fine.
+        }
+
+        // Shell may keep a stale NotebookListPage; bump so the next tab show reloads.
+        _notebookListRefresh.NotifyDataMayHaveChanged();
+        if (Shell.Current is AppShell shell)
+            shell.ResetNotebookListPage();
+
+        var destination = OcrSessionRetention.ResolvePostLoginDestination(
+            session.OnboardingCompleted,
+            OcrSessionRetention.HasLiveRecognizedText(_ocrSession.RecognizedText));
+        await Routes.GoAsync(destination switch
+        {
+            OcrPostLoginDestination.Onboarding => Routes.Onboarding,
+            OcrPostLoginDestination.OcrSelect => ContinueOcrAfterLogin(),
+            _ => $"//{Routes.Main}/{Routes.Home}"
+        });
+    }
+
+    static string ContinueOcrAfterLogin()
+    {
+        if (Shell.Current is AppShell shell)
+            shell.SuppressHomeRootResetOnce();
+        return $"//{Routes.Main}/{Routes.Home}/{Routes.ImagePick}/{Routes.OcrSelect}";
     }
 }

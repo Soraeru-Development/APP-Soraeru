@@ -20,7 +20,7 @@
 3. As a 多裝置學習者, I want 登入後開 App 推拉至最終一致（整卡 LWW／tombstone）, so that 換機或平板能會合同一本帳號的卡。  
 4. As a 學習者, I want 在詳情頁隨時改卡上個人空耳, so that 助記可貼近自己的聽感。  
 5. As a 學習者, I want 分析命中已驗證空耳時只影響該次結果候選、不改寫我已存卡上的空耳, so that 金標不會蓋掉個人版本。  
-6. As a 學習者, I want 換帳時本機單字本與前一帳號隔離, so that 不會把別人的卡推進我的雲端。  
+6. As a 學習者, I want 換帳時只看到自己的本機單字卡且不刪除他帳列, so that 同裝置多帳號可並存且不會把別人的卡推進我的雲端。  
 7. As a 學習者, I want 刪帳時雲端單字本一併刪除, so that 備份不殘留。  
 8. As a Web MVP1 學習者, I want 登入後經雲端鏡像使用單字本, so that 薄 Web 不阻塞，同時與 App 同步會合。
 

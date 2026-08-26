@@ -1,3 +1,4 @@
+using Soraeru.ClientLogic.Ocr;
 using Soraeru.Services.Interfaces;
 
 namespace Soraeru.Pages;
@@ -24,8 +25,13 @@ public partial class HomePage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        // Drop leftover camera/gallery preview when returning to Home (tab reset / back).
-        _ocrSession.Clear();
+        var location = Shell.Current?.CurrentState?.Location?.OriginalString;
+        if (OcrSessionRetention.ShouldClearWhenHomeAppears(location)
+            && OcrSessionRetention.ShouldClearOn(OcrSessionLeaveTarget.Home))
+        {
+            _ocrSession.Clear();
+        }
+
         await LoadQuotaAsync();
     }
 
@@ -61,12 +67,17 @@ public partial class HomePage : ContentPage
     async void OnSettingsClicked(object? sender, EventArgs e) =>
         await Routes.GoToMainTabAsync(Routes.Settings);
 
-    async void OnWordInputTapped(object? sender, TappedEventArgs e) =>
+    async void OnWordInputTapped(object? sender, TappedEventArgs e)
+    {
+        if (OcrSessionRetention.ShouldClearOn(OcrSessionLeaveTarget.WordInput))
+            _ocrSession.Clear();
         await Routes.GoAsync(Routes.WordInput);
+    }
 
     async void OnImagePickTapped(object? sender, TappedEventArgs e)
     {
-        _ocrSession.Clear();
+        if (OcrSessionRetention.ShouldClearOn(OcrSessionLeaveTarget.NewImagePick))
+            _ocrSession.Clear();
         await Routes.GoAsync(Routes.ImagePick);
     }
 

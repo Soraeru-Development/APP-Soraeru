@@ -52,14 +52,17 @@
 
 ## 4. Dashboard 步驟（同一 GitHub repo、一個 API 服務）
 
+> **介面提示（2025–2026）：** Railway **沒有**專案列表上的「Build」分頁。建置選項在 **服務（Service）→ Settings** 裡往下捲的 **Build** 區塊。若只看到 `0/1 service online` 的專案卡片，代表你還在專案層——請點進服務方塊。
+
 1. 將含 Dockerfile 的 commit 推到 GitHub（`origin`：`APP-Soraeru`）。
-2. [Railway](https://railway.com/) → New Project → Deploy from GitHub repo。
-3. 確認建置用根目錄 Dockerfile（不要讓它嘗試還原整個 solution）。
-4. 新增 Volume，mount `/app/data`，Attach 到 API 服務 → Redeploy。
-5. Settings → Replicas = 1。
-6. Generate Domain。
-7. Healthcheck：`/health`。
-8. 填上節 Variables → Redeploy。
+2. [Railway](https://railway.com/) → 點專案（例如 `satisfied-celebration`）→ **點 Canvas 上的服務方塊**（不是 Project Settings 齒輪）。
+3. 上方分頁應為 **Deployments｜Variables｜Metrics｜Settings**。
+4. **Settings** → 往下捲 **Source**：repo = `APP-Soraeru`、branch = `main`、Root Directory 留空。
+5. 同頁 **Build** 區塊：**Builder = Dockerfile**（不要 Railpack）；Dockerfile Path 留空或 `Dockerfile`。
+6. **Variables** → 往下捲 **Volumes** → mount `/app/data` → Redeploy。
+7. **Settings** → Scaling → **Replicas = 1**。
+8. **Settings** → Networking → **Generate Domain**；Deploy 區 Healthcheck = `/health`。
+9. 填上節 3 的 Variables → Redeploy。
 
 驗證：`GET https://<api>.up.railway.app/health` 應為 200。再註冊一筆帳、Redeploy，確認 Volume 上的 `soraeru.db` 還在。
 
@@ -74,15 +77,22 @@ Railway 預設用 **Railpack**。若 GitHub 還沒有根目錄 `Dockerfile`，�
 處理：
 
 1. 確認 `Dockerfile`、`.dockerignore` 已 **commit 並 push** 到 Railway 所接的 GitHub 分支（通常是 `main`）。
-2. Railway 服務 → Settings → Build → **Builder = Dockerfile**（Dockerfile path 留空或 `Dockerfile`）。
-3. Redeploy。成功的建置日誌應出現 `FROM mcr.microsoft.com/dotnet/sdk:10.0`，而不是 `Railpack 0.x`。
+2. 進 **服務方塊 → Settings**，往下捲 **Build** → **Builder = Dockerfile**（Dockerfile path 留空或 `Dockerfile`）。
+3. **Deployments** → 最新一筆 → **Redeploy**（部分情況 Git push 仍走 Railpack，手動 Redeploy 才會用 Dockerfile）。
+4. 成功的建置日誌應出現 `Using detected Dockerfile!` 與 `FROM mcr.microsoft.com/dotnet/sdk:10.0`，而不是 `Railpack 0.x`。
+
+若 **Settings 裡找不到 Builder 下拉** 或欄位鎖住：
+
+- **Variables** 加 `RAILWAY_DOCKERFILE_PATH=Dockerfile`，再 Redeploy；或
+- 刪除失敗服務 → Canvas **+ New** → **GitHub Repo** → 建立時選 **Dockerfile**；或
+- 根目錄 `railway.toml` 已設 `builder = "DOCKERFILE"`，但**新服務**可能忽略 Config as Code——仍以 Dashboard 手動設為準。
 
 ## 5. 已知限制（上線知情）
 
 - 忘記密碼：token 在行程記憶體，信只進 log；封閉測試請用 Email 註冊或 Google。
 - 分析快取是行程內記憶體：redeploy 後清空（可能再扣額度）。
 - SQLite = MVP 單實例；要多區／多副本再遷 Postgres（另開 ADR）。
-- App 目前仍打 `http://10.0.2.2:5080/`。實機／封閉測試連雲端須另改基底 URL（不要把正式 URL 寫死進會進 git 的 Release 設定，除非有意）。
+- App **Android Release／封閉測試 APK** 預設打公開 HTTPS（`MauiProgram.ResolveApiBaseUrl` → `https://airy-enjoyment-production-de0f.up.railway.app/`）。**Debug** 模擬器仍用 `http://10.0.2.2:5080/`。切回本機 Release：編譯常數 `USE_LOCAL_API`；Debug 強制雲端：`USE_RAILWAY_API`。
 
 ## 6. CORS（現在空、Web 之後）
 

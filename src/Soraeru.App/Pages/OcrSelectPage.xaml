@@ -57,32 +57,63 @@
                 <Label Text="來源語言"
                        Style="{StaticResource FieldLabel}"
                        Margin="0,8,0,0" />
+                <Label x:Name="SelectedLanguageLabel"
+                       Text="目前：自動偵測"
+                       Style="{StaticResource CaptionLabel}" />
                 <Border Stroke="{StaticResource OutlineVariant}"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 8"
                         BackgroundColor="{StaticResource Surface}"
-                        Padding="12,4">
-                    <Picker x:Name="LanguagePicker"
-                            Title="選擇語言"
-                            SelectedIndex="0"
-                            TextColor="{StaticResource OnSurface}"
-                            TitleColor="{StaticResource Outline}"
-                            FontSize="16"
-                            SelectedIndexChanged="OnLanguagePickerChanged">
-                        <Picker.Items>
-                            <x:String>自動偵測</x:String>
-                            <x:String>日文 (Japanese)</x:String>
-                            <x:String>泰文 (Thai)</x:String>
-                            <x:String>他加祿語 (Tagalog)</x:String>
-                            <x:String>韓文 (Korean)</x:String>
-                            <x:String>越南文 (Vietnamese)</x:String>
-                        </Picker.Items>
-                    </Picker>
+                        Padding="4,0">
+                    <SearchBar x:Name="LanguageSearchBar"
+                               Placeholder="搜尋語言（如 阿拉伯 / fr / हिंदी）"
+                               PlaceholderColor="{StaticResource Outline}"
+                               TextColor="{StaticResource OnSurface}"
+                               CancelButtonColor="{StaticResource Outline}" />
+                </Border>
+                <Border Stroke="{StaticResource OutlineVariant}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
+                        BackgroundColor="{StaticResource Surface}"
+                        Padding="0"
+                        HeightRequest="180">
+                    <CollectionView x:Name="LanguageList"
+                                    SelectionMode="Single">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="16,10">
+                                    <Label Text="{Binding Display}"
+                                           TextColor="{StaticResource OnSurface}"
+                                           FontSize="15"
+                                           LineBreakMode="TailTruncation" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
                 </Border>
                 <Label x:Name="LanguageHelperLabel"
                        Text="無法從文字可靠推斷時維持自動偵測。選定具體語言後，若本機已有同字卡會直接開詳情（不消耗分析額度）。"
                        Style="{StaticResource CaptionLabel}"
                        LineBreakMode="WordWrap" />
+
+                <Border x:Name="AssistBanner"
+                        IsVisible="False"
+                        Stroke="{StaticResource OutlineVariant}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{StaticResource SurfaceContainerLow}"
+                        Padding="12,10">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="辨識品質可能不穩定（例如西里爾被誤成拉丁）。可請 AI 依文字建議校正——僅傳送文字、不上傳圖片；需您確認後才套用，不會靜默覆寫。"
+                               Style="{StaticResource CaptionLabel}"
+                               LineBreakMode="WordWrap" />
+                        <Button Text="取得文字建議（需確認）…"
+                                Style="{StaticResource LinkButton}"
+                                Padding="0"
+                                HorizontalOptions="Start"
+                                Clicked="OnAssistClicked" />
+                    </VerticalStackLayout>
+                </Border>
 
                 <Border Stroke="{StaticResource OutlineVariant}"
                         StrokeThickness="1"

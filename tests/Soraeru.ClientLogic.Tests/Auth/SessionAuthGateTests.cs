@@ -19,7 +19,7 @@ public sealed class SessionAuthGateTests
     }
 
     [Fact]
-    public void Splash_when_token_present_and_GetMe_unauthorized_clears_and_goes_login()
+    public void Splash_when_token_present_and_GetMe_unauthorized_clears_session_keeps_local_notebook()
     {
         var decision = SessionAuthGate.DecideSplash(
             hasLocalSession: true,
@@ -27,16 +27,16 @@ public sealed class SessionAuthGateTests
             localOnboardingCompleted: true);
 
         decision.Destination.ShouldBe(SplashDestination.Login);
-        decision.ClearLocalNotebook.ShouldBeTrue();
+        decision.ClearLocalNotebook.ShouldBeFalse();
         decision.ClearSession.ShouldBeTrue();
     }
 
     [Fact]
-    public void Settings_when_GetMe_unauthorized_clears_local_notebook_and_session()
+    public void Settings_when_GetMe_unauthorized_clears_session_keeps_local_notebook()
     {
         var decision = SessionAuthGate.DecideSettingsProfile(MeProbeResult.Unauthorized);
 
-        decision.ClearLocalNotebook.ShouldBeTrue();
+        decision.ClearLocalNotebook.ShouldBeFalse();
         decision.ClearSession.ShouldBeTrue();
         decision.GoToLogin.ShouldBeTrue();
         decision.ShowProfile.ShouldBeFalse();
@@ -58,5 +58,18 @@ public sealed class SessionAuthGateTests
 
         decision.ClearLocalNotebook.ShouldBeFalse();
         decision.ClearSession.ShouldBeFalse();
+    }
+
+    /// <summary>
+    /// Explicit logout must not wipe local SoT — multi-user rows remain; list filters by owner.
+    /// Delete account clears only that owner's rows via DecideAfterDeleteAccount.
+    /// </summary>
+    [Fact]
+    public void Logout_clears_session_but_keeps_local_notebook()
+    {
+        var decision = SessionAuthGate.DecideLogout();
+
+        decision.ClearLocalNotebook.ShouldBeFalse();
+        decision.ClearSession.ShouldBeTrue();
     }
 }

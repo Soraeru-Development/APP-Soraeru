@@ -11,20 +11,24 @@ public partial class NotebookListPage : ContentPage
     private readonly LocalNotebookService _notebook;
     private readonly IAuthSessionStore _session;
     private readonly IFormalTtsService _tts;
+    private readonly NotebookListRefreshGate _refreshGate;
     private string _search = string.Empty;
     private string? _languageFilter;
     private bool _suppressPickerChanged;
+    private int _loadedRefreshVersion = -1;
     private IReadOnlyList<SourceLanguageCatalog.LanguagePresentation> _filterLanguages = [];
 
     public NotebookListPage(
         LocalNotebookService notebook,
         IAuthSessionStore session,
-        IFormalTtsService tts)
+        IFormalTtsService tts,
+        NotebookListRefreshGate refreshGate)
     {
         InitializeComponent();
         _notebook = notebook;
         _session = session;
         _tts = tts;
+        _refreshGate = refreshGate;
     }
 
     protected override async void OnAppearing()
@@ -32,6 +36,12 @@ public partial class NotebookListPage : ContentPage
         base.OnAppearing();
         await ReloadAsync();
     }
+
+    /// <summary>
+    /// Shell tab switch may skip <see cref="OnAppearing"/> after login; call when the notebook tab is selected.
+    /// </summary>
+    public Task EnsureFreshAsync() =>
+        _refreshGate.NeedsReload(_loadedRefreshVersion) ? ReloadAsync() : Task.CompletedTask;
 
     async void OnSearchTextChanged(object? sender, TextChangedEventArgs e)
     {
@@ -78,6 +88,7 @@ public partial class NotebookListPage : ContentPage
     {
         try
         {
+            _loadedRefreshVersion = _refreshGate.Version;
             var signedIn = await _session.HasSessionAsync();
             var allCards = (await _notebook.ListAsync()).ToList();
 

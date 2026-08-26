@@ -49,3 +49,21 @@ date,person,hours,ticket,note,kind
 2026-08-21,Ashton,0.75,13,語言>5 picker AutomationId 重複設值修復；確認本機單字卡為 JSON 非 SQLite,dev
 2026-08-21,Ashton,0.25,11,封閉測試前缺陷收斂：列表讀取失敗已修＋OCR 交付備註,dev
 2026-08-24,Ashton,0.75,setup,Railway API：Dockerfile／PORT／CORS／Volume 文件與本機 API 建置,ops
+2026-08-24,Ashton,0.5,setup,Railway Railpack 誤判排查＋Dockerfile 部署成功（Volume／網域／health）,ops
+2026-08-24,Ashton,0.5,11,App Release 改打 Railway API＋產出封閉測試 Signed APK,ops
+2026-08-24,Ashton,0.5,11,tocc.top 自訂網域 APK 嘗試；診斷 SSL 主機名不符（憑證問題、不做 App bypass）,ops
+2026-08-24,Ashton,0.75,13,登出不清本機SoT＋Login後Sync；修單字本登出重登消失／間歇,dev
+2026-08-24,Ashton,0.5,13,登入後單字本列表強制重載（RefreshGate＋Shell Reset）；第一時間空白,dev
+2026-08-24,Ashton,1.0,07,OCR 同圖重選 UX：OcrSessionRetention＋結果／詳情 CTA＋Analyzing 導航修,dev
+2026-08-24,Ashton,0.25,11,改回 Railway URL 並重打 Signed APK（tocc.top SSL 暫緩）,ops
+2026-08-25,Ashton,1.5,07,OCR P0~P2：Hybrid 路由／ru·es／腳本族／spa／品質提示 stub（TDD）,dev
+2026-08-25,Ashton,2.0,07,OCR 腳本族擴充＋可搜尋來源語＋按需 tessdata／ADR0010（TDD）,dev
+2026-08-25,Ashton,0.25,07,語系別文案＋阿語螢幕翻拍本機預處理／錯誤提示,dev
+2026-08-25,Ashton,0.25,10,登入／註冊 email 系統深色模式白字防禦,dev
+2026-08-26,Ashton,0.75,11,上午 Release APK 實機包（Debug改Release、Signed 路徑）,ops
+2026-08-26,Ashton,0.5,07,西里爾三按鈕短詞漏識調查（ест／ect）,dev
+2026-08-26,Ashton,0.25,misc,專案 skill：改程式後自動打 Release APK,ops
+2026-08-26,Ashton,2.5,07,西里爾 OCR 多輪：切塊／誤識 токо·ОКО；review 後刪單詞映射、僅 ect/ест 校正,dev
+2026-08-26,Ashton,0.25,10,設定頁版本 v1.0.1＋成型時間 yyyy/MM/dd-HH:mm,dev
+2026-08-26,Ashton,0.25,11,午後多輪 Release APK 側載驗證,ops
+2026-08-26,Ashton,0.25,tickets,收工：工單／工時對齊並提交改動,plan

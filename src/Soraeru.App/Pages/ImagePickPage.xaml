@@ -95,6 +95,37 @@
                     </Border>
                 </Grid>
 
+                <VerticalStackLayout Spacing="6" Margin="0,4,0,0">
+                    <Label Text="語系別（選填）"
+                           Style="{StaticResource FieldLabel}" />
+                    <Border Stroke="{StaticResource OutlineVariant}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 8"
+                            BackgroundColor="{StaticResource Surface}"
+                            Padding="12,4">
+                        <Picker x:Name="ScriptFamilyPicker"
+                                Title="語系別"
+                                SelectedIndex="0"
+                                TextColor="{StaticResource OnSurface}"
+                                TitleColor="{StaticResource Outline}"
+                                FontSize="16">
+                            <Picker.Items>
+                                <x:String>自動</x:String>
+                                <x:String>拉丁字母（英／法／德／西…）</x:String>
+                                <x:String>西里爾（俄／烏…）</x:String>
+                                <x:String>漢字體系（中／日／韓）</x:String>
+                                <x:String>阿拉伯字母（阿／波…）</x:String>
+                                <x:String>天城文（印地／尼泊爾…）</x:String>
+                                <x:String>東南亞（泰／緬／寮／柬）</x:String>
+                                <x:String>其他</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </Border>
+                    <Label Text="預設自動。不確定時選自動即可；也可依文字長相選語系別，讓本機辨識走對路線（例如阿拉伯字母→ara、西里爾→rus）。原圖不上傳；缺少語言包時會下載至本機快取。"
+                           Style="{StaticResource CaptionLabel}"
+                           LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+
                 <Border StrokeThickness="0"
                         BackgroundColor="{StaticResource SurfaceContainerLowest}"
                         StrokeShape="RoundRectangle 0,8,0,8"

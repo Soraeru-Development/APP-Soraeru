@@ -33,5 +33,5 @@
 - **推拉**：`NotebookSyncCoordinator`＋`ICloudWordCardMirror`；協定以 `InMemoryCloudWordCardMirror` 單測驗證。
 - **App 觸發**：`App` Window `Created`／`Resumed`＋Splash 進已登入流時呼叫 `SyncAsync`（重疊有 gate）。
 - **鏡像佔位**：DI 註冊 `UnavailableCloudWordCardMirror`（pull 失敗→`SkippedOffline`）；真實推拉 API＝票 **15**。
-- **換帳隔離**：`SignInNotebookIsolation`（Login／Register／Splash）；同步只推當前 `OwnerUserId`；`EnsureOwnerIsolationAsync` 安全網。
+- **換帳隔離**：`SignInNotebookIsolation`（Login／Register／Splash）為 no-op 清庫；列表／同步以 `OwnerUserId` 過濾並存多帳列；刪帳才清當前擁有者。
 - **驗證**：`dotnet test tests/Soraeru.ClientLogic.Tests`（含 Merger／Coordinator／Isolation）；App Windows TFM 建置成功。端到端多裝置會合待 15。

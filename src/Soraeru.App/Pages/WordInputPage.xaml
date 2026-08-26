@@ -50,32 +50,45 @@
                            LineBreakMode="WordWrap" />
                 </VerticalStackLayout>
 
-                <!-- 來源語言 -->
+                <!-- 來源語言（可搜尋） -->
                 <VerticalStackLayout Spacing="8">
                     <Label Text="來源語言"
                            TextColor="{StaticResource OnSurface}"
                            FontSize="18"
                            FontAttributes="Bold" />
+                    <Label x:Name="SelectedLanguageLabel"
+                           Text="目前：自動偵測"
+                           Style="{StaticResource CaptionLabel}" />
                     <Border Stroke="{StaticResource OutlineVariant}"
                             StrokeThickness="1"
                             StrokeShape="RoundRectangle 8"
                             BackgroundColor="{StaticResource Surface}"
-                            Padding="12,4">
-                        <Picker x:Name="LanguagePicker"
-                                Title="選擇語言"
-                                SelectedIndex="0"
-                                TextColor="{StaticResource OnSurface}"
-                                TitleColor="{StaticResource Outline}"
-                                FontSize="16">
-                            <Picker.Items>
-                                <x:String>自動偵測</x:String>
-                                <x:String>日文 (Japanese)</x:String>
-                                <x:String>泰文 (Thai)</x:String>
-                                <x:String>他加祿語 (Tagalog)</x:String>
-                                <x:String>韓文 (Korean)</x:String>
-                                <x:String>越南文 (Vietnamese)</x:String>
-                            </Picker.Items>
-                        </Picker>
+                            Padding="4,0">
+                        <SearchBar x:Name="LanguageSearchBar"
+                                   Placeholder="搜尋語言（如 阿拉伯 / fr / हिंदी）"
+                                   PlaceholderColor="{StaticResource Outline}"
+                                   TextColor="{StaticResource OnSurface}"
+                                   CancelButtonColor="{StaticResource Outline}" />
+                    </Border>
+                    <Border Stroke="{StaticResource OutlineVariant}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 8"
+                            BackgroundColor="{StaticResource Surface}"
+                            Padding="0"
+                            HeightRequest="220">
+                        <CollectionView x:Name="LanguageList"
+                                        SelectionMode="Single">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="16,12">
+                                        <Label Text="{Binding Display}"
+                                               TextColor="{StaticResource OnSurface}"
+                                               FontSize="15"
+                                               LineBreakMode="TailTruncation" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
                     </Border>
                 </VerticalStackLayout>
 

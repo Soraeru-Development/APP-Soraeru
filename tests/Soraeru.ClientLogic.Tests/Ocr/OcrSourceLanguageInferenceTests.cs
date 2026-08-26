@@ -14,6 +14,16 @@ public sealed class OcrSourceLanguageInferenceTests
     [InlineData("สวัสดีครับ", "th")]
     [InlineData("phở", "vi")]
     [InlineData("Đà Nẵng", "vi")]
+    [InlineData("Я женщина.", "ru")]
+    [InlineData("Привет", "ru")]
+    [InlineData("España", "es")]
+    [InlineData("¿Cómo estás?", "es")]
+    [InlineData("¡Hola!", "es")]
+    [InlineData("مرحبا", "ar")]
+    [InlineData("नमस्ते", "hi")]
+    [InlineData("မင်္ဂလာပါ", "my")]
+    [InlineData("សួស្តី", "km")]
+    [InlineData("ສະບາຍດີ", "lo")]
     public void Infer_maps_distinctive_scripts(string text, string expected) =>
         OcrSourceLanguageInference.Infer(text).ShouldBe(expected);
 
@@ -26,6 +36,8 @@ public sealed class OcrSourceLanguageInferenceTests
     [InlineData("漢字詞彙")]
     [InlineData("中文词")]
     [InlineData("café")]
+    [InlineData("Buenos dias")]
+    [InlineData("gracias")]
     public void Infer_returns_auto_when_unreliable(string? text) =>
         OcrSourceLanguageInference.Infer(text).ShouldBe("auto");
 

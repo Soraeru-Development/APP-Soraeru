@@ -1,4 +1,6 @@
 using Soraeru.ClientLogic.Notebook;
+using Soraeru.ClientLogic.Ocr;
+using Soraeru.Languages;
 using Soraeru.Services.Interfaces;
 
 namespace Soraeru.Pages;
@@ -7,12 +9,27 @@ public partial class WordInputPage : ContentPage
 {
     private readonly IAnalyzeFlowStore _flow;
     private readonly LocalNotebookService _notebook;
+    private readonly IOcrSessionStore _ocrSession;
+    private SourceLanguageSearchPicker? _languagePicker;
 
-    public WordInputPage(IAnalyzeFlowStore flow, LocalNotebookService notebook)
+    public WordInputPage(IAnalyzeFlowStore flow, LocalNotebookService notebook, IOcrSessionStore ocrSession)
     {
         InitializeComponent();
         _flow = flow;
         _notebook = notebook;
+        _ocrSession = ocrSession;
+        _languagePicker = new SourceLanguageSearchPicker(
+            LanguageSearchBar,
+            LanguageList,
+            SelectedLanguageLabel,
+            _ => { });
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        if (OcrSessionRetention.ShouldClearOn(OcrSessionLeaveTarget.WordInput))
+            _ocrSession.Clear();
     }
 
     void OnWordTextChanged(object? sender, TextChangedEventArgs e)
@@ -59,15 +76,7 @@ public partial class WordInputPage : ContentPage
     }
 
     string ResolveSourceLanguage() =>
-        LanguagePicker.SelectedIndex switch
-        {
-            1 => "ja",
-            2 => "th",
-            3 => "tl",
-            4 => "ko",
-            5 => "vi",
-            _ => "auto"
-        };
+        _languagePicker?.SelectedCode ?? "auto";
 
     string ResolveNotationPreference()
     {

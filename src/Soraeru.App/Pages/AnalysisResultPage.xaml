@@ -156,6 +156,13 @@
                         Style="{StaticResource LinkButton}"
                         HorizontalOptions="Start"
                         Clicked="OnFixLanguageClicked" />
+
+                <Button x:Name="ContinueOcrButton"
+                        Text="繼續選同圖其他字"
+                        Style="{StaticResource LinkButton}"
+                        HorizontalOptions="Start"
+                        IsVisible="False"
+                        Clicked="OnContinueOcrClicked" />
             </VerticalStackLayout>
         </ScrollView>
 

@@ -250,21 +250,41 @@ public sealed class LocalNotebookServiceTests
     }
 
     [Fact]
-    public async Task ClearLocalNotebookAsync_removes_all_cards()
+    public async Task ClearLocalNotebookAsync_removes_only_current_user_cards()
     {
         var store = new InMemoryLocalWordCardStore();
-        var sut = new LocalNotebookService(store, () => LocalSession.SignedIn(UserA));
-        (await sut.SaveAsync(SampleCommand())).IsSuccess.ShouldBeTrue();
-        (await sut.ListAsync()).Count.ShouldBe(1);
+        var userB = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        var now = DateTimeOffset.Parse("2026-08-01T12:00:00Z");
+        var cardBId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        await store.SaveAllAsync(
+        [
+            new LocalWordCard(
+                Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                UserA,
+                "a",
+                "a",
+                "en",
+                "甲",
+                "a",
+                "空耳A",
+                now,
+                now,
+                null),
+            new LocalWordCard(cardBId, userB, "b", "b", "en", "乙", "b", "空耳B", now, now, null)
+        ]);
 
+        var sut = new LocalNotebookService(store, () => LocalSession.SignedIn(UserA));
         await sut.ClearLocalNotebookAsync();
 
         (await sut.ListAsync()).ShouldBeEmpty();
-        (await store.LoadAllAsync()).ShouldBeEmpty();
+        var raw = await store.LoadAllAsync();
+        raw.Count.ShouldBe(1);
+        raw[0].Id.ShouldBe(cardBId);
+        raw[0].OwnerUserId.ShouldBe(userB);
     }
 
     [Fact]
-    public async Task EnsureOwnerIsolationAsync_drops_cards_owned_by_other_accounts()
+    public async Task EnsureOwnerIsolationAsync_keeps_other_users_cards_in_store()
     {
         var store = new InMemoryLocalWordCardStore();
         var userB = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
@@ -301,8 +321,42 @@ public sealed class LocalNotebookServiceTests
         await sut.EnsureOwnerIsolationAsync(userB);
 
         var raw = await store.LoadAllAsync();
-        raw.Count.ShouldBe(1);
-        raw[0].OwnerUserId.ShouldBe(userB);
+        raw.Count.ShouldBe(2);
+        raw.ShouldContain(c => c.OwnerUserId == UserA);
+        raw.ShouldContain(c => c.OwnerUserId == userB);
+        (await sut.ListAsync()).Count.ShouldBe(1);
+        (await sut.ListAsync())[0].OwnerUserId.ShouldBe(userB);
+    }
+
+    [Fact]
+    public async Task Logout_relogin_and_switch_users_retain_each_owners_cards()
+    {
+        var store = new InMemoryLocalWordCardStore();
+        var userB = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        LocalSession session = LocalSession.SignedIn(UserA);
+        var sut = new LocalNotebookService(store, () => session);
+
+        (await sut.SaveAsync(SampleCommand(source: "alpha", mnemonic: "空耳A"))).IsSuccess.ShouldBeTrue();
+
+        // Explicit logout keeps SoT; session becomes anonymous for UI but store rows remain.
+        session = LocalSession.Anonymous();
+        (await store.LoadAllAsync()).Count.ShouldBe(1);
+
+        session = LocalSession.SignedIn(UserA);
+        (await sut.ListAsync()).Count.ShouldBe(1);
+        (await sut.ListAsync())[0].SelectedMnemonic.ShouldBe("空耳A");
+
+        session = LocalSession.SignedIn(userB);
+        await SignInNotebookIsolation.ApplyAsync(sut, UserA, userB);
+        (await sut.ListAsync()).ShouldBeEmpty();
+        (await sut.SaveAsync(SampleCommand(source: "beta", mnemonic: "空耳B"))).IsSuccess.ShouldBeTrue();
+
+        session = LocalSession.SignedIn(UserA);
+        await SignInNotebookIsolation.ApplyAsync(sut, userB, UserA);
+        var aList = await sut.ListAsync();
+        aList.Count.ShouldBe(1);
+        aList[0].SelectedMnemonic.ShouldBe("空耳A");
+        (await store.LoadAllAsync()).Count.ShouldBe(2);
     }
 
     private static SaveLocalWordCardCommand SampleCommand(

@@ -26,9 +26,9 @@
 		<!-- App Identifier -->
 		<ApplicationId>com.soraeru.app</ApplicationId>
 
-		<!-- Versions -->
-		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<!-- Versions: display v1.0.x (patch only). ApplicationVersion = Android versionCode. -->
+		<ApplicationDisplayVersion>1.0.1</ApplicationDisplayVersion>
+		<ApplicationVersion>2</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>
@@ -76,6 +76,7 @@
 		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+		<PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
 		<PackageReference Include="TesseractOcrMaui" Version="1.5.2" />
 	</ItemGroup>
 
@@ -103,5 +104,32 @@
 		<PackageReference Include="Xamarin.Google.MLKit.TextRecognition.Korean" Version="116.0.1.8" />
 		<PackageReference Include="Xamarin.Google.MLKit.TextRecognition.Devanagari" Version="116.0.1.8" />
 	</ItemGroup>
+
+	<!-- Compile-time APK clock for Settings「成型時間」(yyyy/MM/dd-HH:mm, local). -->
+	<ItemGroup>
+		<Compile Remove="SoraeruBuildStamp.g.cs" />
+		<None Remove="SoraeruBuildStamp.g.cs" />
+	</ItemGroup>
+	<PropertyGroup>
+		<CoreCompileDependsOn>GenerateSoraeruBuildStamp;$(CoreCompileDependsOn)</CoreCompileDependsOn>
+	</PropertyGroup>
+	<Target Name="GenerateSoraeruBuildStamp">
+		<PropertyGroup>
+			<SoraeruBuiltAt>$([System.DateTime]::Now.ToString("yyyy'/'MM'/'dd'-'HH':'mm"))</SoraeruBuiltAt>
+			<SoraeruBuildStampFile>$(IntermediateOutputPath)SoraeruBuildStamp.g.cs</SoraeruBuildStampFile>
+			<!-- WriteLinesToFile splits on ';' — use %3B for the C# terminator. One line so %0A is not required. -->
+			<SoraeruBuildStampText>namespace Soraeru { internal static class SoraeruBuildStamp { public const string BuiltAtLocal = "$(SoraeruBuiltAt)"%3B } }</SoraeruBuildStampText>
+		</PropertyGroup>
+		<MakeDir Directories="$(IntermediateOutputPath)" />
+		<WriteLinesToFile File="$(SoraeruBuildStampFile)"
+		                  Lines="$(SoraeruBuildStampText)"
+		                  Overwrite="true"
+		                  Encoding="UTF-8" />
+		<ItemGroup>
+			<Compile Remove="$(SoraeruBuildStampFile)" />
+			<Compile Include="$(SoraeruBuildStampFile)" />
+			<FileWrites Include="$(SoraeruBuildStampFile)" />
+		</ItemGroup>
+	</Target>
 
 </Project>

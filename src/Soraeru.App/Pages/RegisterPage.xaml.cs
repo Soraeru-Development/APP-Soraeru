@@ -8,13 +8,22 @@ public partial class RegisterPage : ContentPage
     private readonly ISoraeruApiClient _api;
     private readonly IAuthSessionStore _session;
     private readonly LocalNotebookService _notebook;
+    private readonly NotebookSyncCoordinator _sync;
+    private readonly NotebookListRefreshGate _notebookListRefresh;
 
-    public RegisterPage(ISoraeruApiClient api, IAuthSessionStore session, LocalNotebookService notebook)
+    public RegisterPage(
+        ISoraeruApiClient api,
+        IAuthSessionStore session,
+        LocalNotebookService notebook,
+        NotebookSyncCoordinator sync,
+        NotebookListRefreshGate notebookListRefresh)
     {
         InitializeComponent();
         _api = api;
         _session = session;
         _notebook = notebook;
+        _sync = sync;
+        _notebookListRefresh = notebookListRefresh;
     }
 
     async void OnPrivacyClicked(object? sender, EventArgs e) =>
@@ -68,6 +77,19 @@ public partial class RegisterPage : ContentPage
             session.UserId,
             session.Email,
             session.OnboardingCompleted);
+
+        try
+        {
+            await _sync.SyncAsync();
+        }
+        catch
+        {
+            // Best-effort; offline / unavailable mirror is fine.
+        }
+
+        _notebookListRefresh.NotifyDataMayHaveChanged();
+        if (Shell.Current is AppShell shell)
+            shell.ResetNotebookListPage();
 
         await Routes.GoAsync(Routes.Onboarding);
     }

@@ -46,4 +46,35 @@ public sealed class OcrTextTokenizerTests
 
         tokens.ShouldBe(["日本語の単語"]);
     }
+
+    [Fact]
+    public void Tokenize_filters_icon_noise_beside_cyrillic()
+    {
+        var tokens = OcrTextTokenizer.Tokenize("$ ) Я женщина. PP\" Ч");
+
+        tokens.ShouldBe(["Я", "женщина."]);
+    }
+
+    [Fact]
+    public void StripNoiseTokens_removes_junk_keeps_cyrillic_words()
+    {
+        var cleaned = OcrTextTokenizer.StripNoiseTokens("$ ) Я женщина.\nPP\" Ч");
+
+        cleaned.ShouldBe("Я женщина.");
+    }
+
+    [Fact]
+    public void Tokenize_keeps_latin_when_no_cyrillic_context()
+    {
+        var tokens = OcrTextTokenizer.Tokenize("hello PP world");
+
+        tokens.ShouldBe(["hello", "PP", "world"]);
+    }
+
+    [Fact]
+    public void IsLikelyVocabularyToken_rejects_symbol_only()
+    {
+        OcrTextTokenizer.IsLikelyVocabularyToken("$)", cyrillicContext: true).ShouldBeFalse();
+        OcrTextTokenizer.IsLikelyVocabularyToken("PP\"", cyrillicContext: true).ShouldBeFalse();
+    }
 }

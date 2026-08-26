@@ -33,3 +33,5 @@
 - 登入／設定／註冊入口改導應用內頁；商店託管 URL 留給票 12。
 - 驗證：`dotnet test …LegalDocumentsTests`（3 綠）；App Windows TFM 建置成功。額度／方案預留／登出／再看 onboarding 為既有行為。
 - **2026-08-13 手動已驗證**：隱私權政策、AI 內容聲明頁有內容。
+- **2026-08-25 晚・登入白字**：系統深色模式會讓 Entry 字變白、登入頁仍為淺底。`App.UserAppTheme = Light`；登入／註冊／忘記密碼 Entry `TextColor` 釘 `OnSurface`。請在系統深色模式複測。
+- **2026-08-26・設定關於**：版本顯示 `v1.0.x`（本輪 **v1.0.1**，只改 patch）；成型時間 `yyyy/MM/dd-HH:mm`（編譯寫入 `SoraeruBuildStamp`，設定頁「關於」）。`ApplicationVersion`（versionCode）＝2。

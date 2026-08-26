@@ -29,4 +29,15 @@ public sealed record DeviceOcrResult(
 public interface IDeviceOcrService
 {
     Task<DeviceOcrResult> RecognizeAsync(string localImagePath, CancellationToken cancellationToken = default);
+
+    Task<DeviceOcrResult> RecognizeAsync(
+        string localImagePath,
+        Soraeru.ClientLogic.Ocr.OcrScriptFamilyHint scriptHint,
+        CancellationToken cancellationToken = default);
+
+    Task<DeviceOcrResult> RecognizeAsync(
+        string localImagePath,
+        Soraeru.ClientLogic.Ocr.OcrScriptFamilyHint scriptHint,
+        IProgress<string>? progress,
+        CancellationToken cancellationToken = default);
 }

@@ -1,3 +1,4 @@
+using Soraeru.ClientLogic.Ocr;
 using Soraeru.Services.Interfaces;
 
 namespace Soraeru.Pages;
@@ -47,9 +48,9 @@ public partial class ImagePickPage : ContentPage
                 return;
             }
 
+            if (OcrSessionRetention.ShouldClearOn(OcrSessionLeaveTarget.NewImagePick))
+                _ocrSession.Clear();
             _ocrSession.LocalImagePath = captured.LocalPath;
-            _ocrSession.RecognizedText = null;
-            _ocrSession.StatusMessage = null;
             RefreshPreviewFromSession();
             StatusLabel.Text = "已選圖（僅本機）。接著可開始辨識。";
         }
@@ -95,8 +96,13 @@ public partial class ImagePickPage : ContentPage
 
         try
         {
+            var scriptHint = ResolveScriptFamilyHint();
             SetBusy(true, "裝置端辨識中（不上傳原圖）…");
-            var result = await _ocr.RecognizeAsync(path);
+            var progress = new Progress<string>(msg =>
+            {
+                MainThread.BeginInvokeOnMainThread(() => StatusLabel.Text = msg);
+            });
+            var result = await _ocr.RecognizeAsync(path, scriptHint, progress);
             if (!result.Success)
             {
                 var goManual = await DisplayAlertAsync(
@@ -113,7 +119,9 @@ public partial class ImagePickPage : ContentPage
             }
 
             _ocrSession.RecognizedText = MergeRecognizedText(result);
-            _ocrSession.StatusMessage = null;
+            _ocrSession.StatusMessage = OcrTextAssistGate.ShouldSuggestAssist(_ocrSession.RecognizedText)
+                ? "quality_suspicious"
+                : null;
             await Routes.GoAsync(Routes.OcrSelect);
         }
         catch (OperationCanceledException)
@@ -138,6 +146,19 @@ public partial class ImagePickPage : ContentPage
             SetBusy(false);
         }
     }
+
+    OcrScriptFamilyHint ResolveScriptFamilyHint() =>
+        ScriptFamilyPicker.SelectedIndex switch
+        {
+            1 => OcrScriptFamilyHint.Latin,
+            2 => OcrScriptFamilyHint.Cyrillic,
+            3 => OcrScriptFamilyHint.Cjk,
+            4 => OcrScriptFamilyHint.Arabic,
+            5 => OcrScriptFamilyHint.Devanagari,
+            6 => OcrScriptFamilyHint.SoutheastAsian,
+            7 => OcrScriptFamilyHint.Other,
+            _ => OcrScriptFamilyHint.Auto
+        };
 
     static string MergeRecognizedText(DeviceOcrResult result)
     {

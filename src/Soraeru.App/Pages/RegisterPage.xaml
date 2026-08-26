@@ -13,7 +13,9 @@
             <Border Style="{StaticResource InputBorder}">
                 <Entry x:Name="DisplayNameEntry"
                        Placeholder="怎麼稱呼你"
-                       PlaceholderColor="{StaticResource Outline}" />
+                       TextColor="{StaticResource OnSurface}"
+                       PlaceholderColor="{StaticResource Outline}"
+                       BackgroundColor="Transparent" />
             </Border>
 
             <Label Text="電子郵件" Style="{StaticResource FieldLabel}" />
@@ -21,7 +23,9 @@
                 <Entry x:Name="EmailEntry"
                        Placeholder="you@example.com"
                        Keyboard="Email"
-                       PlaceholderColor="{StaticResource Outline}" />
+                       TextColor="{StaticResource OnSurface}"
+                       PlaceholderColor="{StaticResource Outline}"
+                       BackgroundColor="Transparent" />
             </Border>
 
             <Label Text="密碼" Style="{StaticResource FieldLabel}" />
@@ -29,7 +33,9 @@
                 <Entry x:Name="PasswordEntry"
                        IsPassword="True"
                        Placeholder="請輸入密碼"
-                       PlaceholderColor="{StaticResource Outline}" />
+                       TextColor="{StaticResource OnSurface}"
+                       PlaceholderColor="{StaticResource Outline}"
+                       BackgroundColor="Transparent" />
             </Border>
             <Label Text="請輸入至少 8 個字元的密碼。"
                    Style="{StaticResource CaptionLabel}"
@@ -40,7 +46,9 @@
                 <Entry x:Name="ConfirmPasswordEntry"
                        IsPassword="True"
                        Placeholder="再次輸入密碼"
-                       PlaceholderColor="{StaticResource Outline}" />
+                       TextColor="{StaticResource OnSurface}"
+                       PlaceholderColor="{StaticResource Outline}"
+                       BackgroundColor="Transparent" />
             </Border>
 
             <HorizontalStackLayout Spacing="8" Margin="0,8,0,0">

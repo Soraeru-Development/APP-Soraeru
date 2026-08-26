@@ -98,7 +98,9 @@ public partial class AnalyzingPage : ContentPage
             if (!_navigating)
             {
                 _navigating = true;
-                await Routes.GoAsync($"../{Routes.AnalysisResult}");
+                // Pop Analyzing first so OcrSelect stays under Result; `../Result` can drop OcrSelect.
+                await Routes.GoAsync("..", animate: false);
+                await Routes.GoAsync(Routes.AnalysisResult);
             }
         }
         catch (OperationCanceledException)

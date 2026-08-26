@@ -10,6 +10,9 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+        // Product tokens / pages are light-surface only. Follow system dark would flip
+        // default Entry TextColor to white while Login still paints SurfaceBright → invisible text.
+        UserAppTheme = AppTheme.Light;
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
@@ -35,6 +38,11 @@ public partial class App : Application
                 return;
 
             await sync.SyncAsync();
+            services?.GetService<NotebookListRefreshGate>()?.NotifyDataMayHaveChanged();
+            var shell = Shell.Current as AppShell
+                ?? Current?.Windows.Select(w => w.Page).OfType<AppShell>().FirstOrDefault();
+            if (shell is not null)
+                await shell.RefreshNotebookListIfSelectedAsync();
         }
         catch
         {

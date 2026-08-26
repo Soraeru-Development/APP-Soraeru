@@ -38,3 +38,11 @@
 - **已修（08-13）**：L00／L09 動畫黑塊（淺色 wash）；首頁 Tab 強制回 L05（Shell 絕對路由）；韓文硬閘文案；注音橫排；語言>5 下拉。
 - **已修（08-21）**：單字本列表語言>5 picker `AutomationId` 重複設值 →「讀取失敗」（見票 13）；OCR session 清空＋來源語自動預選（見票 07）。
 - **仍待**：封閉測試建置／§15 檢核表整包；07 實機多腳本 OCR 品質煙測；其餘 13 殘餘（離線 JWT、UsageDaily 孤兒）不阻擋本票開工。
+- **API／打包（08-24）**：
+  - Railway API 已上線（Dockerfile／Volume／公開網域／`/health`）；Android Release 預設 BaseAddress＝`https://airy-enjoyment-production-de0f.up.railway.app/`（`MauiProgram.ProductionApiBaseUrl`）；Debug 模擬器仍 `10.0.2.2:5080`。
+  - 曾試自訂網域 `tocc.top` 打包 APK → **SSL 主機名／憑證不符**（基礎設施憑證問題）；**不做** App 端 SSL bypass；已改回 Railway URL。若最後簽章 APK 仍指 tocc.top，需再打一包指向 Railway。
+  - 切換見 `MauiProgram.ResolveApiBaseUrl`／`docs/dev-setup-railway.md`。狀態仍 `ready-for-agent`（§15 整包未勾）。
+- **實機包／skill（08-26）**：
+  - 多次打 **Release Signed APK** 供側載（路徑 `src/Soraeru.App/bin/Release/net10.0-android/com.soraeru.app-Signed.apk`；**不進 git**）。曾誤打 Debug，已改一律 Release。
+  - 專案 skill：`.cursor/skills/soraeru-release-apk/` — 改 App 程式後自動打 Release APK。
+  - 設定頁可看 **v1.0.1** 與成型時間，方便測試者對版。§15 整包仍未勾；狀態仍 `ready-for-agent`。

@@ -28,7 +28,9 @@
                 <Entry x:Name="EmailEntry"
                        Placeholder="you@example.com"
                        Keyboard="Email"
-                       PlaceholderColor="{StaticResource Outline}" />
+                       TextColor="{StaticResource OnSurface}"
+                       PlaceholderColor="{StaticResource Outline}"
+                       BackgroundColor="Transparent" />
             </Border>
 
             <Label Text="密碼" Style="{StaticResource FieldLabel}" />
@@ -36,7 +38,9 @@
                 <Entry x:Name="PasswordEntry"
                        Placeholder="請輸入密碼"
                        IsPassword="True"
-                       PlaceholderColor="{StaticResource Outline}" />
+                       TextColor="{StaticResource OnSurface}"
+                       PlaceholderColor="{StaticResource Outline}"
+                       BackgroundColor="Transparent" />
             </Border>
 
             <Button Text="登入"

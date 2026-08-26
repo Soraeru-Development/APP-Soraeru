@@ -197,23 +197,33 @@ public sealed class LocalNotebookService
         return LocalNotebookResult<bool>.Success(true);
     }
 
-    public async Task ClearLocalNotebookAsync(CancellationToken cancellationToken = default) =>
-        await _store.SaveAllAsync([], cancellationToken);
+    /// <summary>
+    /// Remove only the current session owner's rows (delete-account). Other users' cards stay.
+    /// When anonymous / no usable user id, this is a no-op (never wipe the whole DB).
+    /// </summary>
+    public async Task ClearLocalNotebookAsync(CancellationToken cancellationToken = default)
+    {
+        var session = await _session(cancellationToken);
+        if (!session.IsAuthenticated || session.UserId is not { } userId || userId == Guid.Empty)
+            return;
+
+        var all = await _store.LoadAllAsync(cancellationToken);
+        var remaining = all.Where(c => c.OwnerUserId != userId).ToList();
+        if (remaining.Count == all.Count)
+            return;
+
+        await _store.SaveAllAsync(remaining, cancellationToken);
+    }
 
     /// <summary>
-    /// Drop cards not owned by <paramref name="userId"/> (account-switch safety net).
+    /// Session-filter safety: list already scopes by OwnerUserId. Multi-user rows coexist in SoT;
+    /// this no longer deletes other owners' cards.
     /// </summary>
-    public async Task EnsureOwnerIsolationAsync(Guid userId, CancellationToken cancellationToken = default)
+    public Task EnsureOwnerIsolationAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        if (userId == Guid.Empty)
-            return;
-
-        var all = (await _store.LoadAllAsync(cancellationToken)).ToList();
-        var owned = all.Where(c => c.OwnerUserId == userId).ToList();
-        if (owned.Count == all.Count)
-            return;
-
-        await _store.SaveAllAsync(owned, cancellationToken);
+        _ = userId;
+        _ = cancellationToken;
+        return Task.CompletedTask;
     }
 
     public async Task<LocalWordCard?> GetAsync(Guid cardId, CancellationToken cancellationToken = default)

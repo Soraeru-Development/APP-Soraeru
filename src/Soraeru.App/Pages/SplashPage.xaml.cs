@@ -113,6 +113,10 @@ public partial class SplashPage : ContentPage
                     // Best-effort; offline / unavailable mirror is fine.
                 }
             }
+
+            services.GetService<NotebookListRefreshGate>()?.NotifyDataMayHaveChanged();
+            if (Shell.Current is AppShell shell)
+                shell.ResetNotebookListPage();
         }
 
         await Routes.GoAsync(MapSplashRoute(decision.Destination));

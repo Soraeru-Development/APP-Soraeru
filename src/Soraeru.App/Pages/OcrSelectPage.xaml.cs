@@ -1,5 +1,6 @@
 using Soraeru.ClientLogic.Notebook;
 using Soraeru.ClientLogic.Ocr;
+using Soraeru.Languages;
 using Soraeru.Services.Interfaces;
 
 namespace Soraeru.Pages;
@@ -9,10 +10,11 @@ public partial class OcrSelectPage : ContentPage
     private readonly IOcrSessionStore _ocrSession;
     private readonly IAnalyzeFlowStore _flow;
     private readonly LocalNotebookService _notebook;
+    private SourceLanguageSearchPicker? _languagePicker;
     private string? _selectedToken;
     private bool _suppressTextChanged;
-    private bool _suppressLanguagePickerChanged;
     private bool _languageTouchedByUser;
+    private bool _assistDismissed;
 
     public OcrSelectPage(
         IOcrSessionStore ocrSession,
@@ -23,6 +25,15 @@ public partial class OcrSelectPage : ContentPage
         _ocrSession = ocrSession;
         _flow = flow;
         _notebook = notebook;
+        _languagePicker = new SourceLanguageSearchPicker(
+            LanguageSearchBar,
+            LanguageList,
+            SelectedLanguageLabel,
+            code =>
+            {
+                _languageTouchedByUser = true;
+                UpdateLanguageHelper(code, inferred: false);
+            });
     }
 
     protected override void OnAppearing()
@@ -46,6 +57,7 @@ public partial class OcrSelectPage : ContentPage
         _suppressTextChanged = false;
         RebuildTokenRadios(OcrEditor.Text);
         MaybeApplyInferredSourceLanguage(OcrEditor.Text);
+        RefreshAssistBanner();
     }
 
     void OnOcrTextChanged(object? sender, TextChangedEventArgs e)
@@ -56,15 +68,7 @@ public partial class OcrSelectPage : ContentPage
         _ocrSession.RecognizedText = e.NewTextValue;
         RebuildTokenRadios(e.NewTextValue);
         MaybeApplyInferredSourceLanguage(e.NewTextValue);
-    }
-
-    void OnLanguagePickerChanged(object? sender, EventArgs e)
-    {
-        if (_suppressLanguagePickerChanged)
-            return;
-
-        _languageTouchedByUser = true;
-        UpdateLanguageHelper(ResolveSourceLanguage(), inferred: false);
+        RefreshAssistBanner();
     }
 
     void RebuildTokenRadios(string? text)
@@ -130,6 +134,31 @@ public partial class OcrSelectPage : ContentPage
         await Routes.GoAsync(Routes.WordInput);
     }
 
+    async void OnAssistClicked(object? sender, EventArgs e)
+    {
+        var original = OcrEditor.Text ?? string.Empty;
+        if (!OcrTextAssistGate.ShouldSuggestAssist(original)
+            && !string.Equals(_ocrSession.StatusMessage, "quality_suspicious", StringComparison.Ordinal))
+        {
+            AssistBanner.IsVisible = false;
+            return;
+        }
+
+        var confirm = await DisplayAlertAsync(
+            "文字建議（不上傳圖片）",
+            "目前尚未接上獨立「OCR 文字校正」API。若繼續，請手動編輯上方辨識文字；正式建議需確認後才會套用，不會靜默覆寫。\n\n是否關閉此提示並自行校正？",
+            "自行校正",
+            "稍後");
+        if (!confirm)
+            return;
+
+        _assistDismissed = true;
+        AssistBanner.IsVisible = false;
+        // Documented gap: thin suggest-fix endpoint (text-only) can replace this stub
+        // without double-charging analyze quota when wired.
+        _ = OcrTextAssistGate.BuildEditableSuggestionStub(original);
+    }
+
     async void OnAnalyzeClicked(object? sender, EventArgs e)
     {
         if (!OcrAnalyzeSelection.TryResolve(_selectedToken, out var text, out var error))
@@ -142,7 +171,7 @@ public partial class OcrSelectPage : ContentPage
         _ocrSession.RecognizedText = OcrEditor.Text;
 
         var sourceLanguage = ResolveSourceLanguage();
-        var kind = await AnalyzeEntryFlow.RouteLookupAsync(
+        await AnalyzeEntryFlow.RouteLookupAsync(
             this,
             _notebook,
             _flow,
@@ -150,25 +179,37 @@ public partial class OcrSelectPage : ContentPage
             sourceLanguage,
             memoryLanguage: "zh-TW",
             notationPreference: "bopomofo");
-
-        // Keep session while Analyzing so hard-gate / network failure can return to L08.
-        // Local detail / login leave the OCR flow — drop the uploaded preview.
-        if (kind != AnalyzeEntryKind.ProceedToAnalyze)
-            _ocrSession.Clear();
+        // Keep RecognizedText after analyze / local short-circuit / login so the
+        // learner can pick another token from the same photo.
     }
 
     void MaybeApplyInferredSourceLanguage(string? text)
     {
-        if (_languageTouchedByUser)
+        if (_languageTouchedByUser || _languagePicker is null)
             return;
 
         var code = OcrSourceLanguageInference.Infer(text);
-        var index = IndexForLanguageCode(code);
-
-        _suppressLanguagePickerChanged = true;
-        LanguagePicker.SelectedIndex = index;
-        _suppressLanguagePickerChanged = false;
+        _languagePicker.SetSelectedCode(code, notify: false);
         UpdateLanguageHelper(code, inferred: true);
+    }
+
+    void RefreshAssistBanner()
+    {
+        if (_assistDismissed)
+        {
+            AssistBanner.IsVisible = false;
+            return;
+        }
+
+        var text = OcrEditor.Text;
+        var flagged = string.Equals(_ocrSession.StatusMessage, "quality_suspicious", StringComparison.Ordinal)
+            || OcrTextAssistGate.ShouldSuggestAssist(text);
+        AssistBanner.IsVisible = flagged;
+        if (flagged)
+        {
+            // Keep banner copy explicit: text-only, confirm required, no image upload.
+            AssistBanner.IsVisible = true;
+        }
     }
 
     void UpdateLanguageHelper(string code, bool inferred)
@@ -180,15 +221,7 @@ public partial class OcrSelectPage : ContentPage
             return;
         }
 
-        var label = code switch
-        {
-            "ja" => "日文",
-            "th" => "泰文",
-            "tl" => "他加祿語",
-            "ko" => "韓文",
-            "vi" => "越南文",
-            _ => code
-        };
+        var label = SourceLanguageCatalog.FormatShortLabel(code);
 
         LanguageHelperLabel.Text = inferred
             ? $"已依辨識文字預選為{label}（可手動更改）。選定具體語言後，若本機已有同字卡會直接開詳情（不消耗分析額度）。"
@@ -196,24 +229,5 @@ public partial class OcrSelectPage : ContentPage
     }
 
     string ResolveSourceLanguage() =>
-        LanguagePicker.SelectedIndex switch
-        {
-            1 => "ja",
-            2 => "th",
-            3 => "tl",
-            4 => "ko",
-            5 => "vi",
-            _ => "auto"
-        };
-
-    static int IndexForLanguageCode(string code) =>
-        code.Trim().ToLowerInvariant() switch
-        {
-            "ja" => 1,
-            "th" => 2,
-            "tl" => 3,
-            "ko" => 4,
-            "vi" => 5,
-            _ => 0
-        };
+        _languagePicker?.SelectedCode ?? "auto";
 }
