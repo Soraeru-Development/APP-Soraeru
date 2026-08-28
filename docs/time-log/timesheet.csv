@@ -67,3 +67,6 @@ date,person,hours,ticket,note,kind
 2026-08-26,Ashton,0.25,10,設定頁版本 v1.0.1＋成型時間 yyyy/MM/dd-HH:mm,dev
 2026-08-26,Ashton,0.25,11,午後多輪 Release APK 側載驗證,ops
 2026-08-26,Ashton,0.25,tickets,收工：工單／工時對齊並提交改動,plan
+2026-08-28,Ashton,1.75,19,票19：Logo prompt＋MAUI icon／splash＋L00／L01／L04 與 Stitch logo 同步,dev
+2026-08-28,Ashton,0.25,04,DeveloperAccounts 新增 aben8622@gmail.com（策展權限）,dev
+2026-08-28,Ashton,0.75,11,VS 建置雜訊 vs obj 快取損壞排查；Release APK 成功；釐清 App vs Api bin 路徑,ops

@@ -17,6 +17,7 @@ public partial class NotebookListPage : ContentPage
     private bool _suppressPickerChanged;
     private int _loadedRefreshVersion = -1;
     private IReadOnlyList<SourceLanguageCatalog.LanguagePresentation> _filterLanguages = [];
+    private string? _filterLanguagesKey;
 
     public NotebookListPage(
         LocalNotebookService notebook,
@@ -81,7 +82,8 @@ public partial class NotebookListPage : ContentPage
             return;
 
         _languageFilter = code;
-        await ReloadAsync();
+        // Let the native Android picker dialog finish closing before we touch Items/SelectedIndex.
+        await Dispatcher.DispatchAsync(ReloadAsync);
     }
 
     async Task ReloadAsync()
@@ -162,6 +164,7 @@ public partial class NotebookListPage : ContentPage
     {
         var languages = SourceLanguageCatalog.PresentInLibrary(allCards.Select(c => c.DetectedLanguage));
         _filterLanguages = languages;
+        var languagesKey = string.Join('|', languages.Select(l => l.Code));
 
         if (_languageFilter is not null
             && languages.All(l => !string.Equals(l.Code, _languageFilter, StringComparison.OrdinalIgnoreCase)))
@@ -174,6 +177,7 @@ public partial class NotebookListPage : ContentPage
 
         if (!usePicker)
         {
+            _filterLanguagesKey = null;
             FilterAllButton.IsVisible = false;
             LanguageFilterPicker.IsVisible = false;
             FilterChipsScroll.IsVisible = true;
@@ -204,6 +208,16 @@ public partial class NotebookListPage : ContentPage
         FilterAllButton.Style = (Style)Application.Current!.Resources[
             allSelected ? "FilterChipSelected" : "FilterChip"];
 
+        var itemsChanged = !string.Equals(languagesKey, _filterLanguagesKey, StringComparison.Ordinal);
+        _filterLanguagesKey = languagesKey;
+        if (itemsChanged)
+            ApplyLanguageFilterPickerItems(languages);
+        else
+            SyncLanguageFilterPickerSelection(languages);
+    }
+
+    void ApplyLanguageFilterPickerItems(IReadOnlyList<SourceLanguageCatalog.LanguagePresentation> languages)
+    {
         _suppressPickerChanged = true;
         try
         {
@@ -215,7 +229,20 @@ public partial class NotebookListPage : ContentPage
                     : $"{language.IconGlyph} {language.ChipLabel}";
                 LanguageFilterPicker.Items.Add(text);
             }
+        }
+        finally
+        {
+            _suppressPickerChanged = false;
+        }
 
+        SyncLanguageFilterPickerSelection(languages);
+    }
+
+    void SyncLanguageFilterPickerSelection(IReadOnlyList<SourceLanguageCatalog.LanguagePresentation> languages)
+    {
+        _suppressPickerChanged = true;
+        try
+        {
             if (_languageFilter is null)
             {
                 LanguageFilterPicker.SelectedIndex = -1;

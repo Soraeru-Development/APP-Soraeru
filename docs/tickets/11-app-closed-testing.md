@@ -46,3 +46,6 @@
   - 多次打 **Release Signed APK** 供側載（路徑 `src/Soraeru.App/bin/Release/net10.0-android/com.soraeru.app-Signed.apk`；**不進 git**）。曾誤打 Debug，已改一律 Release。
   - 專案 skill：`.cursor/skills/soraeru-release-apk/` — 改 App 程式後自動打 Release APK。
   - 設定頁可看 **v1.0.1** 與成型時間，方便測試者對版。§15 整包仍未勾；狀態仍 `ready-for-agent`。
+- **建置／路徑釐清（08-28）**：
+  - VS 設計期雜訊（XAML type not found、Tesseract MSB3246、XA4301）與真實 **obj 快取損壞** 已區分；清 obj 後 Android **Release APK** 建置成功。
+  - Signed APK 路徑：`src/Soraeru.App/bin/Release/net10.0-android/com.soraeru.app-Signed.apk`（**非** `Soraeru.Api` bin）。

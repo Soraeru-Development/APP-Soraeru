@@ -31,6 +31,19 @@
                     </VerticalStackLayout>
                 </Grid>
 
+                <Label Text="來源語言"
+                       Style="{StaticResource FieldLabel}"
+                       Margin="0,4,0,0" />
+                <Border Style="{StaticResource InputBorder}" Padding="12,4">
+                    <Picker x:Name="SourceLanguagePicker"
+                            Title="選擇來源語言"
+                            HorizontalOptions="Fill" />
+                </Border>
+                <Label x:Name="LanguageHelperLabel"
+                       Text="無法從文字可靠推斷時維持自動偵測。選定具體語言後，若本機已有同字卡會直接開詳情（不消耗分析額度）。"
+                       Style="{StaticResource CaptionLabel}"
+                       LineBreakMode="WordWrap" />
+
                 <Label Text="辨識文字（可編輯）" Style="{StaticResource FieldLabel}" Margin="0,8,0,0" />
                 <Border Style="{StaticResource InputBorder}" Padding="12,8">
                     <Editor x:Name="OcrEditor"
@@ -53,48 +66,6 @@
                 <Border Style="{StaticResource CardBorder}" Padding="8,4">
                     <VerticalStackLayout x:Name="TokenList" Spacing="0" />
                 </Border>
-
-                <Label Text="來源語言"
-                       Style="{StaticResource FieldLabel}"
-                       Margin="0,8,0,0" />
-                <Label x:Name="SelectedLanguageLabel"
-                       Text="目前：自動偵測"
-                       Style="{StaticResource CaptionLabel}" />
-                <Border Stroke="{StaticResource OutlineVariant}"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 8"
-                        BackgroundColor="{StaticResource Surface}"
-                        Padding="4,0">
-                    <SearchBar x:Name="LanguageSearchBar"
-                               Placeholder="搜尋語言（如 阿拉伯 / fr / हिंदी）"
-                               PlaceholderColor="{StaticResource Outline}"
-                               TextColor="{StaticResource OnSurface}"
-                               CancelButtonColor="{StaticResource Outline}" />
-                </Border>
-                <Border Stroke="{StaticResource OutlineVariant}"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 8"
-                        BackgroundColor="{StaticResource Surface}"
-                        Padding="0"
-                        HeightRequest="180">
-                    <CollectionView x:Name="LanguageList"
-                                    SelectionMode="Single">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Padding="16,10">
-                                    <Label Text="{Binding Display}"
-                                           TextColor="{StaticResource OnSurface}"
-                                           FontSize="15"
-                                           LineBreakMode="TailTruncation" />
-                                </Grid>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </Border>
-                <Label x:Name="LanguageHelperLabel"
-                       Text="無法從文字可靠推斷時維持自動偵測。選定具體語言後，若本機已有同字卡會直接開詳情（不消耗分析額度）。"
-                       Style="{StaticResource CaptionLabel}"
-                       LineBreakMode="WordWrap" />
 
                 <Border x:Name="AssistBanner"
                         IsVisible="False"

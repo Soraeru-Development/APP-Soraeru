@@ -41,3 +41,4 @@
 - **金標 ≠ 使用者自建**：僅策展授權身分透過 `/api/v1/curator/verified-mnemonics` 寫入 `VerifiedMnemonics`；一般學習者 JWT 寫入 → 403。App 端**不能**自己建金標。
 - **MVP 現況**：策展 Blazor（票 05）仍 deferred；過渡以 API／腳本建立。若庫中尚無啟用中條目，分析不會出現「聽感已核定」——屬預期，非 App bug。
 - 學習者可改的是單字卡**個人空耳**（票 16），與金標庫分離（票 17：金標不覆蓋已存卡）。
+- **2026-08-28・DeveloperAccounts**：新增 `aben8622@gmail.com` 至 `appsettings.json`／`appsettings.Development.json`（與 `larun70@gmail.com` 同級策展權限）。

@@ -53,14 +53,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#004d64" />
+		<!-- App Icon (full raster — teal ear + multilingual orbit) -->
+		<MauiIcon Include="Resources\AppIcon\appicon.png" />
 
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#004d64" BaseSize="128,128" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\logo.png" Resize="True" BaseSize="256,256" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
 		
 		<!-- Custom Fonts -->

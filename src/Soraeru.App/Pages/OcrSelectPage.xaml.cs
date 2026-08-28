@@ -10,7 +10,7 @@ public partial class OcrSelectPage : ContentPage
     private readonly IOcrSessionStore _ocrSession;
     private readonly IAnalyzeFlowStore _flow;
     private readonly LocalNotebookService _notebook;
-    private SourceLanguageSearchPicker? _languagePicker;
+    private SourceLanguageDropdownPicker? _languagePicker;
     private string? _selectedToken;
     private bool _suppressTextChanged;
     private bool _languageTouchedByUser;
@@ -25,10 +25,8 @@ public partial class OcrSelectPage : ContentPage
         _ocrSession = ocrSession;
         _flow = flow;
         _notebook = notebook;
-        _languagePicker = new SourceLanguageSearchPicker(
-            LanguageSearchBar,
-            LanguageList,
-            SelectedLanguageLabel,
+        _languagePicker = new SourceLanguageDropdownPicker(
+            SourceLanguagePicker,
             code =>
             {
                 _languageTouchedByUser = true;

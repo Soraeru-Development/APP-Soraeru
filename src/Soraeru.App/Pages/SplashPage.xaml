@@ -21,25 +21,17 @@
                              Padding="32"
                              MaximumWidthRequest="360">
 
-            <Border x:Name="BrandMarkFrame"
-                    WidthRequest="96"
-                    HeightRequest="96"
-                    StrokeThickness="0"
-                    StrokeShape="RoundRectangle 28"
-                    BackgroundColor="{StaticResource Primary}"
-                    HorizontalOptions="Center"
-                    Margin="0,0,0,16">
-                <Border.Shadow>
+            <Image x:Name="BrandMark"
+                   Source="logo.png"
+                   HeightRequest="96"
+                   WidthRequest="96"
+                   Aspect="AspectFit"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center">
+                <Image.Shadow>
                     <Shadow Brush="Black" Offset="0,4" Radius="12" Opacity="0.18" />
-                </Border.Shadow>
-                <Image x:Name="BrandMark"
-                       Source="logo.png"
-                       HeightRequest="56"
-                       WidthRequest="56"
-                       Aspect="AspectFit"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center" />
-            </Border>
+                </Image.Shadow>
+            </Image>
 
             <Label x:Name="TitleLabel"
                    Text="空耳學單字"

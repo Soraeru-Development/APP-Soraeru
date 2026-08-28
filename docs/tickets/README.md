@@ -6,16 +6,16 @@ Parent（Client-first 單字本）: [`docs/specs/client-first-wordcards-sync.md`
 Parent（同字再查／本機短路）: [`docs/specs/local-notebook-lookup-short-circuit.md`](../specs/local-notebook-lookup-short-circuit.md) · ADR-0008  
 Glossary: [`docs/glossary.md`](../glossary.md) · ADRs: [`docs/adr/`](../adr/)（0001–0009）
 
-## 總覽（2026-08-26）
+## 總覽（2026-08-28）
 
 | 指標 | 數量 |
 |---|---|
-| **done** | 14 |
+| **done** | 15 |
 | **in-progress（WIP）** | 0（空） |
 | **ready-for-agent** | 1（11） |
 | **blocked** | 1（12） |
 | **deferred** | 2（05、06） |
-| **完成率** | 14／18＝78%（不含 deferred：14／16＝88%） |
+| **完成率** | 15／19＝79%（不含 deferred：15／17＝88%） |
 
 **Frontier：**
 
@@ -29,6 +29,7 @@ Glossary: [`docs/glossary.md`](../glossary.md) · ADRs: [`docs/adr/`](../adr/)�
 | **08** | ✅ 已驗證 | TTS |
 | **09** | ✅ 行為已驗證；UI 文案已修 | 達上限不再分析；詳情／結果「已達分析上限」；`RegenerateActionPresentation` 鎖文案 |
 | **11／列表** | ✅ AutomationId 已修 | 語言>5 picker 不再重複設 AutomationId；「讀取失敗」已消 |
+| **19** | ✅ 品牌圖示 | Deep Teal logo；MAUI icon／splash；L00／L01／L04＋Stitch 同步 |
 | **13** | ✅ 本機 SQLite SoT | 多使用者 `OwnerUserId` 並存；JSON 一次性遷移；登出／401／換帳不清他帳 |
 | **10** | ✅ 已驗證 | 隱私權政策、AI 內容聲明頁有內容 |
 | **16** | ✅ 已驗證 | 可自行修改諧音（個人空耳） |
@@ -58,7 +59,7 @@ Glossary: [`docs/glossary.md`](../glossary.md) · ADRs: [`docs/adr/`](../adr/)�
 | [08](08-app-tts-formal-reading.md) | App MVP | 播放正式發音（系統 TTS） | done | 結果／詳情／列表系統 TTS 已接 | 已跑-有開放項 | 自動+手動（TTS 實機聽感／缺語音包提示） | — | — | **手動已驗證（08-13）**；缺語音包提示僅文字，尚無深連結 | 1.5h（08-12）＋0.25h（08-13） |
 | [09](09-app-regenerate-cap-and-errors.md) | App MVP | 同字重產 ≤3 與分析錯誤態 | done | `REGENERATION_LIMIT_EXCEEDED`＋App 錯誤態 | 已跑-有開放項 | 自動（App+API TDD）＋手動（達上限煙測） | — | — | **行為+UI 文案已修（08-13）**；缺 quota exceeded 行為測試 | 1.5h（08-12）＋1h（08-13） |
 | [10](10-app-privacy-settings-polish.md) | App MVP | 隱私／AI 聲明與設定收尾 | done | LegalDocument＋設定入口；登入深色模式白字防禦；關於 v1.0.1／成型時間 | 已跑-有開放項 | 自動+手動（設定入口／onboarding 入口確認） | — | 系統深色模式複測登入字色 | **手動已驗證（08-13）**；商店託管 URL 留票 12 | 1.25h（08-12）＋0.25h（08-13）＋0.25h（08-25）＋0.25h（08-26） |
-| [11](11-app-closed-testing.md) | App 上架 | 封閉測試就緒與缺陷收斂 | **ready-for-agent** | 07–10 全 done；Railway API 已上線；08-26 多輪 Release Signed APK；§15 整包尚未勾 | 已跑-有開放項 | 手動（§15 檢核表；封閉測試整包） | 07–10（皆 done） | 確認 Railway Signed APK＋回歸清單＋§15 勾選 | Spec 指出 AC 未勾；tocc.top SSL 憑證待基礎設施修好 | 0.5h（08-13）＋0.25h（08-21）＋1.0h（08-24）＋1.0h（08-26） |
+| [11](11-app-closed-testing.md) | App 上架 | 封閉測試就緒與缺陷收斂 | **ready-for-agent** | 07–10 全 done；Railway API 已上線；08-28 obj 快取排查後 Release APK 成功；§15 整包尚未勾 | 已跑-有開放項 | 手動（§15 檢核表；封閉測試整包） | 07–10（皆 done） | 確認 Railway Signed APK＋回歸清單＋§15 勾選 | Spec 指出 AC 未勾；tocc.top SSL 憑證待基礎設施修好 | 0.5h（08-13）＋0.25h（08-21）＋1.0h（08-24）＋1.0h（08-26）＋0.75h（08-28） |
 | [12](12-app-play-store-submit.md) | App 上架 | 商店素材與送審 | **blocked** | 等 11 封閉測試通過 | 不適用 | 手動（Play Console） | 11 | 11 完成後準備素材 | — | — |
 | [13](13-app-local-wordcard-store.md) | Client-first | 本機單字卡儲存與列表／存／刪 | done | **SQLite** SoT；明確登出保留本機；換帳／刪帳／401 不清他帳；列表 RefreshGate | 未跑 | 自動+手動（煙測） | — | 離線煙測見 Notes | 離線 JWT 過期偵測；UsageDaily 孤兒列 | ~4.25h（08-11）＋1.5h（08-13）＋0.75h（08-21）＋1.25h（08-24） |
 | [14](14-app-sync-protocol-lww.md) | Client-first | 可選同步協定（LWW／tombstone／換帳） | done | Merger＋Coordinator＋前景觸發；假鏡像單測綠 | 已跑-有開放項 | 自動（ClientLogic.Tests） | 13 | 補端到端多裝置驗收 | EF Core 持續擴張；端到端多裝置待 15 現場驗 | 1.5h（08-12） |
@@ -66,6 +67,7 @@ Glossary: [`docs/glossary.md`](../glossary.md) · ADRs: [`docs/adr/`](../adr/)�
 | [16](16-app-edit-personal-mnemonic.md) | Client-first | 詳情頁隨時編修個人空耳 | done | `UpdateSelectedMnemonicAsync`＋詳情 UI | 已跑-有開放項 | 自動+手動 | 13 | — | **手動已驗證（08-13）** | 1h（08-12）＋0.25h（08-13） |
 | [17](17-verified-mnemonic-no-overwrite-saved-card.md) | Client-first | 金標不覆蓋已存卡個人空耳 | done | Save 同鍵回傳既有卡；TDD 回歸鎖住 | 已跑-有開放項 | 自動（Application+ClientLogic） | 13；04 | 補整體驗收煙測 | dual review 已跑但仍有待收斂開放項 | 0.75h（08-12） |
 | [18](18-app-local-notebook-lookup-short-circuit.md) | Client-first | 同字再查本機短路＋詳情重新分析 | done | ClientLogic Gate＋App 短路／重新分析已交付；code-review-dual 通過 | 已跑-有開放項 | 自動+手動（本機短路／重新分析煙測） | 13（done） | 封閉輪次勾選煙測 | 他機未同步卡仍會分析（ADR-0008 接受）；列表 AutomationId 已修見 13 | 1.5h（08-12） |
+| [19](19-app-branding-icon.md) | App MVP | 品牌圖示與 L00／L01／L04 對齊 | done | Deep Teal logo；MAUI icon／splash；Stitch L00／L01／L04 同步 | 未跑 | 手動（launcher／splash／登入頁）＋Release APK | — | — | 商店截圖定稿仍留票 12 | 1.75h（08-28） |
 
 > **code-review-dual 語意**：`未跑`＝尚無 Station 5 雙軸審查紀錄；`已跑-有開放項`＝已完成雙軸審查但仍有缺口或待確認項；`不適用`＝未開工或延後；勿將 `未跑` 視為通過。
 

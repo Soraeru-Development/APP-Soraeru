@@ -144,9 +144,9 @@ public partial class SplashPage : ContentPage
     {
         try
         {
-            BrandMarkFrame.Opacity = 0;
-            BrandMarkFrame.TranslationY = 20;
-            BrandMarkFrame.Scale = 0.95;
+            BrandMark.Opacity = 0;
+            BrandMark.TranslationY = 20;
+            BrandMark.Scale = 0.95;
             TitleLabel.Opacity = 0;
             TitleLabel.TranslationY = 15;
             TaglineLabel.Opacity = 0;
@@ -155,9 +155,9 @@ public partial class SplashPage : ContentPage
 
             await Task.Delay(100);
             await Task.WhenAll(
-                BrandMarkFrame.FadeToAsync(1, 800, Easing.SpringOut),
-                BrandMarkFrame.TranslateToAsync(0, 0, 800, Easing.SpringOut),
-                BrandMarkFrame.ScaleToAsync(1, 800, Easing.SpringOut));
+                BrandMark.FadeToAsync(1, 800, Easing.SpringOut),
+                BrandMark.TranslateToAsync(0, 0, 800, Easing.SpringOut),
+                BrandMark.ScaleToAsync(1, 800, Easing.SpringOut));
 
             await Task.Delay(100);
             _ = TitleLabel.FadeToAsync(1, 600, Easing.CubicOut);
