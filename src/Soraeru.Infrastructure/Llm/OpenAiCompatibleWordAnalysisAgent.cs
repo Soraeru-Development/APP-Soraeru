@@ -55,23 +55,35 @@ public sealed class OpenAiCompatibleWordAnalysisAgent : IWordAnalysisAgent
                 request.MemoryLanguage,
                 request.NotationPreference);
 
-        var body = new ChatCompletionRequest(
-            _options.Model,
-            [
-                new ChatMessage("system", systemPrompt),
-                new ChatMessage("user", userPrompt)
-            ],
-            Temperature: 0.4,
-            ResponseFormat: new ResponseFormat("json_object"));
-
-        using var response = await _http.PostAsJsonAsync("chat/completions", body, JsonOptions, cancellationToken);
-        var raw = await response.Content.ReadAsStringAsync(cancellationToken);
-        if (!response.IsSuccessStatusCode)
+        var messages = new ChatMessage[]
         {
-            _logger.LogWarning("LLM HTTP {Status}: {Body}", (int)response.StatusCode, Truncate(raw));
+            new("system", systemPrompt),
+            new("user", userPrompt)
+        };
+
+        var (firstStatus, firstRaw) = await PostCompletionAsync(messages, useJsonObject: true, cancellationToken);
+        var raw = firstRaw;
+        if (!IsSuccessStatusCode(firstStatus) && ShouldRetryWithoutJsonObject(firstStatus, firstRaw))
+        {
+            _logger.LogInformation(
+                "LLM json_object rejected ({Status}); retrying without response_format.",
+                (int)firstStatus);
+            var (retryStatus, retryRaw) = await PostCompletionAsync(messages, useJsonObject: false, cancellationToken);
+            raw = retryRaw;
+            if (!IsSuccessStatusCode(retryStatus))
+            {
+                _logger.LogWarning("LLM HTTP {Status}: {Body}", (int)retryStatus, Truncate(raw));
+                return new WordAnalysisAgentFailure(
+                    "LLM_HTTP_ERROR",
+                    $"LLM 呼叫失敗（{(int)retryStatus}）。");
+            }
+        }
+        else if (!IsSuccessStatusCode(firstStatus))
+        {
+            _logger.LogWarning("LLM HTTP {Status}: {Body}", (int)firstStatus, Truncate(raw));
             return new WordAnalysisAgentFailure(
                 "LLM_HTTP_ERROR",
-                $"LLM 呼叫失敗（{(int)response.StatusCode}）。");
+                $"LLM 呼叫失敗（{(int)firstStatus}）。");
         }
 
         ChatCompletionResponse? completion;
@@ -93,6 +105,60 @@ public sealed class OpenAiCompatibleWordAnalysisAgent : IWordAnalysisAgent
 
         var json = UnwrapMarkdownFence(content.Trim());
         return ParsePayload(json);
+    }
+
+    private async Task<(System.Net.HttpStatusCode Status, string Raw)> PostCompletionAsync(
+        IReadOnlyList<ChatMessage> messages,
+        bool useJsonObject,
+        CancellationToken cancellationToken)
+    {
+        var body = useJsonObject
+            ? new ChatCompletionRequest(
+                _options.Model,
+                messages,
+                Temperature: 0.4,
+                ResponseFormat: new ResponseFormat("json_object"))
+            : new ChatCompletionRequest(
+                _options.Model,
+                messages,
+                Temperature: 0.4,
+                ResponseFormat: null);
+
+        using var response = await _http.PostAsJsonAsync("chat/completions", body, JsonOptions, cancellationToken);
+        var raw = await response.Content.ReadAsStringAsync(cancellationToken);
+        return (response.StatusCode, raw);
+    }
+
+    private static bool IsSuccessStatusCode(System.Net.HttpStatusCode status)
+    {
+        var code = (int)status;
+        return code >= 200 && code <= 299;
+    }
+
+    private static bool ShouldRetryWithoutJsonObject(System.Net.HttpStatusCode status, string raw)
+    {
+        if (status != System.Net.HttpStatusCode.BadRequest)
+            return false;
+
+        try
+        {
+            using var doc = JsonDocument.Parse(raw);
+            if (!doc.RootElement.TryGetProperty("error", out var error))
+                return false;
+
+            if (error.TryGetProperty("code", out var codeEl)
+                && string.Equals(codeEl.GetString(), "json_validate_failed", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return error.TryGetProperty("message", out var msgEl)
+                && msgEl.GetString()?.Contains("Failed to validate JSON", StringComparison.OrdinalIgnoreCase) == true;
+        }
+        catch (JsonException)
+        {
+            return raw.Contains("json_validate_failed", StringComparison.OrdinalIgnoreCase);
+        }
     }
 
     private void EnsureConfigured()
@@ -182,7 +248,7 @@ public sealed class OpenAiCompatibleWordAnalysisAgent : IWordAnalysisAgent
         [property: JsonPropertyName("model")] string Model,
         [property: JsonPropertyName("messages")] IReadOnlyList<ChatMessage> Messages,
         [property: JsonPropertyName("temperature")] double Temperature,
-        [property: JsonPropertyName("response_format")] ResponseFormat ResponseFormat);
+        [property: JsonPropertyName("response_format")] ResponseFormat? ResponseFormat);
 
     private sealed record ChatMessage(
         [property: JsonPropertyName("role")] string Role,
